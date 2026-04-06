@@ -1,7 +1,7 @@
 import {od6sutilities} from "../system/utilities.js";
 import OD6S from "../config/config-od6s.js";
 
-export default class ExplosivesTemplate extends MeasuredTemplate {
+export default class ExplosivesTemplate extends foundry.canvas.placeables.MeasuredTemplate {
 
     /**
      * Track the timestamp when the last mouse move event was captured.

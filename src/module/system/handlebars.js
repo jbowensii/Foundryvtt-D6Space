@@ -1253,5 +1253,5 @@ async function loadHandleBarTemplates() {
         starshipTabPath + "main.html",
         starshipTabPath + "data.html"
     ]
-    return loadTemplates(templatePaths);
+    return foundry.applications.handlebars.loadTemplates(templatePaths);
 }

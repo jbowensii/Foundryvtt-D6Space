@@ -31,14 +31,22 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
     };
 
     static PARTS = {
-        form: { template: "" }
+        form: { template: "systems/od6s/templates/item/item-skill-sheet.html" }
     };
 
-    _configureRenderOptions(options) {
-        super._configureRenderOptions(options);
-        options.parts = ["form"];
-        this.options.parts ??= {};
-        OD6SItemSheet.PARTS.form.template = `systems/od6s/templates/item/item-${this.document.type}-sheet.html`;
+    /** @override */
+    _getHeaderControls() {
+        return super._getHeaderControls();
+    }
+
+    /** @override */
+    async _renderHTML(context, options) {
+        // Dynamically set template based on item type before rendering
+        this.constructor.PARTS.form = {
+            ...this.constructor.PARTS.form,
+            template: `systems/od6s/templates/item/item-${this.document.type}-sheet.html`
+        };
+        return super._renderHTML(context, options);
     }
 
     /* -------------------------------------------- */

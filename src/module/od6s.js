@@ -72,8 +72,8 @@ Hooks.once('init', async function () {
     CONFIG.Item.documentClass = OD6SItem;
 
     // Register sheet application classes
-    Actors.registerSheet("od6s", OD6SActorSheet, {makeDefault: true});
-    Items.registerSheet("od6s", OD6SItemSheet, {makeDefault: true});
+    foundry.documents.collections.Actors.registerSheet("od6s", OD6SActorSheet, {makeDefault: true});
+    foundry.documents.collections.Items.registerSheet("od6s", OD6SItemSheet, {makeDefault: true});
 });
 
 // update measuredTemplate hook
@@ -158,8 +158,7 @@ Hooks.on('deleteMeasuredTemplate', async (template) => {
 
 // Chat hooks
 // Chat listeners
-Hooks.on('renderChatMessage', (msg, html, data) => {
-    // v13: html is HTMLElement, not jQuery. Use native DOM.
+Hooks.on('renderChatMessageHTML', (msg, html, data) => {
     if (game.settings.get('od6s', 'hide-gm-rolls') && data.whisperTo !== '') {
         if (game.user.isGM === false &&
             game.userId !== data.author.id &&
@@ -716,7 +715,7 @@ Hooks.on('diceSoNiceRollStart', (messageId, context) => {
     }
 })
 
-Hooks.on('renderChatMessage', (message, html, data) => {
+Hooks.on('renderChatMessageHTML', (message, html, data) => {
     ui.chat.scrollBottom();
 })
 
@@ -1452,7 +1451,7 @@ async function simpleRoll() {
     }).render(true);
 }
 
-export class WildDie extends Die {
+export class WildDie extends foundry.dice.terms.Die {
     constructor(termData) {
         termData.faces = 6;
         termData.modifiers = ["x6"];
@@ -1462,7 +1461,7 @@ export class WildDie extends Die {
     static DENOMINATION = "w";
 }
 
-export class CharacterPointDie extends Die {
+export class CharacterPointDie extends foundry.dice.terms.Die {
     constructor(termData) {
         termData.faces = 6;
         termData.modifiers = ["x6"];

@@ -1,6 +1,6 @@
 import OD6S from "../config/config-od6s.js";
 
-export class OD6SToken extends Token {
+export class OD6SToken extends foundry.canvas.placeables.Token {
 
     /* Override */
     _canDrag(user, event) {
