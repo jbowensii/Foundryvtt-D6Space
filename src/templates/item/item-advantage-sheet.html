@@ -1,5 +1,4 @@
-<form class="{{cssClass}}" autocomplete="off">
-    <header class="sheet-header">
+<header class="sheet-header">
         <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}"
              alt="{{localize 'OD6S.ALT_ITEM_IMAGE'}}"/>
         <div class="header-fields">
@@ -20,8 +19,11 @@
 
         {{!-- Description Tab --}}
         <div class="tab" data-group="primary" data-tab="description">
-            <div class="editor">{{editor item.system.description target="system.description" button=true
-                                         editable=editable}}</div>
+            {{#if editable}}
+              <prose-mirror name="system.description" value="{{item.system.description}}" toggled="true"></prose-mirror>
+            {{else}}
+              <div class="editor">{{{item.system.description}}}</div>
+            {{/if}}
         </div>
 
         {{!-- Attributes Tab --}}
@@ -37,4 +39,3 @@
         {{> systems/od6s/templates/item/item-labels-tags.html }}
 
     </section>
-</form>

@@ -675,7 +675,7 @@ export class OD6SActor extends Actor {
         let tokens;
         tokens ??= this.getActiveTokens();
 
-        const roll = await new Roll("10d6").evaluate({async: true});
+        const roll = await new Roll("10d6").evaluate();
         const flavor = this.name + game.i18n.localize('OD6S.CHAT_UNCONSCIOUS_01') +
             roll.total + game.i18n.localize('OD6S.CHAT_UNCONSCIOUS_02');
         if (game.modules.get("dice-so-nice")?.active) game.dice3d.messageHookDisabled=true;
@@ -1103,11 +1103,12 @@ export class OD6SActor extends Actor {
                 roll: {
                     label: game.i18n.localize('OD6S.ROLL'),
                     callback: async (dlg) => {
-                        const speed = $(dlg[0]).find("#vehiclespeed")[0].value;
+                        const dlgEl = dlg instanceof HTMLElement ? dlg : dlg[0];
+                        const speed = dlgEl.querySelector("#vehiclespeed").value;
                         const speedValue = OD6S.vehicle_speeds[speed].damage;
-                        const type = $(dlg[0]).find("#vehiclecollisiontype")[0].value;
+                        const type = dlgEl.querySelector("#vehiclecollisiontype").value;
                         const typeValue = OD6S.collision_types[type].score;
-                        const mod = $(dlg[0]).find("#vehiclecollisionmod")[0].value;
+                        const mod = dlgEl.querySelector("#vehiclecollisionmod").value;
                         const score = (+speedValue) + (+typeValue) + (+mod * OD6S.pipsPerDice);
                         const dice = od6sutilities.getDiceFromScore(score);
                         let rollString;
@@ -1123,7 +1124,7 @@ export class OD6SActor extends Actor {
                             rollString = dice.dice + "d6" + +game.i18n.localize('OD6S.BASE_DIE_FLAVOR');
                         }
                         dice.pips ? rollString += "+" + dice.pips : null;
-                        let roll = await new Roll(rollString).evaluate({"async": true});
+                        let roll = await new Roll(rollString).evaluate();
                         let label = game.i18n.localize('OD6S.DAMAGE') + " (" +
                             game.i18n.localize(OD6S.damageTypes['p']) + ") "
                             + game.i18n.localize("OD6S.FROM") + " " + game.i18n.localize("OD6S.COLLISION");

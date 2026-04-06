@@ -1,5 +1,4 @@
-<form class="{{cssClass}}" autocomplete="off">
-    <header class="sheet-header">
+<header class="sheet-header">
         <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}"
              alt="{{localize 'OD6S.ALT_ITEM_IMAGE'}}"/>
         <div class="header-fields">
@@ -28,14 +27,14 @@
             <div class="grid title-add-grid">
                 <div class="flexrow flex-group-center"><b>{{localize 'OD6S.ACTOR_TYPES'}}</b></div>
                 <div class="flexrow flex-group-center item-controls">
-                    <a class="item-control add-actor-type" title="{{localize 'OD6S.ADD_ACTOR_TYPE'}}"
+                    <a class="item-control add-actor-type" data-action="addActorType" title="{{localize 'OD6S.ADD_ACTOR_TYPE'}}"
                        data-type="actor-type">
                         <i class="fas fa-plus"></i></a>
                 </div>
             </div>
             <div class="grid grid-6col">
                 {{#each item.system.actor_types as |type|}}
-                    <div class="flexrow flex-group-left delete-actor-type"
+                    <div class="flexrow flex-group-left delete-actor-type" data-action="deleteActorType"
                          title="{{localize 'OD6S.DELETE'}}" data-type="{{type}}">
                         {{ localize (getActorTypeLabel type) }}
                     </div>
@@ -49,7 +48,7 @@
                                 <div><b>{{localize itemType.label}}</b></div>
                                 {{#if itemType.label}}
                                     <div class="item-controls">
-                                        <a class="item-control template-item-add"
+                                        <a class="item-control template-item-add" data-action="addTemplateItem"
                                            title="{{localize 'OD6S.ADD'}} {{localize itemType.label}}"
                                            data-type="{{typeKey}}">
                                             <i class="fas fa-plus"></i>
@@ -66,13 +65,13 @@
                                             <div class="template-item-grid">
                                                 <div title="{{templateItem.description}}">{{templateItem.name}}</div>
                                                 <div class="template-item template-item-control flexrow flex-group-center">
-                                                    <a class="template-item-control template-item-edit"
+                                                    <a class="template-item-control template-item-edit" data-action="editTemplateItem"
                                                        data-name="{{templateItem.name}}"
                                                        data-type="{{templateItem.type}}"
                                                        data-desc="{{templateItem.description}}"
                                                        title="{{localize 'OD6S.EDIT_ITEM'}}">
                                                         <i class="fas fa-edit"></i></a>
-                                                    <a class="template-item-control template-item-delete"
+                                                    <a class="template-item-control template-item-delete" data-action="deleteTemplateItem"
                                                        data-name="{{templateItem.name}}"
                                                        data-type="{{templateItem.type}}"
                                                        title="{{localize 'OD6S.DELETE_ITEM'}}">
@@ -93,4 +92,3 @@
         {{> systems/od6s/templates/item/item-labels-tags.html }}
 
     </section>
-</form>

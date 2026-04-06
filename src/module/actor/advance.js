@@ -316,11 +316,14 @@ export class od6sadvance {
                 buttons: {
                     advance: {
                         label: game.i18n.localize("OD6S.ADVANCE"),
-                        callback: dlg => od6sadvance.advanceAction(
+                        callback: dlg => {
+                            const dlgEl = dlg instanceof HTMLElement ? dlg : dlg[0];
+                            return od6sadvance.advanceAction(
                             d.actorSheet.actor,
                             d.advanceData,
                             event,
-                            $(dlg[0]).find("#base")[0].base)
+                            dlgEl.querySelector("#base").base);
+                        }
                     }
                 },
                 default: "advance"
@@ -332,12 +335,15 @@ export class od6sadvance {
                 buttons: {
                     advance: {
                         label: game.i18n.localize("OD6S.ADVANCE"),
-                        callback: dlg => od6sadvance.advanceAction(
+                        callback: dlg => {
+                            const dlgEl = dlg instanceof HTMLElement ? dlg : dlg[0];
+                            return od6sadvance.advanceAction(
                             d.actorSheet.actor,
                             d.advanceData,
                             event,
-                            $(dlg[0]).find("#dice")[0].value,
-                            $(dlg[0]).find("#pips")[0].value)
+                            dlgEl.querySelector("#dice").value,
+                            dlgEl.querySelector("#pips").value);
+                        }
                     }
                 },
                 default: "advance"

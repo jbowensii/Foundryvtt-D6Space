@@ -152,7 +152,7 @@ export class od6sutilities {
 
         await OD6S.socket.executeAsGM('updateExplosiveTemplate', {operation: 'setFlags', templateId: templateId, flags: flags});
 
-        const scatterRoll = await new Roll('1d6').evaluate({"async": true});
+        const scatterRoll = await new Roll('1d6').evaluate();
         scatter = scatterRoll.total;
 
         switch(range) {
@@ -172,7 +172,7 @@ export class od6sutilities {
                 break;
         }
 
-        const distanceRoll = await new Roll(distanceTerms).evaluate({"async": true});
+        const distanceRoll = await new Roll(distanceTerms).evaluate();
         //distance = (distanceRoll.total * game.scenes.active.SceneDimensions.size)/game.scenes.active.SceneDimensions.distance;
         distance = distanceRoll.total * (canvas.dimensions.distancePixels);
 
@@ -449,7 +449,7 @@ export class od6sutilities {
             } else {
                 rollString = dice.dice + "d6" + game.i18n.localize('OD6S.BASE_DIE_FLAVOR');
             }
-            let roll = await new Roll(rollString).evaluate({"async": true});
+            let roll = await new Roll(rollString).evaluate();
             // Iterate over targets
             for (const i in targets) {
                 const target = targets[i];
@@ -546,7 +546,7 @@ export class od6sutilities {
                 if (game.settings.get('od6s', 'random_dice_difficulty')) {
                     const dice = OD6S.difficulty[level].dice;
                     const terms = dice + "D6";
-                    const roll = await new Roll(terms).evaluate({"async": true});
+                    const roll = await new Roll(terms).evaluate();
                     difficulty = roll.total;
                 } else {
                     let min = 0;
@@ -1087,7 +1087,7 @@ export class od6sutilities {
 
                     if (stunEffect === 'unconscious') {
                         if (OD6S.stunDice) {
-                            const roll = await new Roll("2d6").evaluate({async: true});
+                            const roll = await new Roll("2d6").evaluate();
                             result = loser.flavorName + game.i18n.localize('OD6S.CHAT_UNCONSCIOUS_01') +
                                 roll.total + game.i18n.localize('OD6S.CHAT_UNCONSCIOUS_02');
                         } else {

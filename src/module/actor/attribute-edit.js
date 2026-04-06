@@ -26,11 +26,14 @@ export class od6sattributeedit {
             buttons: {
                 submit: {
                     label: game.i18n.localize("OD6S.EDIT_ATTRIBUTE"),
-                    callback: dlg => od6sattributeedit.editAttributeAction(
-                        $(dlg[0]).find("#dice")[0].value,
-                        $(dlg[0]).find("#pips")[0].value,
+                    callback: dlg => {
+                        const dlgEl = dlg instanceof HTMLElement ? dlg : dlg[0];
+                        return od6sattributeedit.editAttributeAction(
+                        dlgEl.querySelector("#dice").value,
+                        dlgEl.querySelector("#pips").value,
                         event,
-                        this.actor)
+                        this.actor);
+                    }
                 }
             },
             default: "submit"

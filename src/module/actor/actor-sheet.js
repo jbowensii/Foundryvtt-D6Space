@@ -392,228 +392,240 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         this._initializeTabs();
         this._sheetTabs.bind(this.element);
 
-        // Wrap the element in jQuery for transitional compatibility
-        const html = $(this.element);
-
         // Everything below here is only needed if the sheet is editable
         if (!this.isEditable) return;
 
         // Alpha sort items
-        html.find('.alpha-item-sort-button').click(async ev => {
-            await this._alphaSortAllItems();
-            this.render();
-        })
+        this.element.querySelectorAll('.alpha-item-sort-button').forEach(el =>
+            el.addEventListener('click', async ev => {
+                await this._alphaSortAllItems();
+                this.render();
+            }));
 
 
         // Stun Tracker
-        html.find('.track_stuns_counter').click(async ev => {
-            ev.preventDefault();
-            const update = {
-                system: {
-                    stuns: {
-                        value: 0
+        this.element.querySelectorAll('.track_stuns_counter').forEach(el =>
+            el.addEventListener('click', async ev => {
+                ev.preventDefault();
+                const update = {
+                    system: {
+                        stuns: {
+                            value: 0
+                        }
                     }
                 }
-            }
-            await this.actor.update(update);
-            await this.render();
-        })
+                await this.actor.update(update);
+                await this.render();
+            }));
 
         // Embedded Pilot
-        html.find('.embedded-pilot-add').click(async ev => {
-            ev.preventDefault();
-            const data = {};
-            data.targets = game.collections.get('Actor').filter(a => a.type === 'npc' && !a.isToken);
-            data.actor = this.actor.uuid;
-            await new OD6SAddEmbeddedCrew(data).render('true');
-        })
+        this.element.querySelectorAll('.embedded-pilot-add').forEach(el =>
+            el.addEventListener('click', async ev => {
+                ev.preventDefault();
+                const data = {};
+                data.targets = game.collections.get('Actor').filter(a => a.type === 'npc' && !a.isToken);
+                data.actor = this.actor.uuid;
+                await new OD6SAddEmbeddedCrew(data).render('true');
+            }));
 
-        html.find('.embedded-pilot-remove').click(async ev=> {
-            // Remove skills/specs from the base actor
-            let removeSkills = this.actor.skills.map(i=>i._id);
-            removeSkills = removeSkills.concat(this.actor.specializations.map(i=>i._id));
-            if(removeSkills.length > 0) {
-                await this.actor.deleteEmbeddedDocuments('Item', removeSkills);
-            }
+        this.element.querySelectorAll('.embedded-pilot-remove').forEach(el =>
+            el.addEventListener('click', async ev => {
+                // Remove skills/specs from the base actor
+                let removeSkills = this.actor.skills.map(i=>i._id);
+                removeSkills = removeSkills.concat(this.actor.specializations.map(i=>i._id));
+                if(removeSkills.length > 0) {
+                    await this.actor.deleteEmbeddedDocuments('Item', removeSkills);
+                }
 
-            //zero out attributes
-            const update = {};
-            update.system = {};
-            for (let a in this.actor.system.attributes) {
-                update[`system.attributes.${a}.base`] = 0;
-                update[`system.embedded_pilot.actor`] = "";
-            }
-            await this.actor.update(update);
-            this.render();
-        })
+                //zero out attributes
+                const update = {};
+                update.system = {};
+                for (let a in this.actor.system.attributes) {
+                    update[`system.attributes.${a}.base`] = 0;
+                    update[`system.embedded_pilot.actor`] = "";
+                }
+                await this.actor.update(update);
+                this.render();
+            }));
 
 
         // Character Creation
-        html.find('.create-character').click(async ev => {
-            let newChar = new OD6SCreateCharacter({
-                actor: this.actor,
-                templates: od6sutilities.getAllItemsByType('character-template')
-            });
-            newChar.render({force: true});
-            await this.close();
-        })
+        this.element.querySelectorAll('.create-character').forEach(el =>
+            el.addEventListener('click', async ev => {
+                let newChar = new OD6SCreateCharacter({
+                    actor: this.actor,
+                    templates: od6sutilities.getAllItemsByType('character-template')
+                });
+                newChar.render({force: true});
+                await this.close();
+            }));
 
         // Roll Body Points
-        html.find('.rollbodypoints').click(async ev => {
-            const confirmText = "<p>" + game.i18n.localize("OD6S.CONFIRM_ROLL_BODYPOINTS") + "</p>";
-            await Dialog.prompt({
-                title: game.i18n.localize("OD6S.ROLL") + " " + game.i18n.localize(OD6S.bodyPointsName),
-                content: confirmText,
-                callback: () => {
-                    return this._rollBodyPoints();
-                }
-            })
-        })
-
-        // Purchase click event
-        html.find('.item-purchase').click(async ev => {
-            if (typeof (game.user.character) === 'undefined') {
-                ui.notifications.warn(game.i18n.localize('OD6S.WARN_NO_CHARACTER_ASSIGNED'));
-                return;
-            }
-            if (OD6S.cost === '0') {
-                await this.rollPurchase(ev, game.user.character.id);
-            } else {
-                await this._onPurchase(ev.currentTarget.dataset.itemId, game.user.character.id);
-            }
-        })
-
-        // Transfer click event
-        html.find('.item-transfer').click(async ev => {
-            if (typeof (game.user.character) === 'undefined') {
-                ui.notifications.warn(game.i18n.localize('OD6S.WARN_NO_CHARACTER_ASSIGNED'));
-                return;
-            }
-            //await this._onTransfer(ev.currentTarget.dataset.itemId, game.user.character.id);
-            await this._onTransfer(ev.currentTarget.dataset.itemId,
-                ev.currentTarget.dataset.senderId,
-                ev.currentTarget.dataset.recId);
-        })
-
-        // Edit body points
-        html.find('.editbodypoints').change(async ev => {
-            await this.actor.setWoundLevelFromBodyPoints(ev.target.value);
-            this.render();
-        })
-
-        // Edit funds
-        html.find('.edit-funds').change(async ev => {
-            const newScore = {};
-            newScore.dice = 0;
-            newScore.pips = 0;
-            let updateScore = 0;
-            const oldScore = od6sutilities.getDiceFromScore(this.actor.system.funds.score);
-            if (ev.target.id === 'funds-dice') {
-                newScore.pips = oldScore.pips;
-                newScore.dice = (+ev.target.value);
-                updateScore = od6sutilities.getScoreFromDice(newScore.dice, newScore.pips);
-            } else if (ev.target.id === 'funds-pips') {
-                newScore.dice = oldScore.dice;
-                newScore.pips = (+ev.target.value);
-                updateScore = od6sutilities.getScoreFromDice(newScore.dice, newScore.pips);
-            }
-            const update = {};
-            update.id = this.actor.id;
-            update[`system.funds.score`] = updateScore;
-            await this.actor.update(update);
-            this.render();
-        })
-
-        // Edit maneuverability
-        html.find('.edit-maneuverability').change(async ev => {
-            const newScore = {};
-            newScore.dice = 0;
-            newScore.pips = 0;
-            let updateScore = 0;
-            const oldScore = od6sutilities.getDiceFromScore(this.actor.system.maneuverability.score);
-            if (ev.target.id === 'maneuverability-dice') {
-                newScore.pips = oldScore.pips;
-                newScore.dice = (+ev.target.value);
-                updateScore = od6sutilities.getScoreFromDice(newScore.dice, newScore.pips);
-            } else if (ev.target.id === 'maneuverability-pips') {
-                newScore.dice = oldScore.dice;
-                newScore.pips = (+ev.target.value);
-                updateScore = od6sutilities.getScoreFromDice(newScore.dice, newScore.pips);
-            }
-            const update = {};
-            update.id = this.actor.id;
-            update[`system.maneuverability.score`] = updateScore;
-            await this.actor.update(update);
-            this.render();
-        })
-
-        // Edit toughness
-        html.find('.edit-toughness').change(async ev => {
-            const newScore = {};
-            newScore.dice = 0;
-            newScore.pips = 0;
-            let updateScore = 0;
-            const oldScore = od6sutilities.getDiceFromScore(this.actor.system.toughness.score);
-            if (ev.target.id === 'toughness-dice') {
-                newScore.pips = oldScore.pips;
-                newScore.dice = (+ev.target.value);
-                updateScore = od6sutilities.getScoreFromDice(newScore.dice, newScore.pips);
-            } else if (ev.target.id === 'toughness-pips') {
-                newScore.dice = oldScore.dice;
-                newScore.pips = (+ev.target.value);
-                updateScore = od6sutilities.getScoreFromDice(newScore.dice, newScore.pips);
-            }
-            const update = {};
-            update.id = this.actor.id;
-            update[`system.toughness.score`] = updateScore;
-            await this.actor.update(update);
-            this.render();
-        })
-
-        // Edit item quantity
-        html.find('.edit-quantity').change(async ev => {
-            const item = await this.actor.items.get(ev.currentTarget.dataset.itemId);
-            const update = {};
-            update[`system.quantity`] = ev.target.value
-            await item.update(update);
-        })
-
-        // Use a consumable
-        html.find('.use-consumable').click(async ev => {
-            const item = await this.actor.items.get(ev.currentTarget.dataset.itemId);
-            const update = {};
-            update.id = item._id;
-            update[`system.quantity`] = item.system.quantity - 1;
-            await item.update(update);
-
-            const actorEffectsList = this.actor.getEmbeddedCollection('ActiveEffect');
-
-            if (actorEffectsList.size > 0) {
-                let actorUpdate = [];
-                actorEffectsList.forEach(e => {
-                    let [parentType, parentId, documentType, documentId] = e.origin?.split(".") ?? [];
-                    if (parentType === "Scene") {
-                        let actorType, actorId;
-                        [parentType, parentId, actorType, actorId, documentType, documentId] = e.origin?.split(".") ?? [];
-                    }
-                    if (documentType === "Item") {
-                        const effectItem = this.actor.items.find(i => i.id === documentId);
-                        if (effectItem) {
-                            if (e.disabled === true) {
-                                const effectUpdate = {};
-                                effectUpdate._id = e.id;
-                                effectUpdate.disabled = false;
-                                actorUpdate.push(effectUpdate);
-                            }
-                        }
+        this.element.querySelectorAll('.rollbodypoints').forEach(el =>
+            el.addEventListener('click', async ev => {
+                const confirmText = "<p>" + game.i18n.localize("OD6S.CONFIRM_ROLL_BODYPOINTS") + "</p>";
+                await Dialog.prompt({
+                    title: game.i18n.localize("OD6S.ROLL") + " " + game.i18n.localize(OD6S.bodyPointsName),
+                    content: confirmText,
+                    callback: () => {
+                        return this._rollBodyPoints();
                     }
                 })
-                await this.actor.updateEmbeddedDocuments('ActiveEffect', actorUpdate);
-            }
-        })
+            }));
+
+        // Purchase click event
+        this.element.querySelectorAll('.item-purchase').forEach(el =>
+            el.addEventListener('click', async ev => {
+                if (typeof (game.user.character) === 'undefined') {
+                    ui.notifications.warn(game.i18n.localize('OD6S.WARN_NO_CHARACTER_ASSIGNED'));
+                    return;
+                }
+                if (OD6S.cost === '0') {
+                    await this.rollPurchase(ev, game.user.character.id);
+                } else {
+                    await this._onPurchase(ev.currentTarget.dataset.itemId, game.user.character.id);
+                }
+            }));
+
+        // Transfer click event
+        this.element.querySelectorAll('.item-transfer').forEach(el =>
+            el.addEventListener('click', async ev => {
+                if (typeof (game.user.character) === 'undefined') {
+                    ui.notifications.warn(game.i18n.localize('OD6S.WARN_NO_CHARACTER_ASSIGNED'));
+                    return;
+                }
+                //await this._onTransfer(ev.currentTarget.dataset.itemId, game.user.character.id);
+                await this._onTransfer(ev.currentTarget.dataset.itemId,
+                    ev.currentTarget.dataset.senderId,
+                    ev.currentTarget.dataset.recId);
+            }));
+
+        // Edit body points
+        this.element.querySelectorAll('.editbodypoints').forEach(el =>
+            el.addEventListener('change', async ev => {
+                await this.actor.setWoundLevelFromBodyPoints(ev.target.value);
+                this.render();
+            }));
+
+        // Edit funds
+        this.element.querySelectorAll('.edit-funds').forEach(el =>
+            el.addEventListener('change', async ev => {
+                const newScore = {};
+                newScore.dice = 0;
+                newScore.pips = 0;
+                let updateScore = 0;
+                const oldScore = od6sutilities.getDiceFromScore(this.actor.system.funds.score);
+                if (ev.target.id === 'funds-dice') {
+                    newScore.pips = oldScore.pips;
+                    newScore.dice = (+ev.target.value);
+                    updateScore = od6sutilities.getScoreFromDice(newScore.dice, newScore.pips);
+                } else if (ev.target.id === 'funds-pips') {
+                    newScore.dice = oldScore.dice;
+                    newScore.pips = (+ev.target.value);
+                    updateScore = od6sutilities.getScoreFromDice(newScore.dice, newScore.pips);
+                }
+                const update = {};
+                update.id = this.actor.id;
+                update[`system.funds.score`] = updateScore;
+                await this.actor.update(update);
+                this.render();
+            }));
+
+        // Edit maneuverability
+        this.element.querySelectorAll('.edit-maneuverability').forEach(el =>
+            el.addEventListener('change', async ev => {
+                const newScore = {};
+                newScore.dice = 0;
+                newScore.pips = 0;
+                let updateScore = 0;
+                const oldScore = od6sutilities.getDiceFromScore(this.actor.system.maneuverability.score);
+                if (ev.target.id === 'maneuverability-dice') {
+                    newScore.pips = oldScore.pips;
+                    newScore.dice = (+ev.target.value);
+                    updateScore = od6sutilities.getScoreFromDice(newScore.dice, newScore.pips);
+                } else if (ev.target.id === 'maneuverability-pips') {
+                    newScore.dice = oldScore.dice;
+                    newScore.pips = (+ev.target.value);
+                    updateScore = od6sutilities.getScoreFromDice(newScore.dice, newScore.pips);
+                }
+                const update = {};
+                update.id = this.actor.id;
+                update[`system.maneuverability.score`] = updateScore;
+                await this.actor.update(update);
+                this.render();
+            }));
+
+        // Edit toughness
+        this.element.querySelectorAll('.edit-toughness').forEach(el =>
+            el.addEventListener('change', async ev => {
+                const newScore = {};
+                newScore.dice = 0;
+                newScore.pips = 0;
+                let updateScore = 0;
+                const oldScore = od6sutilities.getDiceFromScore(this.actor.system.toughness.score);
+                if (ev.target.id === 'toughness-dice') {
+                    newScore.pips = oldScore.pips;
+                    newScore.dice = (+ev.target.value);
+                    updateScore = od6sutilities.getScoreFromDice(newScore.dice, newScore.pips);
+                } else if (ev.target.id === 'toughness-pips') {
+                    newScore.dice = oldScore.dice;
+                    newScore.pips = (+ev.target.value);
+                    updateScore = od6sutilities.getScoreFromDice(newScore.dice, newScore.pips);
+                }
+                const update = {};
+                update.id = this.actor.id;
+                update[`system.toughness.score`] = updateScore;
+                await this.actor.update(update);
+                this.render();
+            }));
+
+        // Edit item quantity
+        this.element.querySelectorAll('.edit-quantity').forEach(el =>
+            el.addEventListener('change', async ev => {
+                const item = await this.actor.items.get(ev.currentTarget.dataset.itemId);
+                const update = {};
+                update[`system.quantity`] = ev.target.value
+                await item.update(update);
+            }));
+
+        // Use a consumable
+        this.element.querySelectorAll('.use-consumable').forEach(el =>
+            el.addEventListener('click', async ev => {
+                const item = await this.actor.items.get(ev.currentTarget.dataset.itemId);
+                const update = {};
+                update.id = item._id;
+                update[`system.quantity`] = item.system.quantity - 1;
+                await item.update(update);
+
+                const actorEffectsList = this.actor.getEmbeddedCollection('ActiveEffect');
+
+                if (actorEffectsList.size > 0) {
+                    let actorUpdate = [];
+                    actorEffectsList.forEach(e => {
+                        let [parentType, parentId, documentType, documentId] = e.origin?.split(".") ?? [];
+                        if (parentType === "Scene") {
+                            let actorType, actorId;
+                            [parentType, parentId, actorType, actorId, documentType, documentId] = e.origin?.split(".") ?? [];
+                        }
+                        if (documentType === "Item") {
+                            const effectItem = this.actor.items.find(i => i.id === documentId);
+                            if (effectItem) {
+                                if (e.disabled === true) {
+                                    const effectUpdate = {};
+                                    effectUpdate._id = e.id;
+                                    effectUpdate.disabled = false;
+                                    actorUpdate.push(effectUpdate);
+                                }
+                            }
+                        }
+                    })
+                    await this.actor.updateEmbeddedDocuments('ActiveEffect', actorUpdate);
+                }
+            }));
 
         // Activate a manifestation
-        html.find('.active-checkbox').click(async ev => {
+        this.element.querySelectorAll('.active-checkbox').forEach(el =>
+            el.addEventListener('click', async ev => {
             ev.preventDefault();
             const item = this.actor.items.find(i => i.id === ev.currentTarget.dataset.itemId);
 
@@ -658,10 +670,11 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 }
             }
             this.render();
-        })
+        }));
 
         // Equip an item
-        html.find('.equip-checkbox').change(async ev => {
+        this.element.querySelectorAll('.equip-checkbox').forEach(el =>
+            el.addEventListener('change', async ev => {
             const item = this.actor.items.find(i => i.id === ev.currentTarget.dataset.itemId);
 
             if (item) {
@@ -718,112 +731,132 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 }
             }
             this.render();
-        })
+        }));
 
         // Free edit attribute
         const attributeEditDialog = new od6sattributeedit();
-        html.find('.attribute-edit').click(attributeEditDialog._onAttributeEdit.bind(this));
+        this.element.querySelectorAll('.attribute-edit').forEach(el =>
+            el.addEventListener('click', attributeEditDialog._onAttributeEdit.bind(this)));
 
         // Add Inventory Item
-        html.find('.item-create').click(this._onItemCreate.bind(this));
-        html.find('.cargo-hold-add').click(this.actor.onCargoHoldItemCreate.bind(this.actor));
+        this.element.querySelectorAll('.item-create').forEach(el =>
+            el.addEventListener('click', this._onItemCreate.bind(this)));
+        this.element.querySelectorAll('.cargo-hold-add').forEach(el =>
+            el.addEventListener('click', this.actor.onCargoHoldItemCreate.bind(this.actor)));
 
         // Update Effect
-        html.find('.effect-edit').click(async ev => {
-            const effect = this.actor.effects.get(ev.currentTarget.dataset.effectId);
-            await effect.sheet.render(true);
-        });
+        this.element.querySelectorAll('.effect-edit').forEach(el =>
+            el.addEventListener('click', async ev => {
+                const effect = this.actor.effects.get(ev.currentTarget.dataset.effectId);
+                await effect.sheet.render(true);
+            }));
 
         // Update Effect
-        html.find('.effect-delete').click(async ev => {
-            await this.actor.deleteEmbeddedDocuments('ActiveEffect', [ev.currentTarget.dataset.effectId]);
-        });
+        this.element.querySelectorAll('.effect-delete').forEach(el =>
+            el.addEventListener('click', async ev => {
+                await this.actor.deleteEmbeddedDocuments('ActiveEffect', [ev.currentTarget.dataset.effectId]);
+            }));
 
         // Update Inventory Item
-        html.find('.item-edit').click(async ev => {
-            let itemId;
-            if (typeof (ev.currentTarget.dataset.itemId) !== 'undefined' &&
-                ev.currentTarget.dataset.itemId !== '') {
-                itemId = ev.currentTarget.dataset.itemId
-            } else {
-                const li = $(ev.currentTarget).parents(".item");
-                itemId = (li.data("itemId"))
-            }
-            const item = this.actor.items.get(itemId);
-            item.sheet.render(true);
-        });
+        this.element.querySelectorAll('.item-edit').forEach(el =>
+            el.addEventListener('click', async ev => {
+                let itemId;
+                if (typeof (ev.currentTarget.dataset.itemId) !== 'undefined' &&
+                    ev.currentTarget.dataset.itemId !== '') {
+                    itemId = ev.currentTarget.dataset.itemId
+                } else {
+                    const li = ev.currentTarget.closest(".item");
+                    itemId = li.dataset.itemId;
+                }
+                const item = this.actor.items.get(itemId);
+                item.sheet.render(true);
+            }));
 
         // Delete Inventory Item
-        html.find('.item-delete').click(async ev => {
-            ev.preventDefault();
-            await this.actor.sheet.deleteItem(ev);
-        });
+        this.element.querySelectorAll('.item-delete').forEach(el =>
+            el.addEventListener('click', async ev => {
+                ev.preventDefault();
+                await this.actor.sheet.deleteItem(ev);
+            }));
 
         // Rollable abilities.
         let rollDialog = new (od6sroll);
-        html.find('.rolldialog').click(rollDialog._onRollEvent.bind(this));
-        html.find('.initrolldialog').click(od6sInitRoll._onInitRollDialog.bind(this));
-        html.find('.actionroll').click(rollDialog._onRollItem.bind(this));
+        this.element.querySelectorAll('.rolldialog').forEach(el =>
+            el.addEventListener('click', rollDialog._onRollEvent.bind(this)));
+        this.element.querySelectorAll('.initrolldialog').forEach(el =>
+            el.addEventListener('click', od6sInitRoll._onInitRollDialog.bind(this)));
+        this.element.querySelectorAll('.actionroll').forEach(el =>
+            el.addEventListener('click', rollDialog._onRollItem.bind(this)));
 
         // Attribute/skill advances
         let advanceDialog = new (od6sadvance);
-        html.find('.advancedialog').click(advanceDialog._onAdvance.bind(this));
+        this.element.querySelectorAll('.advancedialog').forEach(el =>
+            el.addEventListener('click', advanceDialog._onAdvance.bind(this)));
 
         // Attribute context menu
-        html.find('.attributedialog').contextmenu(() => {
-        })
+        this.element.querySelectorAll('.attributedialog').forEach(el =>
+            el.addEventListener('contextmenu', () => {
+            }));
 
         // Skill context menu
-        html.find('.skilldialog').contextmenu(() => {
-        })
+        this.element.querySelectorAll('.skilldialog').forEach(el =>
+            el.addEventListener('contextmenu', () => {
+            }));
 
         // Skill specialization
         let specializeDialog = new (od6sspecialize);
-        html.find('.specializedialog').click(specializeDialog._onSpecialize.bind(this));
+        this.element.querySelectorAll('.specializedialog').forEach(el =>
+            el.addEventListener('click', specializeDialog._onSpecialize.bind(this)));
 
         // Reset template/actor
-        html.find('.reset-template').click(() => {
-            const confirmText = "<p>" + game.i18n.localize("OD6S.CONFIRM_TEMPLATE_CLEAR") + "</p>";
-            Dialog.prompt({
-                title: game.i18n.localize("OD6S.CLEAR_TEMPLATE"),
-                content: confirmText,
-                callback: () => {
-                    return this._onClearCharacterTemplate();
-                }
-            })
-        });
+        this.element.querySelectorAll('.reset-template').forEach(el =>
+            el.addEventListener('click', () => {
+                const confirmText = "<p>" + game.i18n.localize("OD6S.CONFIRM_TEMPLATE_CLEAR") + "</p>";
+                Dialog.prompt({
+                    title: game.i18n.localize("OD6S.CLEAR_TEMPLATE"),
+                    content: confirmText,
+                    callback: () => {
+                        return this._onClearCharacterTemplate();
+                    }
+                })
+            }));
 
-        html.find('.reset-species-template').click(() => {
-            const confirmText = "<p>" + game.i18n.localize("OD6S.CONFIRM_SPECIES_TEMPLATE_CLEAR") + "</p>";
-            Dialog.prompt({
-                title: game.i18n.localize("OD6S.CLEAR_SPECIES_TEMPLATE"),
-                content: confirmText,
-                callback: () => {
-                    return this._onClearSpeciesTemplate();
-                }
-            })
-        });
+        this.element.querySelectorAll('.reset-species-template').forEach(el =>
+            el.addEventListener('click', () => {
+                const confirmText = "<p>" + game.i18n.localize("OD6S.CONFIRM_SPECIES_TEMPLATE_CLEAR") + "</p>";
+                Dialog.prompt({
+                    title: game.i18n.localize("OD6S.CLEAR_SPECIES_TEMPLATE"),
+                    content: confirmText,
+                    callback: () => {
+                        return this._onClearSpeciesTemplate();
+                    }
+                })
+            }));
 
         // Force-exit from vehicle
-        html.find(".vehicle-exit").click(async ev => {
-            ev.preventDefault();
-            await this.actor.setFlag('od6s', 'crew', '');
-        })
+        this.element.querySelectorAll('.vehicle-exit').forEach(el =>
+            el.addEventListener('click', async ev => {
+                ev.preventDefault();
+                await this.actor.setFlag('od6s', 'crew', '');
+            }));
 
         // Add Item to actor using a button
-        html.find('.item-add').click(async ev => {
-            ev.preventDefault();
-            await this.addItem(ev);
-        });
+        this.element.querySelectorAll('.item-add').forEach(el =>
+            el.addEventListener('click', async ev => {
+                ev.preventDefault();
+                await this.addItem(ev);
+            }));
 
         // Open a crewmember's character sheet
-        html.find(".crew-member").click(async ev => {
-            const actor = await od6sutilities.getActorFromUuid(ev.currentTarget.dataset.uuid);
-            if (actor.testUserPermission(game.user, "OWNER")) actor.sheet.render('true')
-        })
+        this.element.querySelectorAll('.crew-member').forEach(el =>
+            el.addEventListener('click', async ev => {
+                const actor = await od6sutilities.getActorFromUuid(ev.currentTarget.dataset.uuid);
+                if (actor.testUserPermission(game.user, "OWNER")) actor.sheet.render('true')
+            }));
 
         // Add/remove crew to vehicles
-        html.find(".crew-add").click(async ev => {
+        this.element.querySelectorAll('.crew-add').forEach(el =>
+            el.addEventListener('click', async ev => {
             ev.preventDefault();
             const data = {};
             data.crew = [];
@@ -867,56 +900,64 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
             data.actor = this.actor.uuid;
             data.type = this.actor.type;
             new OD6SAddCrew(data).render(true);
-        });
+        }));
 
-        html.find('.crew-delete').click(async ev => {
-            ev.preventDefault();
-            if (!game.user.isGM && this.actor.uuid === ev.currentTarget.dataset.crewid) {
-                return await OD6S.socket.executeAsGM('unlinkCrew', ev.currentTarget.dataset.crewid, ev.currentTarget.dataset.vehicleid);
-            } else if (game.user.isGM && this.actor.uuid === ev.currentTarget.dataset.crewid) {
-                const vehicle = await od6sutilities.getActorFromUuid(ev.currentTarget.dataset.vehicleid)
-                await vehicle.sheet.unlinkCrew(this.actor.uuid);
-            } else {
-                return await this.unlinkCrew(ev.currentTarget.dataset.crewid);
-            }
-        })
+        this.element.querySelectorAll('.crew-delete').forEach(el =>
+            el.addEventListener('click', async ev => {
+                ev.preventDefault();
+                if (!game.user.isGM && this.actor.uuid === ev.currentTarget.dataset.crewid) {
+                    return await OD6S.socket.executeAsGM('unlinkCrew', ev.currentTarget.dataset.crewid, ev.currentTarget.dataset.vehicleid);
+                } else if (game.user.isGM && this.actor.uuid === ev.currentTarget.dataset.crewid) {
+                    const vehicle = await od6sutilities.getActorFromUuid(ev.currentTarget.dataset.vehicleid)
+                    await vehicle.sheet.unlinkCrew(this.actor.uuid);
+                } else {
+                    return await this.unlinkCrew(ev.currentTarget.dataset.crewid);
+                }
+            }));
 
         // Add/remove actions
-        html.find('.addaction').click(() => {
-            this._onActionAdd();
-        })
+        this.element.querySelectorAll('.addaction').forEach(el =>
+            el.addEventListener('click', () => {
+                this._onActionAdd();
+            }));
 
-        html.find('.combat-action').contextmenu((ev) => {
-            this._onAvailableActionAdd(ev);
-        })
+        this.element.querySelectorAll('.combat-action').forEach(el =>
+            el.addEventListener('contextmenu', (ev) => {
+                this._onAvailableActionAdd(ev);
+            }));
 
         // Roll available action
-        html.find('.combat-action').click(async (ev) => {
-            await this._rollAvailableAction(ev);
-        })
+        this.element.querySelectorAll('.combat-action').forEach(el =>
+            el.addEventListener('click', async (ev) => {
+                await this._rollAvailableAction(ev);
+            }));
 
         // Roll available vehicle action
-        html.find('.vehicle-action').click(async (ev) => {
-            await this._rollAvailableVehicleAction(ev);
-        })
+        this.element.querySelectorAll('.vehicle-action').forEach(el =>
+            el.addEventListener('click', async (ev) => {
+                await this._rollAvailableVehicleAction(ev);
+            }));
 
         // Edit misc action
-        html.find('.editmiscaction').change(async (ev) => {
-            const update = {};
-            update._id = ev.currentTarget.dataset.itemId;
-            update.name = ev.target.value;
-            const action = await this.actor.items.find(i => i.id === update._id);
-            await action.update(update);
-            this.render();
-        })
+        this.element.querySelectorAll('.editmiscaction').forEach(el =>
+            el.addEventListener('change', async (ev) => {
+                const update = {};
+                update._id = ev.currentTarget.dataset.itemId;
+                update.name = ev.target.value;
+                const action = await this.actor.items.find(i => i.id === update._id);
+                await action.update(update);
+                this.render();
+            }));
 
         // Edit active effect
-        html.find('.edit-effect').click(async (ev) => {
-            await this._editEffect(ev);
-        })
+        this.element.querySelectorAll('.edit-effect').forEach(el =>
+            el.addEventListener('click', async (ev) => {
+                await this._editEffect(ev);
+            }));
 
         // Fate point in effect checkbox
-        html.find('.fatepointeffect').change(async () => {
+        this.element.querySelectorAll('.fatepointeffect').forEach(el =>
+            el.addEventListener('change', async () => {
             // Don't allow if actor has 0 points
             if (this.actor.system.fatepoints.value < 1) {
                 await this.actor.setFlag('od6s', 'fatepointeffect', false)
@@ -936,10 +977,11 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 update.system.fatepoints.value = this.actor.system.fatepoints.value -= 1;
                 await this.actor.update(update, {diff: true});
             }
-        })
+        }));
 
         // Vehicle shield allocation
-        html.find('.arc').click(async (ev) => {
+        this.element.querySelectorAll('.arc').forEach(el =>
+            el.addEventListener('click', async (ev) => {
             const arc = ev.currentTarget.dataset.arc;
             const direction = ev.currentTarget.dataset.direction;
             const value = this.actor.system.shields.value;
@@ -974,10 +1016,11 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
                 await this.actor.update(update, {diff: true});
             }
-        })
+        }));
 
         // Show item details
-        html.find('.show-item-details').click(async (ev) => {
+        this.element.querySelectorAll('.show-item-details').forEach(el =>
+            el.addEventListener('click', async (ev) => {
             ev.preventDefault();
             let item = game.actors.get(ev.currentTarget.dataset.actorId).items.get(ev.currentTarget.dataset.itemId);
             if (typeof (item) !== 'undefined') {
@@ -995,42 +1038,46 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                     }
                 }
             }
-        })
+        }));
 
-        html.find('.merchant-quantity-owner').change(async (ev) => {
-            const item = this.actor.items.get(ev.currentTarget.dataset.itemId);
-            const update = {};
-            update._id = item.id;
-            update.system = {};
-            update.system.quantity = ev.target.value;
+        this.element.querySelectorAll('.merchant-quantity-owner').forEach(el =>
+            el.addEventListener('change', async (ev) => {
+                const item = this.actor.items.get(ev.currentTarget.dataset.itemId);
+                const update = {};
+                update._id = item.id;
+                update.system = {};
+                update.system.quantity = ev.target.value;
 
-            await this.actor.updateEmbeddedDocuments('Item', [update]);
-        })
-
-        // Merchant owner edit cost
-        html.find('.merchant-cost-owner').change(async (ev) => {
-            const item = this.actor.items.get(ev.currentTarget.dataset.itemId);
-            const update = {};
-            update._id = item.id;
-            update.system = {};
-            update.system.cost = ev.target.value;
-
-            await this.actor.updateEmbeddedDocuments('Item', [update]);
-        })
+                await this.actor.updateEmbeddedDocuments('Item', [update]);
+            }));
 
         // Merchant owner edit cost
-        html.find('.merchant-price-owner').change(async (ev) => {
-            const item = this.actor.items.get(ev.currentTarget.dataset.itemId);
-            const update = {};
-            update._id = item.id;
-            update.system = {};
-            update.system.price = ev.target.value;
+        this.element.querySelectorAll('.merchant-cost-owner').forEach(el =>
+            el.addEventListener('change', async (ev) => {
+                const item = this.actor.items.get(ev.currentTarget.dataset.itemId);
+                const update = {};
+                update._id = item.id;
+                update.system = {};
+                update.system.cost = ev.target.value;
 
-            await this.actor.updateEmbeddedDocuments('Item', [update]);
-        })
+                await this.actor.updateEmbeddedDocuments('Item', [update]);
+            }));
+
+        // Merchant owner edit cost
+        this.element.querySelectorAll('.merchant-price-owner').forEach(el =>
+            el.addEventListener('change', async (ev) => {
+                const item = this.actor.items.get(ev.currentTarget.dataset.itemId);
+                const update = {};
+                update._id = item.id;
+                update.system = {};
+                update.system.price = ev.target.value;
+
+                await this.actor.updateEmbeddedDocuments('Item', [update]);
+            }));
 
         // Vehicle shield allocation by crew member
-        html.find('.c-arc').click(async (ev) => {
+        this.element.querySelectorAll('.c-arc').forEach(el =>
+            el.addEventListener('click', async (ev) => {
             const actor = await od6sutilities.getActorFromUuid(ev.currentTarget.dataset.uuid);
             const arc = ev.currentTarget.dataset.arc;
             const direction = ev.currentTarget.dataset.direction;
@@ -1068,33 +1115,35 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                     this.actor.modifyShields(update)
                 }
             }
-        })
+        }));
 
         // Event listener for skill usage checkboxes
-        html.find('.skill-used-checkbox, .spec-used-checkbox').change(async event => {
-            const itemId = $(event.currentTarget).data('item-id');
-            const item = this.actor.items.get(itemId);
+        this.element.querySelectorAll('.skill-used-checkbox, .spec-used-checkbox').forEach(el =>
+            el.addEventListener('change', async event => {
+                const itemId = event.currentTarget.dataset.itemId;
+                const item = this.actor.items.get(itemId);
 
-            if (item) {
-                await item.update({'system.used.value': event.currentTarget.checked})
-                    .catch(err => console.error('Failed to update item used status:', err));
-            }
-        });
+                if (item) {
+                    await item.update({'system.used.value': event.currentTarget.checked})
+                        .catch(err => console.error('Failed to update item used status:', err));
+                }
+            }));
 
         // Event listener for Session Reset button
-        html.find('.session-reset-button').click(event => {
-            const checkboxes = html.find('.skill-used-checkbox, .spec-used-checkbox');
-            checkboxes.each((index, checkbox) => {
-                const itemId = $(checkbox).data('item-id');
-                const item = this.actor.items.get(itemId);
-                if (item) {
-                    item.update({'system.used.value': false}).catch(err => console.error(err));
-                    $(checkbox).prop('checked', false);
-                } else {
-                    console.error("Item not found for reset: ", itemId);
-                }
-            });
-        });
+        this.element.querySelectorAll('.session-reset-button').forEach(el =>
+            el.addEventListener('click', event => {
+                const checkboxes = this.element.querySelectorAll('.skill-used-checkbox, .spec-used-checkbox');
+                checkboxes.forEach(checkbox => {
+                    const itemId = checkbox.dataset.itemId;
+                    const item = this.actor.items.get(itemId);
+                    if (item) {
+                        item.update({'system.used.value': false}).catch(err => console.error(err));
+                        checkbox.checked = false;
+                    } else {
+                        console.error("Item not found for reset: ", itemId);
+                    }
+                });
+            }));
 
         // Drag events
         if (this.actor.isOwner) {
@@ -1103,27 +1152,27 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
             if (this.actor.type === 'container' && !game.user.isGM) return;
 
             // Items
-            html.find('li.item').each((i, li) => {
+            this.element.querySelectorAll('li.item').forEach(li => {
                 if (li.classList.contains("inventory-header")) return;
                 li.setAttribute("draggable", true);
                 li.addEventListener("dragstart", handler, false);
             });
 
             // Combat Actions
-            html.find('li.availableaction').each((i, li) => {
+            this.element.querySelectorAll('li.availableaction').forEach(li => {
                 li.setAttribute("draggable", true);
                 li.addEventListener("dragstart", this._dragAvailableCombatAction, false);
-            })
-            html.find('li.assignedaction').each((i, li) => {
+            });
+            this.element.querySelectorAll('li.assignedaction').forEach(li => {
                 li.setAttribute("draggable", true);
                 li.addEventListener("dragstart", this._dragAssignedCombatAction, false);
-            })
+            });
 
             // Crewmembers
-            html.find('li.crew-list').each((i, li) => {
+            this.element.querySelectorAll('li.crew-list').forEach(li => {
                 li.setAttribute('draggable', true);
                 li.addEventListener("dragstart", this._dragCrewMember, false);
-            })
+            });
         }
     }
 
@@ -1145,8 +1194,8 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 ev.currentTarget.dataset.itemId !== '') {
                 itemId = ev.currentTarget.dataset.itemId
             } else {
-                const li = $(ev.currentTarget).parents(".item");
-                itemId = (li.data("itemId"))
+                const li = ev.currentTarget.closest(".item");
+                itemId = li.dataset.itemId;
             }
             const confirmText = "<p>" + game.i18n.localize("OD6S.DELETE_CONFIRM") + "</p>";
             await Dialog.prompt({
@@ -1158,7 +1207,6 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 }
             })
         } else {
-            const li = $(ev.currentTarget).parents(".item");
             await this.actor.deleteEmbeddedDocuments('Item', [ev.currentTarget.dataset.itemId]);
             this.render();
         }
@@ -2172,7 +2220,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
         let rollMode = 0;
         if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
-        let roll = await new Roll(rollString).evaluate({"async": true});
+        let roll = await new Roll(rollString).evaluate();
         await roll.toMessage({
             speaker: ChatMessage.getSpeaker(),
             flavor: label,

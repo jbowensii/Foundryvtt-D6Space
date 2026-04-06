@@ -399,7 +399,7 @@ Hooks.on('renderChatLog', (log, html, data) => {
             if (data.damagescalebonus < 0) rollString += "-" + Math.abs(data.damagescalebonus);
         }
 
-        let roll = await new Roll(rollString).evaluate({"async": true});
+        let roll = await new Roll(rollString).evaluate();
 
         let label = game.i18n.localize('OD6S.DAMAGE') + " (" +
             game.i18n.localize(OD6S.damageTypes[data.damagetype]) + ")";
@@ -794,7 +794,7 @@ Hooks.on("updateActor", async (document, change, options, userId) => {
             if (game.user.isGM) {
                 if (document.system.stuns.value >= od6sutilities.getDiceFromScore(document.system.attributes.str.score).dice) {
                     // Actor has become unconscious
-                    const roll = await new Roll("2d6").evaluate({async: true});
+                    const roll = await new Roll("2d6").evaluate();
                     const flavor = document.name +
                         game.i18n.localize('OD6S.CHAT_UNCONSCIOUS_01') +
                         roll.total +
@@ -1374,7 +1374,7 @@ async function simpleRoll() {
                         label += " " + game.i18n.localize('OD6S.DAMAGE') + "(" +
                             game.i18n.localize(OD6S.damageTypes[damageType]) + ")";
                     }
-                    let roll = await new Roll(rollString).evaluate({"async": true});
+                    let roll = await new Roll(rollString).evaluate();
 
                     let flags = {
                         "type": "simple",

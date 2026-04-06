@@ -134,7 +134,7 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
                 submit: {
                     label: game.i18n.localize("OD6S.ADD"),
                     callback: dlg => this._addActorTypeAction(
-                        $(dlg[0]).find("#actor-type")[0].value
+                        dlg[0].querySelector("#actor-type").value
                     )
                 }
             },
@@ -183,8 +183,8 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
                 submit: {
                     label: game.i18n.localize("OD6S.ADD"),
                     callback: dlg => this._addLabelAction(
-                        $(dlg[0]).find("#key")[0].value,
-                        $(dlg[0]).find("#value")[0].value)
+                        dlg[0].querySelector("#key").value,
+                        dlg[0].querySelector("#value").value)
                 }
             },
             default: "submit"
@@ -222,7 +222,7 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
         const name = game.i18n.localize('OD6S.NEW_ACTIVE_EFFECT')
         const effect = await this.document.createEmbeddedDocuments("ActiveEffect",
             [
-                {label: name},
+                {name: name},
             ]
         );
         const sheet = new ActiveEffectConfig(effect[0]);
@@ -456,7 +456,7 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
                 submit: {
                     label: game.i18n.localize("OD6S.ADD"),
                     callback: dlg => this._addTemplateItemAction(
-                        $(dlg[0]).find("#itemname")[0].value,
+                        dlg[0].querySelector("#itemname").value,
                         event.currentTarget.dataset.type,
                         this)
                 }
@@ -524,7 +524,7 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
                 submit: {
                     label: game.i18n.localize("OD6S.EDIT"),
                     callback: dlg => this._editTemplateItemAction(
-                        $(dlg[0]).find("#itemdesc")[0].value,
+                        dlg[0].querySelector("#itemdesc").value,
                         event,
                         this)
                 }
@@ -587,8 +587,8 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
                 submit: {
                     label: game.i18n.localize("OD6S.EDIT_ATTRIBUTE"),
                     callback: dlg => this._editAttributeAction(
-                        $(dlg[0]).find("#dice")[0].value,
-                        $(dlg[0]).find("#pips")[0].value,
+                        dlg[0].querySelector("#dice").value,
+                        dlg[0].querySelector("#pips").value,
                         event,
                         this)
                 }
