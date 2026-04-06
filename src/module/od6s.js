@@ -5,9 +5,9 @@ import {OD6SItem} from "./item/item.js";
 import {OD6SItemSheet} from "./item/item-sheet.js";
 import {OD6SToken} from "./overrides/token.js";
 import {od6sutilities} from "./system/utilities.js";
-import {OD6SCombatTracker} from "./overrides/combat-tracker.js";
-import {OD6SCompendiumDirectory} from "./overrides/compendium-directory.js";
-import {OD6SChatLog} from "./overrides/chat-log.js";
+// REMOVED in v13 migration: CombatTracker, CompendiumDirectory, ChatLog overrides
+// These core classes were converted to AppV2 in v13 and can no longer be subclassed this way.
+// Combat tracker initiative logic moved to OD6SCombat.rollInitiative() in combat.js.
 import OD6SEditDifficulty, {OD6SChat, OD6SChooseTarget, OD6SEditDamage, OD6SHandleWildDieForm} from "./apps/chat.js";
 import OD6SSocketHandler from "./system/socket.js";
 import OD6S from "./config/config-od6s.js";
@@ -60,9 +60,6 @@ Hooks.once('init', async function () {
     }
 
     CONFIG.Combat.documentClass = OD6SCombat;
-    CONFIG.ui.chat = OD6SChatLog;
-    CONFIG.ui.combat = OD6SCombatTracker;
-    CONFIG.ui.compendium = OD6SCompendiumDirectory;
     CONFIG.statusEffects = OD6S.statusEffects;
     CONFIG.Dice.terms["w"] = WildDie;
     CONFIG.Dice.terms["b"] = CharacterPointDie;
@@ -75,27 +72,11 @@ Hooks.once('init', async function () {
     CONFIG.Item.documentClass = OD6SItem;
 
     // Register sheet application classes
-    Actors.unregisterSheet("core", ActorSheet);
     Actors.registerSheet("od6s", OD6SActorSheet, {makeDefault: true});
-    Items.unregisterSheet("core", ItemSheet);
     Items.registerSheet("od6s", OD6SItemSheet, {makeDefault: true});
 });
 
-// Application Close Hook
-Hooks.on('closeApplication', async (app, buttons) => {
-
-})
-
-Hooks.on('drawMeasuredTemplate', async (template, refreshState) => {
-})
-
-Hooks.on('refreshMeasuredTemplate', async (template, refreshState) => {
-})
-
-Hooks.on('createMeasuredTemplate', async (template, data, data2) => {
-})
-
-//update measuredTemplate hook
+// update measuredTemplate hook
 Hooks.on('updateMeasuredTemplate', async (template, change) => {
     // If the template has a message attached, update the targets in the message
     if (game.user.isGM) {
@@ -178,12 +159,13 @@ Hooks.on('deleteMeasuredTemplate', async (template) => {
 // Chat hooks
 // Chat listeners
 Hooks.on('renderChatMessage', (msg, html, data) => {
+    // v13: html is HTMLElement, not jQuery. Use native DOM.
     if (game.settings.get('od6s', 'hide-gm-rolls') && data.whisperTo !== '') {
         if (game.user.isGM === false &&
             game.userId !== data.author.id &&
             data.message.whisper.indexOf(game.user.id) === -1) {
             msg.sound = null;
-            html.hide();
+            html.style.display = 'none';
         }
     }
 })
@@ -210,18 +192,10 @@ Hooks.on("preDeleteChatMessage", async (message, data, diff, id) => {
     }
 })
 
-Hooks.on("preUpdateChatMessage", async (message, data, options, id) => {
-
-})
-
-Hooks.on('deleteChatMessage', async (message, data, options, id) => {
-
-})
-
 Hooks.on("updateChatMessage", async (message, data, diff, id) => {
     if (data.blind === false) {
-        let messageLi = $(`.message[data-message-id=${data._id}]`);
-        messageLi.show();
+        let messageLi = document.querySelector(`.message[data-message-id="${data._id}"]`);
+        if (messageLi) messageLi.style.display = '';
     }
 
     if (message.getFlag('od6s','isExplosive') && typeof(data.flags?.od6s?.success) !== 'undefined') {
@@ -274,6 +248,9 @@ Hooks.on("updateChatMessage", async (message, data, diff, id) => {
 });
 
 Hooks.on('renderChatLog', (log, html, data) => {
+    // v13: html is HTMLElement. Wrap in jQuery for Phase 1 compatibility.
+    // Phase 2 will convert to native DOM event delegation.
+    html = $(html);
 
     html.on('input', ".explosive-damage", async ev => {
         const message =  await game.messages.get(ev.currentTarget.dataset.messageId);
@@ -345,8 +322,8 @@ Hooks.on('renderChatLog', (log, html, data) => {
                     await actor.update(update);
                 }
                 if(!actor.effects.contents.find(
-                    i => i.label === game.i18n.localize(CONFIG.statusEffects.find(
-                        e => e.id === 'stunned').label))) {
+                    i => i.name === game.i18n.localize(CONFIG.statusEffects.find(
+                        e => e.id === 'stunned').name))) {
                     await token.object.toggleEffect(CONFIG.statusEffects.find(e => e.id === 'stunned', {
                         overlay: false,
                         active: true
@@ -524,8 +501,8 @@ Hooks.on('renderChatLog', (log, html, data) => {
         const message = game.messages.get(ev.currentTarget.dataset.messageId);
         let actor;
         if (message.speaker.actor && message?.speaker.token) {
-            actor = game.actors.tokens[message.speaker.token];
-            if (typeof (actor === undefined) || actor === '') {
+            actor = game.scenes.active?.tokens.get(message.speaker.token)?.actor;
+            if (!actor) {
                 actor = game.actors.get(message.speaker.actor);
             }
         } else {
@@ -550,11 +527,11 @@ Hooks.on('renderChatLog', (log, html, data) => {
         const message = game.messages.get(ev.currentTarget.dataset.messageId);
         let actor;
         if (message.speaker.actor && message.speaker.token) {
-            actor = game.actors.tokens[message.speaker.token];
+            actor = game.scenes.active?.tokens.get(message.speaker.token)?.actor;
         } else {
             actor = game.actors.get(message.speaker.actor)
         }
-        actor.sheet.render(true);
+        if (actor) actor.sheet.render(true);
     })
 
     html.on("click", ".edit-difficulty", async ev => {
@@ -565,9 +542,6 @@ Hooks.on('renderChatLog', (log, html, data) => {
         data.baseDifficulty = message.getFlag('od6s', 'baseDifficulty');
         data.modifiers = message.getFlag('od6s', 'modifiers');
         new OD6SEditDifficulty(data).render(true);
-    })
-
-    html.on("click", ".edit-difficulty-submit", async ev => {
     })
 
     html.on("click", ".edit-damage", async ev => {
@@ -1074,14 +1048,6 @@ Hooks.on("updateCombat", async (Combat, data, options, userId) => {
     }
 })
 
-Hooks.on('combatRound', async (Combat, data, options) => {
-
-})
-
-Hooks.on('combatTurn', async (Combat, data, options) => {
-
-})
-
 Hooks.on("preUpdateCombat", async (Combat, data, options, userId) => {
     // End-of-round stuff here
     if (data.turn === 0) {
@@ -1105,8 +1071,8 @@ Hooks.on("preUpdateCombat", async (Combat, data, options, userId) => {
                     if (rounds < 1) {
                         // Remove any stun status effects
                         const effect = combatant.actor.effects.contents.find(
-                            i => i.label === game.i18n.localize(CONFIG.statusEffects.find(
-                                e => e.id === 'stunned').label));
+                            i => i.name === game.i18n.localize(CONFIG.statusEffects.find(
+                                e => e.id === 'stunned').name));
 
                         if (typeof (effect) !== 'undefined') {
                             await combatant.actor.deleteEmbeddedDocuments("ActiveEffect", [effect.id]);
@@ -1160,12 +1126,6 @@ Hooks.on("preUpdateCombat", async (Combat, data, options, userId) => {
             }
         }
     }
-})
-
-Hooks.on("createCombat", async (Combat, combatant, info, data) => {
-})
-
-Hooks.on("preCreateCombat", async (Combat, combatant, info, data) => {
 })
 
 Hooks.on("deleteCombat", async function (Combat) {
@@ -1321,7 +1281,7 @@ export async function createOD6SMacro(data, slot) {
 export function rollItemMacro(itemId) {
     const speaker = ChatMessage.getSpeaker();
     let actor;
-    if (speaker.token) actor = game.actors.tokens[speaker.token];
+    if (speaker.token) actor = game.scenes.active?.tokens.get(speaker.token)?.actor;
     if (!actor) actor = game.actors.get(speaker.actor);
     const item = actor ? actor.items.find(i => i.id === itemId) : null;
     if (!item) return ui.notifications.warn(game.i18n.localize('OD6S.WARN_NO_ITEM_ID') + " " + itemId);
@@ -1339,7 +1299,7 @@ export function rollItemNameMacro(name) {
     name = game.i18n.localize(name);
     const speaker = ChatMessage.getSpeaker();
     let actor;
-    if (speaker.token) actor = game.actors.tokens[speaker.token];
+    if (speaker.token) actor = game.scenes.active?.tokens.get(speaker.token)?.actor;
     if (!actor) actor = game.actors.get(speaker.actor);
     const item = actor ? actor.items.find(i => i.name === name) : null;
     if (!item) return ui.notifications.warn(game.i18n.localize('OD6S.WARN_NO_ITEM_NAME') + " " + name);
@@ -1386,12 +1346,13 @@ async function simpleRoll() {
                     let wild = false;
                     let rollString = "";
                     let rollMode = 0;
-                    let dice = $(dlg[0]).find("#dice")[0].value;
-                    let pips = $(dlg[0]).find("#pips")[0].value;
-                    let damageRoll = $(dlg[0]).find('#damageroll')[0].checked;
-                    let damageType = $(dlg[0]).find('#damagetype')[0].value;
+                    const dlgEl = dlg instanceof HTMLElement ? dlg : dlg[0];
+                    let dice = dlgEl.querySelector("#dice").value;
+                    let pips = dlgEl.querySelector("#pips").value;
+                    let damageRoll = dlgEl.querySelector('#damageroll').checked;
+                    let damageType = dlgEl.querySelector('#damagetype').value;
                     if (game.settings.get('od6s', 'use_wild_die')) {
-                        wild = $(dlg[0]).find("#wilddie")[0].checked;
+                        wild = dlgEl.querySelector("#wilddie").checked;
                     } else {
                         wild = false;
                     }
