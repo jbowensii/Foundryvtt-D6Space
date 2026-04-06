@@ -1,51 +1,54 @@
-export default class od6sDifficultyConfiguration extends FormApplication {
+const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
-    constructor(object={}, options={}) {
-        super(options);
-        this.object = object;
-        this.form = null;
-        this.requiresWorldReload = false;
-    }
+export default class od6sDifficultyConfiguration extends HandlebarsApplicationMixin(ApplicationV2) {
 
-    static get defaultOptions() {
-        const options = super.defaultOptions;
-        options.id = "custom_labels";
-        options.template = "systems/od6s/templates/settings/settings.html";
-        options.width = 600;
-        options.minimizable = true;
-        options.resizable = true;
-        options.title = game.i18n.localize("OD6S.CONFIG_DIFFICULTY_MENU");
-        options.submitOnChange = true;
-        options.closeOnSubmit = false;
-        options.submitOnClose = true;
-        return options;
-    }
+    requiresWorldReload = false;
 
-    async activateListeners(html) {
-        super.activateListeners(html);
-
-        html.find('.submit').click( async () => {
-            if(this.requiresWorldReload) await SettingsConfig.reloadConfirm({world: this.requiresWorldReload});
-            await this.close();
-        })
-    }
-
-    getData() {
-        let data = super.getData;
-
-        data.settings = Array.from(game.settings.settings).filter(s => s[1].od6sDifficulty).map(i => i[1])
-        data.settings.forEach(s => s.inputType = s.type == Boolean ? "checkbox" : "text")
-        data.settings.forEach(s => s.choice = typeof(s.choices) === 'undefined'  ? false : true)
-        data.settings.forEach(s => s.value = game.settings.get(s.namespace, s.key))
-        return data;
-    }
-
-    async _updateObject(event, formData) {
-        for(let setting in formData) {
-            await game.settings.set("od6s", setting, formData[setting]);
-            const s = game.settings.settings.get('od6s.'+setting);
-            this.requiresWorldReload ||= s.requiresReload;
+    static DEFAULT_OPTIONS = {
+        id: "custom_labels",
+        classes: ["od6s", "settings"],
+        tag: "form",
+        position: { width: 600, height: "auto" },
+        window: {
+            title: "OD6S.CONFIG_DIFFICULTY_MENU",
+            resizable: true,
+            contentClasses: ["standard-form"]
+        },
+        form: {
+            handler: od6sDifficultyConfiguration.#onSubmit,
+            submitOnChange: true,
+            closeOnSubmit: false,
+        },
+        actions: {
+            submit: od6sDifficultyConfiguration.#onClose
         }
+    };
 
+    static PARTS = {
+        form: { template: "systems/od6s/templates/settings/settings.html" },
+        footer: { template: "templates/generic/form-footer.hbs" }
+    };
+
+    async _prepareContext(options) {
+        const context = {};
+        context.settings = Array.from(game.settings.settings).filter(s => s[1].od6sDifficulty).map(i => i[1]);
+        context.settings.forEach(s => s.inputType = s.type == Boolean ? "checkbox" : "text");
+        context.settings.forEach(s => s.choice = typeof(s.choices) === 'undefined' ? false : true);
+        context.settings.forEach(s => s.value = game.settings.get(s.namespace, s.key));
+        context.buttons = [{ type: "submit", icon: "fa-solid fa-save", label: "Submit" }];
+        return context;
+    }
+
+    static async #onSubmit(event, form, formData) {
+        for (let setting in formData.object) {
+            await game.settings.set("od6s", setting, formData.object[setting]);
+            const s = game.settings.settings.get('od6s.' + setting);
+            this.requiresWorldReload ||= s?.requiresReload;
+        }
+    }
+
+    static async #onClose() {
+        if (this.requiresWorldReload) await SettingsConfig.reloadConfirm({ world: this.requiresWorldReload });
+        await this.close();
     }
 }

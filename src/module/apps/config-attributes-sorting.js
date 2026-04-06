@@ -1,16 +1,42 @@
 import OD6S from "../config/config-od6s.js";
 
+const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
-export default class od6sAttributesSortingConfiguration extends FormApplication {
+export default class od6sAttributesSortingConfiguration extends HandlebarsApplicationMixin(ApplicationV2) {
 
-    constructor(object={}, options={}) {
+    requiresWorldReload = true;
+    attributes = [];
+    dragStart = null;
+
+    static DEFAULT_OPTIONS = {
+        id: "custom_attributes_sorting",
+        classes: ["od6s", "settings"],
+        tag: "form",
+        position: { width: 600, height: "auto" },
+        window: {
+            title: "OD6S.CONFIG_ATTRIBUTES_SORTING",
+            resizable: true,
+            contentClasses: ["standard-form"]
+        },
+        form: {
+            handler: od6sAttributesSortingConfiguration.#onSubmit,
+            submitOnChange: true,
+            closeOnSubmit: false,
+        },
+        actions: {
+            submit: od6sAttributesSortingConfiguration.#onClose
+        }
+    };
+
+    static PARTS = {
+        form: { template: "systems/od6s/templates/settings/attributes-sorting.html" },
+        footer: { template: "templates/generic/form-footer.hbs" }
+    };
+
+    constructor(options = {}) {
         super(options);
-        this.object = object;
-        this.form = null;
-        this.requiresWorldReload = true;
-
         const attributes = [];
-        for (const i in OD6S.attributes ) {
+        for (const i in OD6S.attributes) {
             const entry = {};
             entry.id = i;
             entry.name = OD6S.attributes[i].name;
@@ -18,51 +44,25 @@ export default class od6sAttributesSortingConfiguration extends FormApplication 
             entry.active = OD6S.attributes[i].active;
             attributes.push(entry);
         }
-        this.attributes = attributes.sort((a,b) => (a.sort) - (b.sort));
-        this.dragStart = null;
+        this.attributes = attributes.sort((a, b) => (a.sort) - (b.sort));
     }
 
-    static get defaultOptions() {
-        const options = super.defaultOptions;
-        options.id = "custom_attributes_sorting";
-        options.template = "systems/od6s/templates/settings/attributes-sorting.html";
-        options.width = 600;
-        options.minimizable = true;
-        options.resizable = true;
-        options.title = game.i18n.localize("OD6S.CONFIG_ATTRIBUTES_SORTING");
-        options.submitOnChange = true;
-        options.closeOnSubmit = false;
-        options.submitOnClose = true;
-        options.dragDrop = [{dropSelector: null}];
-        return options;
+    async _prepareContext(options) {
+        const context = {};
+        context.attributes = this.attributes;
+        context.buttons = [{ type: "submit", icon: "fa-solid fa-save", label: "Submit" }];
+        return context;
     }
 
-    async activateListeners(html) {
-        super.activateListeners(html);
-        let handler = ev => this._onDragStart(ev);
-
-        html.find('li.attributes-sort-list').each((i, li) => {
+    _onRender(context, options) {
+        const items = this.element.querySelectorAll('li.attributes-sort-list');
+        items.forEach(li => {
             li.setAttribute("draggable", true);
-            li.addEventListener("dragstart", handler, false);
+            li.addEventListener("dragstart", (ev) => this._onDragStart(ev), false);
         });
 
-        html.find('.submit').click( async () => {
-            const attrSort = {};
-            for (const i in this.attributes) {
-                const key = this.attributes[i].id;
-                attrSort[key] = {};
-                attrSort[key].sort = this.attributes[i].sort;
-            }
-            await game.settings.set('od6s', 'attributes_sorting', attrSort);
-            if(this.requiresWorldReload) await SettingsConfig.reloadConfirm({world: this.requiresWorldReload});
-            await this.close();
-        })
-    }
-
-    getData(options) {
-        let data = super.getData(options);
-        data.attributes = this.attributes;
-	    return data;
+        this.element.addEventListener("dragover", (ev) => ev.preventDefault());
+        this.element.addEventListener("drop", (ev) => this._onDrop(ev));
     }
 
     _onDragStart(ev) {
@@ -70,62 +70,72 @@ export default class od6sAttributesSortingConfiguration extends FormApplication 
     }
 
     _onDrop(ev) {
-        // Change sorting order
-        const source = this.attributes.find(a=>a.id===this.dragStart);
+        const source = this.attributes.find(a => a.id === this.dragStart);
         this.dragStart = null;
         const dropTarget = ev.target.closest("li[data-attribute-id]");
-        if(!dropTarget) return;
-        const target = this.attributes.find(a=>a.id===dropTarget.dataset.attributeId);
-        if(source === target) return;
+        if (!dropTarget) return;
+        const target = this.attributes.find(a => a.id === dropTarget.dataset.attributeId);
+        if (source === target) return;
 
         const attributes = [];
         if (source.sort < target.sort) {
             for (let i = 0; i < this.attributes.length; i++) {
-                if(i <= target.sort && i > source.sort) {
+                if (i <= target.sort && i > source.sort) {
                     attributes.push({
                         id: this.attributes[i].id,
                         name: this.attributes[i].name,
                         sort: this.attributes[i].sort - 1,
                         active: this.attributes[i].active
-                    })
+                    });
                 } else if (i === source.sort) {
                     attributes.push({
                         id: source.id,
                         name: source.name,
                         sort: target.sort,
                         active: source.active
-                    })
+                    });
                 } else {
                     attributes.push(this.attributes[i]);
                 }
             }
         } else {
             for (let i = 0; i < this.attributes.length; i++) {
-                if(i >= target.sort && i < source.sort) {
+                if (i >= target.sort && i < source.sort) {
                     attributes.push({
                         id: this.attributes[i].id,
                         name: this.attributes[i].name,
                         sort: this.attributes[i].sort + 1,
                         active: this.attributes[i].active
-                    })
+                    });
                 } else if (i === source.sort) {
                     attributes.push({
                         id: source.id,
                         name: source.name,
                         sort: target.sort,
                         active: source.active
-                    })
+                    });
                 } else {
                     attributes.push(this.attributes[i]);
                 }
             }
         }
-        this.attributes = attributes.sort((a,b) => (a.sort || 0) - (b.sort || 0));
-        this.getData();
+        this.attributes = attributes.sort((a, b) => (a.sort || 0) - (b.sort || 0));
         this.render();
     }
 
-    async _updateObject(event, formData) {
+    static async #onSubmit(event, form, formData) {
+        // No-op for submit-on-change — actual save happens on close
+    }
 
+    static async #onClose() {
+        const attrSort = {};
+        for (const i in this.attributes) {
+            const key = this.attributes[i].id;
+            attrSort[key] = {};
+            attrSort[key].sort = this.attributes[i].sort;
+        }
+        await game.settings.set('od6s', 'attributes_sorting', attrSort);
+        if (this.requiresWorldReload) await SettingsConfig.reloadConfirm({ world: this.requiresWorldReload });
+        await this.close();
     }
 }

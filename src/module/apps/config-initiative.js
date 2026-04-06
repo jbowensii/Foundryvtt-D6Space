@@ -1,70 +1,69 @@
-export default class od6sInitiativeConfiguration extends FormApplication {
+const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
-    constructor(object={}, options={}) {
-        super(options);
-        this.object = object;
-        this.form = null;
-        this.requiresWorldReload = false;
-    }
+export default class od6sInitiativeConfiguration extends HandlebarsApplicationMixin(ApplicationV2) {
 
-    static get defaultOptions() {
-        const options = super.defaultOptions;
-        options.id = "custom_labels";
-        options.template = "systems/od6s/templates/settings/initiative-settings.html";
-        options.width = 600;
-        options.minimizable = true;
-        options.resizable = true;
-        options.title = game.i18n.localize("OD6S.CONFIG_INITIATIVE_MENU");
-        options.submitOnChange = true;
-        options.closeOnSubmit = false;
-        options.submitOnClose = true;
-        return options;
-    }
+    requiresWorldReload = false;
 
+    static DEFAULT_OPTIONS = {
+        id: "custom_initiative",
+        classes: ["od6s", "settings"],
+        tag: "form",
+        position: { width: 600, height: "auto" },
+        window: {
+            title: "OD6S.CONFIG_INITIATIVE_MENU",
+            resizable: true,
+            contentClasses: ["standard-form"]
+        },
+        form: {
+            handler: od6sInitiativeConfiguration.#onSubmit,
+            submitOnChange: true,
+            closeOnSubmit: false,
+        },
+        actions: {
+            submit: od6sInitiativeConfiguration.#onClose
+        }
+    };
 
-    async activateListeners(html) {
-        super.activateListeners(html);
+    static PARTS = {
+        form: { template: "systems/od6s/templates/settings/initiative-settings.html" },
+        footer: { template: "templates/generic/form-footer.hbs" }
+    };
 
-        html.find('.submit').click( async () => {
-            if(this.requiresWorldReload) await SettingsConfig.reloadConfirm({world: this.requiresWorldReload});
-            await this.close();
-        })
-    }
+    async _prepareContext(options) {
+        const context = {};
+        context.settings = Array.from(game.settings.settings).filter(s => s[1].od6sInitiative).map(i => i[1]);
+        context.settings.forEach(s => s.inputType = s.type == Boolean ? "checkbox" : "text");
+        context.settings.forEach(s => s.choice = typeof(s.choices) === 'undefined' ? false : true);
+        context.settings.forEach(s => s.value = game.settings.get(s.namespace, s.key));
 
-    getData() {
-        let data = super.getData;
-
-        data.settings = Array.from(game.settings.settings).filter(s => s[1].od6sInitiative).map(i => i[1])
-        data.settings.forEach(s => s.inputType = s.type == Boolean ? "checkbox" : "text")
-        data.settings.forEach(s => s.choice = typeof(s.choices) === 'undefined'  ? false : true)
-        data.settings.forEach(s => s.value = game.settings.get(s.namespace, s.key))
-
-        if (data.settings.filter(s=> s.key === 'reroll_initiative').choice === false) {
-            data.settings.filter(s=> s.key === 'auto_reroll_character').choice = false;
-            data.settings.filter(s=> s.key === 'auto_reroll_npc').choice = false;
-            data.settings.filter(s=> s.key === 'auto_reroll_character').value = false;
-            data.settings.filter(s=> s.key === 'auto_reroll_npc').value = false;
+        const rerollSetting = context.settings.find(s => s.key === 'reroll_initiative');
+        if (rerollSetting && !rerollSetting.value) {
+            const autoChar = context.settings.find(s => s.key === 'auto_reroll_character');
+            const autoNpc = context.settings.find(s => s.key === 'auto_reroll_npc');
+            if (autoChar) { autoChar.value = false; }
+            if (autoNpc) { autoNpc.value = false; }
         }
 
-        return data;
+        context.buttons = [{ type: "submit", icon: "fa-solid fa-save", label: "Submit" }];
+        return context;
     }
 
-    async _updateObject(event, formData) {
-        for(let setting in formData) {
-            await game.settings.set("od6s", setting, formData[setting]).then(() => {
-                this.render(true)
-            });
-            const s = game.settings.settings.get('od6s.'+setting);
-            this.requiresWorldReload ||= s.requiresReload;
+    static async #onSubmit(event, form, formData) {
+        for (let setting in formData.object) {
+            await game.settings.set("od6s", setting, formData.object[setting]);
+            const s = game.settings.settings.get('od6s.' + setting);
+            this.requiresWorldReload ||= s?.requiresReload;
         }
 
-        if(formData.reroll_initiative === false) {
-            await game.settings.set("od6s", 'auto_reroll_character', false).then(() => {
-                this.render(true)
-            });
-            await game.settings.set("od6s", 'auto_reroll_npc', false).then(() => {
-                this.render(true)
-            });
+        if (formData.object.reroll_initiative === false) {
+            await game.settings.set("od6s", 'auto_reroll_character', false);
+            await game.settings.set("od6s", 'auto_reroll_npc', false);
         }
+        this.render();
+    }
+
+    static async #onClose() {
+        if (this.requiresWorldReload) await SettingsConfig.reloadConfirm({ world: this.requiresWorldReload });
+        await this.close();
     }
 }
