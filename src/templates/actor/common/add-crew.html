@@ -1,11 +1,9 @@
 <div class="flexrow flex-group-left">
     <label for="addcrew">{{localize "OD6S.ADD"}}:</label>
     <select name="addcrew" id="addcrew">
-        {{#select target}}
             {{#each object.targets as | target |}}
-                <option value="{{target.uuid}}">{{target.name}}</option>
+                <option value="{{target.uuid}}" {{#if (eq target.uuid ../target)}}selected{{/if}}>{{target.name}}</option>
             {{/each}}
-        {{/select}}
     </select>
 </div>
 <input name="actor" type="hidden" value="{{object.actor}}">

@@ -19,8 +19,11 @@
 
         {{!-- Description Tab --}}
         <div class="tab" data-group="primary" data-tab="description">
-            <div class="editor">{{ editor item.system.description target="system.description" button=true
-                                         editable=editable}}</div>
+            {{#if editable}}
+              <prose-mirror name="system.description" value="{{item.system.description}}" toggled="true"></prose-mirror>
+            {{else}}
+              <div class="editor-content">{{{item.system.description}}}</div>
+            {{/if}}
         </div>
 
         {{!-- Attributes Tab --}}
@@ -59,13 +62,11 @@
                 <label class="item.system.skills.channel.difficulty">{{localize 'OD6S.DEFAULT_DIFFICULTY'}}</label>
                 <select name="system.skills.channel.difficulty" id="item.system.skills.channel.difficulty" style="width: 70px;"
                         {{#unless item.system.skills.channel.value}}disabled{{/unless}}>
-                    {{#select item.system.skills.channel.difficulty}}
                         {{#each (getDifficultiesShort) as |level key|}}
-                            <option value="{{ key }}">
+                            <option value="{{ key }}" {{#if (eq key ../item.system.skills.channel.difficulty)}}selected{{/if}}>
                                 {{localize level}}
                             </option>
                         {{/each}}
-                    {{/select}}
                 </select>
             </div>
             <div class="attributes flexrow flex-group-left">
@@ -77,13 +78,11 @@
                 <label class="item.system.skills.sense.difficulty">{{localize 'OD6S.DEFAULT_DIFFICULTY'}}</label>
                 <select name="system.skills.sense.difficulty" id="item.system.skills.sense.difficulty" style="width: 70px;"
                         {{#unless item.system.skills.sense.value}}disabled{{/unless}}>
-                    {{#select item.system.skills.sense.difficulty}}
                         {{#each (getDifficultiesShort) as |level key|}}
-                            <option value="{{ key }}">
+                            <option value="{{ key }}" {{#if (eq key ../item.system.skills.sense.difficulty)}}selected{{/if}}>
                                 {{localize level}}
                             </option>
                         {{/each}}
-                    {{/select}}
                 </select>
             </div>
             <div class="attributes flexrow flex-group-left">
@@ -96,13 +95,11 @@
                 <select name="system.skills.transform.difficulty" id="item.system.skills.transform.difficulty"
                         style="width: 70px;"
                         {{#unless item.system.skills.transform.value}}disabled{{/unless}}>
-                    {{#select item.system.skills.transform.difficulty}}
                         {{#each (getDifficultiesShort) as |level key|}}
-                            <option value="{{ key }}">
+                            <option value="{{ key }}" {{#if (eq key ../item.system.skills.transform.difficulty)}}selected{{/if}}>
                                 {{localize level}}
                             </option>
                         {{/each}}
-                    {{/select}}
                 </select>
             </div>
         </div>

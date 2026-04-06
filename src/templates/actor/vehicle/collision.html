@@ -3,28 +3,24 @@
          data-speed="{{vehiclespeed}}">
         <label for="vehiclespeed">{{localize 'OD6S.VEHICLE_ATTACK_SPEED'}}</label>
         <select name="vehiclespeed" id="vehiclespeed" style="width: 70px;">
-            {{#select vehiclespeed}}
                 {{#each (getVehicleSpeeds) as |vehiclespeed key|}}
                     <option value="{{key}}"
-                            {{#if (eq key vehiclespeed)}}selected{{/if}}>
+                            {{#if (eq key ../vehiclespeed)}}selected{{/if}}>
                         {{localize vehiclespeed.name}}
                     </option>
                 {{/each}}
-            {{/select}}
         </select>
     </div>
     <div class="flexrow flex-group-left vehiclecollisiontype" data-type="vehiclecollisiontype"
          data-speed="{{vehiclecollisiontype}}">
         <label for="vehiclecollisiontype">{{localize 'OD6S.VEHICLE_COLLISION_TYPE'}}</label>
         <select name="vehiclecollisiontype" id="vehiclecollisiontype" style="width: 70px;">
-            {{#select vehiclecollisiontype}}
                 {{#each (getCollisionTypes) as |vehiclecollisiontype key|}}
                     <option value="{{key}}"
-                            {{#if (eq key vehiclecollisiontype)}}selected{{/if}}>
+                            {{#if (eq key ../vehiclecollisiontype)}}selected{{/if}}>
                         {{localize vehiclecollisiontype.name}}
                     </option>
                 {{/each}}
-            {{/select}}
         </select>
     </div>
     <div class="flexrow flex-group-left vehiclecollisionmod" data-type="vehiclecollisionmod">

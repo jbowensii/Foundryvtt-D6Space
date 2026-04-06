@@ -70,11 +70,9 @@
                 <div class="flexrow flex-group-left">
                     <label for="choose-difficulty">{{localize "OD6S.DIFFICULTY"}}:</label>
                     <select class="choose-difficulty" name="choose-difficulty" id="choose-difficulty" data-message-id="{{message._id}}">
-                        {{#select difficulty}}
                             {{#each (getDifficultyLevels) as | level |}}
-                                <option value="{{level}}">{{localize level}}</option>
+                                <option value="{{level}}" {{#if (eq level ../difficulty)}}selected{{/if}}>{{localize level}}</option>
                             {{/each}}
-                        {{/select}}
                     </select>
                 </div>
             {{/if}}

@@ -1,12 +1,10 @@
 <div class="flex0row flex-group-left">
     <select class="select-skill" name="add-item" id="add-item" style="width: 150px;">
-        {{#select object.items}}
             {{#each object.items as |item key|}}
                 <option value="{{ key }}" {{#if (eq key ../object.selected)}}selected{{/if}}>
                     {{item.name}}
                 </option>
             {{/each}}
-        {{/select}}
     </select>
 </div>
 {{#if (and (or (eq object.type "skill")(eq object.type "specialization")) (eq object.actorType "npc")) }}

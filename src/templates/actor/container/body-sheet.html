@@ -44,13 +44,11 @@
                                         <select name="system.price" id="item.system.price"
                                                 class="merchant-price-owner" data-actor-uuid="{{../../actor.uuid}}"
                                                 data-item-id="{{item._id}}" style="width: 70px" data-dtype="String">
-                                            {{#select item.system.price}}
                                                 {{#each (getConfig 'difficultyShort' '') as |level key|}}
-                                                    <option value="{{key}}">
+                                                    <option value="{{key}}" {{#if (eq key ../item.system.price)}}selected{{/if}}>
                                                         {{localize level}}
                                                     </option>
                                                 {{/each}}
-                                            {{/select}}
                                         </select>
                                     {{ else }}
                                         <label for="item.system.cost">{{localize 'OD6S.PRICE'}}:</label>

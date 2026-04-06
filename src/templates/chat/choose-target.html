@@ -2,11 +2,9 @@
 <label for="choosetarget">{{localize "OD6S.TARGET"}}:</label>
 <div class="flexrow flex-group-left">
     <select name="choosetarget" id="choosetarget" {{#if object.isExplosive}}multiple{{/if}}>
-        {{#select target}}
             {{#each object.targets as | target |}}
-                <option value="{{target.id}}">{{target.name}}</option>
+                <option value="{{target.id}}" {{#if (eq target.id ../target)}}selected{{/if}}>{{target.name}}</option>
             {{/each}}
-        {{/select}}
     </select>
 </div>
 <input name="messageId" type="hidden" value="{{object.messageId}}">

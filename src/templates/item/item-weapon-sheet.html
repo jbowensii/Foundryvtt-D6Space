@@ -17,13 +17,11 @@
                             <div class="resource">
                                 <label class="resource-label" for="item.system.price">{{localize 'OD6S.PRICE'}}</label>
                                 <select name="system.price" id="item.system.price">
-                                    {{#select item.system.price}}
                                         {{#each (getPrices) as |price key|}}
-                                            <option value="{{ key }}">
+                                            <option value="{{ key }}" {{#if (eq key ../item.system.price)}}selected{{/if}}>
                                                 {{key}}: {{localize price}}
                                             </option>
                                         {{/each}}
-                                    {{/select}}
                                 </select>
                             </div>
                             {{#if (gt item.system.ammo 0)}}
@@ -31,13 +29,11 @@
                                     <label class="resource-label" for="item.system.ammo_price">{{localize
                                             'OD6S.AMMO_PRICE'}}</label>
                                     <select name="system.ammo_price" id="item.system.ammo_price">
-                                        {{#select item.system.ammo_price}}
                                             {{#each (getPrices) as |ammo_price key|}}
-                                                <option value="{{ key }}">
+                                                <option value="{{ key }}" {{#if (eq key ../item.system.ammo_price)}}selected{{/if}}>
                                                     {{key}}: {{localize ammo_price}}
                                                 </option>
                                             {{/each}}
-                                        {{/select}}
                                     </select>
                                 </div>
                             {{/if}}
@@ -52,13 +48,11 @@
                             <div class="resource">
                                 <label class="resource-label" for="item.system.damaged">{{localize 'OD6S.DAMAGE'}}</label>
                                 <select name="system.damaged" id="item.system.damaged">
-                                    {{#select item.system.damaged}}
                                         {{#each (getWeaponDamageLevels) as |level key|}}
-                                            <option value="{{ key }}">
+                                            <option value="{{ key }}" {{#if (eq key ../item.system.damaged)}}selected{{/if}}>
                                                 {{localize level}}
                                             </option>
                                         {{/each}}
-                                    {{/select}}
                                 </select>
                             </div>
                         {{/if}}
@@ -80,9 +74,11 @@
     <section class="sheet-body">
         {{!-- Description Tab --}}
         <div class="tab" data-group="primary" data-tab="description">
-            <div class="editor">{{ editor item.system.description target="system.description" button=true
-                                          editable=editable}}
-            </div>
+            {{#if editable}}
+              <prose-mirror name="system.description" value="{{item.system.description}}" toggled="true"></prose-mirror>
+            {{else}}
+              <div class="editor-content">{{{item.system.description}}}</div>
+            {{/if}}
         </div>
 
         {{!-- Attributes Tab --}}
@@ -92,13 +88,11 @@
             <div class="flexrow flex-group-left">
                 <label for="item.system.subtype">{{localize 'OD6S.CHAR_WEAPONS_TYPE'}}:</label>
                 <select name="system.subtype" id="item.system.subtype">
-                    {{#select item.system.subtype}}
                         {{#each (getWeaponTypes) as |subtype|}}
-                            <option value="{{ localize subtype }}">
+                            <option value="{{ localize subtype }}" {{#if (eq (localize subtype) ../item.system.subtype)}}selected{{/if}}>
                                 {{localize subtype}}
                             </option>
                         {{/each}}
-                    {{/select}}
                 </select>
             </div>
             <div class="flexrow flex-group-left">
@@ -112,13 +106,11 @@
                     <div class="flexrow flex-group-left">
                         <label for="item.system.difficulty">{{localize 'OD6S.DIFFICULTY'}}:</label>
                         <select name="system.difficulty" id="item.system.difficulty">
-                            {{#select item.system.difficulty}}
                                 {{#each (getMeleeDifficultyLevels) as |level|}}
-                                    <option value="{{ level }}">
+                                    <option value="{{ level }}" {{#if (eq level ../item.system.difficulty)}}selected{{/if}}>
                                         {{localize level}}
                                     </option>
                                 {{/each}}
-                            {{/select}}
                         </select>
                     </div>
                 {{/if}}
@@ -197,13 +189,11 @@
                         <label for="item.system.damage.type">{{localize 'OD6S.DAMAGE_TYPE'}}:</label>
                         <select name="system.damage.type" id="item.system.damage.type"
                                 {{#if item.system.stun.stun_only}}disabled{{/if}}>
-                            {{#select item.system.damage.type }}
                                 {{#each (getDamageTypes) as |damagetype key|}}
-                                    <option value="{{ key }}">
+                                    <option value="{{ key }}" {{#if (eq key ../item.system.damage.type)}}selected{{/if}}>
                                         {{localize damagetype}}
                                     </option>
                                 {{/each}}
-                            {{/select}}
                         </select>
                     </div>
                 </div>
@@ -238,13 +228,11 @@
                     <div class="flexrow flex-group-left">
                         <label for="item.system.stun.type">{{localize 'OD6S.DAMAGE_TYPE'}}:</label>
                         <select name="system.stun.type" id="item.system.stun.type">
-                            {{#select item.system.stun.type }}
                                 {{#each (getDamageTypes) as |damagetype key|}}
-                                    <option value="{{ key }}">
+                                    <option value="{{ key }}" {{#if (eq key ../item.system.stun.type)}}selected{{/if}}>
                                         {{localize damagetype}}
                                     </option>
                                 {{/each}}
-                            {{/select}}
                         </select>
                     </div>
                     <div class="column">
@@ -303,13 +291,11 @@
                         <div class="flexrow flex-group-left">
                             <label for="item.system.stun.type">{{localize 'OD6S.DAMAGE_TYPE'}}:</label>
                             <select name="system.stun.type" id="item.system.stun.type">
-                                {{#select item.system.stun.type }}
                                     {{#each (getDamageTypes) as |damagetype key|}}
-                                        <option value="{{ key }}">
+                                        <option value="{{ key }}" {{#if (eq key ../item.system.stun.type)}}selected{{/if}}>
                                             {{localize damagetype}}
                                         </option>
                                     {{/each}}
-                                {{/select}}
                             </select>
                         </div>
                     </div>
@@ -350,13 +336,11 @@
             <div class="flexrow flex-group-left" data-attribute="{{item.system.stats.attribute}}">
                 <label for="item.system.stats.attribute">{{localize 'OD6S.ATTRIBUTE'}}:</label>
                 <select name="system.stats.attribute" id="item.system.stats.attribute" style="width: 70px;">
-                    {{#select item.system.stats.attribute }}
                         {{#each (getAttributes) as |attribute key|}}
-                            <option value="{{ key }}">
+                            <option value="{{ key }}" {{#if (eq key ../item.system.stats.attribute)}}selected{{/if}}>
                                 {{localize attribute.name}}
                             </option>
                         {{/each}}
-                    {{/select}}
                 </select>
             </div>
             <div class="flexrow flex-group-left">

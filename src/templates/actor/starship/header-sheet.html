@@ -135,13 +135,11 @@
         <div class="flexrow flex-group-left">
             <label for="actor.system.damage.value">{{localize 'OD6S.DAMAGE'}}:</label>
             <select name="system.damage.value" id="actor.system.damage.value" style="width: 70px;">
-                {{#select actor.system.damage.value}}
                     {{#each (getVehicleDamageLevels) as |level key|}}
-                        <option value="{{ key }}">
+                        <option value="{{ key }}" {{#if (eq key ../actor.system.damage.value)}}selected{{/if}}>
                             {{localize key}}
                         </option>
                     {{/each}}
-                {{/select}}
             </select>
         </div>
         <div class="flexrow flex-group-left"
@@ -162,10 +160,8 @@
         <div class="flexrow flex-group-left sheetmode">
             <label for="actor.system.sheetmode.value">{{localize 'OD6S.SHEETMODE'}}:</label>
             <select name="system.sheetmode.value" id="actor.system.sheetmode.value" style="width: 70px;">
-                {{#select actor.system.sheetmode.value}}
-                    <option value="normal">{{localize 'OD6S.SHEETMODE_NORMAL'}}</option>
-                    <option value="freeedit">{{localize 'OD6S.SHEETMODE_FREEDIT'}}</option>
-                {{/select}}
+                    <option value="normal" {{#if (eq actor.system.sheetmode.value "normal")}}selected{{/if}}>{{localize 'OD6S.SHEETMODE_NORMAL'}}</option>
+                    <option value="freeedit" {{#if (eq actor.system.sheetmode.value "freeedit")}}selected{{/if}}>{{localize 'OD6S.SHEETMODE_FREEDIT'}}</option>
             </select>
         </div>
     </div>

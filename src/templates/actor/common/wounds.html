@@ -34,13 +34,11 @@
         <div class="flexrow flex-group-left">
             <label for="actor.system.wounds.value">{{localize 'OD6S.WOUNDS'}}:</label>
             <select name="system.wounds.value" id="actor.system.wounds.value" style="width: 70px;">
-                {{#select actor.system.wounds.value}}
                     {{#each (getWoundLevels actor.type) as |level key|}}
-                        <option value="{{ key }}">
+                        <option value="{{ key }}" {{#if (eq key ../actor.system.wounds.value)}}selected{{/if}}>
                             {{localize (woundsFromValue key ../actor.type)}}
                         </option>
                     {{/each}}
-                {{/select}}
             </select>
         </div>
     {{/if}}

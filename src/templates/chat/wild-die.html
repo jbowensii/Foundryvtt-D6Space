@@ -2,11 +2,9 @@
 <div class="flexrow flex-group-left">
     <label for="wildie">{{localize "OD6S.CHOOSE_WILD_EFFECT"}}:</label>
     <select name="wilddie" id="wilddie">
-        {{#select effect}}
-            <option value="0" {{#if (getWildDieDefault 'OD6S.WILD_DIE_NONE')}}selected{{/if}}>{{localize 'OD6S.WILD_DIE_NONE'}}</option>
-            <option value="1" {{#if (getWildDieDefault 'OD6S.REMOVE_HIGHEST_DIE')}}selected{{/if}}>{{localize 'OD6S.REMOVE_HIGHEST_DIE'}}</option>
-            <option value="2" {{#if (getWildDieDefault 'OD6S.COMPLICATIONS')}}selected{{/if}}>{{localize 'OD6S.COMPLICATION'}}</option>
-        {{/select}}
+            <option value="0" {{#if (eq effect "0")}}selected{{else}}{{#if (getWildDieDefault 'OD6S.WILD_DIE_NONE')}}selected{{/if}}{{/if}}>{{localize 'OD6S.WILD_DIE_NONE'}}</option>
+            <option value="1" {{#if (eq effect "1")}}selected{{else}}{{#if (getWildDieDefault 'OD6S.REMOVE_HIGHEST_DIE')}}selected{{/if}}{{/if}}>{{localize 'OD6S.REMOVE_HIGHEST_DIE'}}</option>
+            <option value="2" {{#if (eq effect "2")}}selected{{else}}{{#if (getWildDieDefault 'OD6S.COMPLICATIONS')}}selected{{/if}}{{/if}}>{{localize 'OD6S.COMPLICATION'}}</option>
     </select>
 </div>
 <input name="messageId" type="hidden" value="{{object.currentTarget.dataset.messageId}}">

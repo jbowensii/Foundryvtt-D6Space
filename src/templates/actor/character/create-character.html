@@ -11,15 +11,13 @@
                 <div class="template-dropdown">
                     <label for="select-template">{{localize 'OD6S.TEMPLATES'}}:</label>
                     <select name="select-template" id="select-template" style="min-width: 100px;">
-                        {{#select selectedTemplate}}
                             {{#if (eq selectedTemplate '') }}
                                 <option value="" selected disabled hidden></option>
                             {{/if}}
                             <!--   <option value="custom">{{!--localize 'OD6S.CUSTOM'--}}</option> -->
                             {{#each characterTemplates as |itemTemplate|}}
-                                <option value="{{itemTemplate._id}}">{{itemTemplate.name}}</option>
+                                <option value="{{itemTemplate._id}}" {{#if (eq itemTemplate._id ../selectedTemplate)}}selected{{/if}}>{{itemTemplate.name}}</option>
                             {{/each}}
-                        {{/select}}
                     </select>
                 </div>
                 {{> systems/od6s/templates/actor/character/create-character-template.html}}

@@ -2,14 +2,12 @@
         <div class="flexrow flex-group-left explosive-type">
             <label for="explosive-type">{{localize 'OD6S.TYPE'}}:</label>
             <select name="explosive-type" id="explosive-type" style="width: 70px;">
-                {{#select explosive-type}}
                     {{#each options as |option|}}
                         <option value="{{ option }}"
                             {{#if (eq ../type option)}} selected{{/if}}>
                             {{localize (option)}}
                         </option>
                     {{/each}}
-                {{/select}}
             </select>
         </div>
     {{/if}}

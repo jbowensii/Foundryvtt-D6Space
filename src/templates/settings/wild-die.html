@@ -16,13 +16,11 @@
                     <div class="form-fields">
                         {{#if setting.choice}}
                             <select name="{{setting.key}}" id="{{setting.key}}">
-                                {{#select setting.value}}
                                     {{#each setting.choices as |choice key|}}
-                                        <option value="{{key}}">
+                                        <option value="{{key}}" {{#if (eq key ../setting.value)}}selected{{/if}}>
                                             {{localize choice}}
                                         </option>
                                     {{/each}}
-                                {{/select}}
                             </select>
                         {{else}}
                             {{#if (eq setting.filePicker "image")}}

@@ -4,6 +4,9 @@
     {{else}}
         <label for="actor.system.description.content" class="resource-label">{{localize 'OD6S.DESCRIPTION'}}:</label>
     {{/if}}
-    {{ editor actor.system.description.content name=actor.system.description.content target="system.description.content"
-              button=true editable=true}}
+    {{#if editable}}
+      <prose-mirror name="system.description.content" value="{{actor.system.description.content}}" toggled="true"></prose-mirror>
+    {{else}}
+      <div class="editor-content">{{{actor.system.description.content}}}</div>
+    {{/if}}
 </div>

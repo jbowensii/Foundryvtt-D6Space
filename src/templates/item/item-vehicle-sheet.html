@@ -3,7 +3,9 @@
         <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}"
              alt="{{localize 'OD6S.ALT_ITEM_IMAGE'}}"/>
         <div class="header-fields">
-            <h1 class="charname"><input name="name" type="text" value="{{item.name}}" placeholder="Name"/></h1>
+            <div>
+                <h2 class="charname"><input name="name" type="text" value="{{item.name}}" placeholder="Name"/></h2>
+            </div>
         </div>
     </header>
 
@@ -21,16 +23,22 @@
         {{!-- Description Tab --}}
         <div class="tab" data-group="primary" data-tab="description">
             {{#if editable}}
-              <prose-mirror name="system.description" value="{{item.system.description}}" toggled="true"></prose-mirror>
+                <prose-mirror name="system.description" value="{{item.system.description}}" toggled="true"></prose-mirror>
             {{else}}
-              <div class="editor-content">{{{item.system.description}}}</div>
+                <div class="editor-content">{{{item.system.description}}}</div>
             {{/if}}
         </div>
 
         {{!-- Attributes Tab --}}
         <div class="tab attributes" data-group="primary" data-tab="attributes">
-            {{!-- As you add new fields, add them in here! --}}
-            <div>{{localize 'OD6S.TYPE'}}: {{localize "OD6S.SPECIAL_ABILITY"}}</div>
+            <div>{{localize 'OD6S.TYPE'}}: {{localize "OD6S.VEHICLE"}}</div>
+            <div class="column">
+                <div class="flexrow flex-group-left">
+                    <label for="item.system.equipped.value">{{localize 'OD6S.EQUIPPED'}}</label>
+                    <input id="item.system.equipped.value" name="system.equipped.value" type="checkbox"
+                           data-dtype="Boolean" {{checked item.system.equipped.value}}/>
+                </div>
+            </div>
         </div>
 
         {{!-- Effects Tab --}}

@@ -79,15 +79,13 @@
                      data-skill="{{key}}">
                     <label for="difficultylevel">{{localize 'OD6S.DIFFICULTY'}}</label>
                     <select name="difficultylevel" id="difficultylevel">
-                        {{#select difficultylevel}}
                             {{#each (getDifficulties) as |difficultylevel key|}}
                                 <option value="{{key}}"
-                                        {{#if (eq key skill.difficulty)}}selected{{/if}}>
+                                        {{#if (eq key ../skill.difficulty)}}selected{{/if}}>
                                     {{localize key}}
                                 </option>
 
                             {{/each}}
-                        {{/select}}
                     </select>
                 </div>
                 {{#if (eq difficultylevel "OD6S.DIFFICULTY_CUSTOM")}}
