@@ -1,0 +1,1 @@
+See https://gitlab.com/vtt2/opend6-space/-/wikis/Release-Notes.

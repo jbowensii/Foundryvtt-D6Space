@@ -1,0 +1,48 @@
+image: registry.gitlab.com/vtt2/foundry-system-build@sha256:9b5ec3c149f5379e138995b570ac0e8fc974b7604f0cfe83c1456f88d0dc18b9
+
+variables:
+  DOCKER_HOST: tcp://docker:2375
+
+stages:
+  - build
+  - package
+  - test
+  - release
+
+build:
+  stage: build
+  script:
+    - /bin/bash -c ".gitlab-scripts/lint.sh"
+    - /bin/bash -c ".gitlab-scripts/gulp.sh"
+  artifacts:
+    paths:
+      - src/css/*
+      - src/packs/*
+
+package:
+  stage: package
+  script:
+    - /bin/bash -c ".gitlab-scripts/package.sh"
+  artifacts:
+    paths:
+      - build/artifacts/*
+      - src/system.json
+  dependencies:
+    - build
+
+test:
+  stage: test
+  services:
+    - docker:dind
+  script:
+    - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/load-secure-files/-/raw/main/installer" | bash
+    - /bin/bash -c ".gitlab-scripts/test.sh"
+
+release:
+  stage: release
+  image: curlimages/curl:latest
+  script:
+    - /bin/sh -c ".gitlab-scripts/release.sh"
+  only:
+    refs:
+      - tags
