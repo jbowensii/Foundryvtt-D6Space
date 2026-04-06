@@ -1,54 +1,83 @@
 import {od6sutilities} from "../system/utilities.js";
 import OD6S from "../config/config-od6s.js";
 
-export class AdvanceDialog extends Dialog {
+const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
-    constructor(actorSheet, advanceData, advanceTemplate, data, options) {
-        super(data, options);
-        this.actorSheet = actorSheet;
-        this.advanceData = advanceData;
-        this.advanceTemplate = advanceTemplate;
+export class AdvanceDialog extends HandlebarsApplicationMixin(ApplicationV2) {
+
+    static DEFAULT_OPTIONS = {
+        classes: ["od6s", "dialog"],
+        tag: "form",
+        position: { width: 400, height: "auto" },
+        window: { title: "OD6S.ADVANCE" },
+        form: { handler: AdvanceDialog.#onSubmit, closeOnSubmit: true },
+        actions: {}
+    };
+
+    static PARTS = {
+        form: { template: "systems/od6s/templates/actor/character/advance.html" }
+    };
+
+    constructor(options = {}) {
+        super(options);
+        this.actorSheet = options.actorSheet;
+        this.advanceData = options.advanceData;
+        this.advanceTemplate = options.advanceTemplate || "systems/od6s/templates/actor/character/advance.html";
+        this._onSubmitCallback = options.onSubmit;
     }
 
-    activateListeners(html) {
+    async _prepareContext(options) {
+        return this.advanceData;
+    }
 
-        super.activateListeners(html);
-
-        html.find('.freeadvancecheckbox').change( async () => {
-            /* Whenever this is toggled, reset values */
-            this.advanceData.cpcost = 0;
-            this.advanceData.score = this.advanceData.originalscore;
-            this.advanceData.freeadvance = !(this.advanceData.freeadvance);
-            await this.updateDialog();
+    _onRender(context, options) {
+        this.element.querySelectorAll('.freeadvancecheckbox').forEach(el => {
+            el.addEventListener('change', async () => {
+                /* Whenever this is toggled, reset values */
+                this.advanceData.cpcost = 0;
+                this.advanceData.score = this.advanceData.originalscore;
+                this.advanceData.freeadvance = !(this.advanceData.freeadvance);
+                await this.updateDialog();
+            });
         });
 
-        html.find('.metaphysicsteachercheckbox').change( async () => {
-            this.advanceData.metaphysicsteacher = !(this.advanceData.metaphysicsteacher);
-            if (this.advanceData.metaphysicsteacher && this.advanceData.cpcost > 0) {
-                this.advanceData.cpcost = Math.ceil(this.advanceData.cpcost/OD6S.advanceCostMetaphysicsSkill);
-            } else if (!this.advanceData.metaphysicsteacher && this.advanceData.cpcost > 0) {
-                this.advanceData.cpcost = Math.ceil(this.advanceData.cpcost * OD6S.advanceCostMetaphysicsSkill);
-            }
-            await this.updateDialog();
+        this.element.querySelectorAll('.metaphysicsteachercheckbox').forEach(el => {
+            el.addEventListener('change', async () => {
+                this.advanceData.metaphysicsteacher = !(this.advanceData.metaphysicsteacher);
+                if (this.advanceData.metaphysicsteacher && this.advanceData.cpcost > 0) {
+                    this.advanceData.cpcost = Math.ceil(this.advanceData.cpcost/OD6S.advanceCostMetaphysicsSkill);
+                } else if (!this.advanceData.metaphysicsteacher && this.advanceData.cpcost > 0) {
+                    this.advanceData.cpcost = Math.ceil(this.advanceData.cpcost * OD6S.advanceCostMetaphysicsSkill);
+                }
+                await this.updateDialog();
+            });
         });
 
-        html.find('.advanceup').click(async () => {
-            this.pipUp();
-            await this.updateDialog();
+        this.element.querySelectorAll('.advanceup').forEach(el => {
+            el.addEventListener('click', async () => {
+                this.pipUp();
+                await this.updateDialog();
+            });
         });
 
-        html.find('.advancedown').click(async () => {
-            this.pipDown()
-            await this.updateDialog();
+        this.element.querySelectorAll('.advancedown').forEach(el => {
+            el.addEventListener('click', async () => {
+                this.pipDown()
+                await this.updateDialog();
+            });
         });
     }
 
     async updateDialog() {
         this.advanceData.cpcost > this.actorSheet.actor.system.characterpoints.value ? this.advanceData.cpcostcolor="red" :
             this.advanceData.cpcostcolor="black";
-        const advanceTemplate = this.advanceTemplate;
-        this.data.content = await renderTemplate(advanceTemplate, this.advanceData);
         this.render();
+    }
+
+    static async #onSubmit(event, form, formData) {
+        if (this._onSubmitCallback) {
+            await this._onSubmitCallback(form);
+        }
     }
 
     /*
@@ -306,48 +335,39 @@ export class od6sadvance {
         }
 
         const advanceTemplate = "systems/od6s/templates/actor/character/advance.html";
-        const html = await renderTemplate(advanceTemplate, advanceData);
 
         let d;
         if(OD6S.flatSkills) {
-            d = new AdvanceDialog(this, advanceData, advanceTemplate, {
-                title: game.i18n.localize("OD6S.ADVANCE") + "!",
-                content: html,
-                buttons: {
-                    advance: {
-                        label: game.i18n.localize("OD6S.ADVANCE"),
-                        callback: dlg => {
-                            const dlgEl = dlg instanceof HTMLElement ? dlg : dlg[0];
-                            return od6sadvance.advanceAction(
-                            d.actorSheet.actor,
-                            d.advanceData,
-                            event,
-                            dlgEl.querySelector("#base").base);
-                        }
-                    }
+            d = new AdvanceDialog({
+                actorSheet: this,
+                advanceData: advanceData,
+                advanceTemplate: advanceTemplate,
+                onSubmit: (form) => {
+                    return od6sadvance.advanceAction(
+                        d.actorSheet.actor,
+                        d.advanceData,
+                        event,
+                        form.querySelector("#base").value);
                 },
-                default: "advance"
-            }).render(true);
+                window: { title: game.i18n.localize("OD6S.ADVANCE") + "!" }
+            });
+            d.render({ force: true });
         } else {
-            d = new AdvanceDialog(this, advanceData, advanceTemplate, {
-                title: game.i18n.localize("OD6S.ADVANCE") + "!",
-                content: html,
-                buttons: {
-                    advance: {
-                        label: game.i18n.localize("OD6S.ADVANCE"),
-                        callback: dlg => {
-                            const dlgEl = dlg instanceof HTMLElement ? dlg : dlg[0];
-                            return od6sadvance.advanceAction(
-                            d.actorSheet.actor,
-                            d.advanceData,
-                            event,
-                            dlgEl.querySelector("#dice").value,
-                            dlgEl.querySelector("#pips").value);
-                        }
-                    }
+            d = new AdvanceDialog({
+                actorSheet: this,
+                advanceData: advanceData,
+                advanceTemplate: advanceTemplate,
+                onSubmit: (form) => {
+                    return od6sadvance.advanceAction(
+                        d.actorSheet.actor,
+                        d.advanceData,
+                        event,
+                        form.querySelector("#dice").value,
+                        form.querySelector("#pips").value);
                 },
-                default: "advance"
-            }).render(true);
+                window: { title: game.i18n.localize("OD6S.ADVANCE") + "!" }
+            });
+            d.render({ force: true });
         }
     }
 

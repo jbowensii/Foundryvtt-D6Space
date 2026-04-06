@@ -248,51 +248,56 @@ Hooks.on("updateChatMessage", async (message, data, diff, id) => {
 });
 
 Hooks.on('renderChatLog', (log, html, data) => {
-    // v13: html is HTMLElement. Wrap in jQuery for Phase 1 compatibility.
-    // Phase 2 will convert to native DOM event delegation.
-    html = $(html);
+    // Native DOM event delegation helper — replaces jQuery html.on(event, selector, handler)
+    function _delegate(eventType, selector, handler) {
+        html.addEventListener(eventType, (ev) => {
+            const target = ev.target.closest(selector);
+            if (!target || !html.contains(target)) return;
+            handler(ev, target);
+        });
+    }
 
-    html.on('input', ".explosive-damage", async ev => {
-        const message =  await game.messages.get(ev.currentTarget.dataset.messageId);
+    _delegate('input', ".explosive-damage", async (ev, el) => {
+        const message = await game.messages.get(el.dataset.messageId);
         const targets = message.getFlag('od6s','targets');
-        targets[ev.currentTarget.dataset.target].damage = ev.target.value;
+        targets[el.dataset.target].damage = ev.target.value;
         await message.setFlag('od6s','targets',targets);
     })
 
-    html.on("click", ".modifiers-button", async ev => {
-        let content = document.getElementById("modifiers-display-" + ev.currentTarget.dataset.messageId);
+    _delegate("click", ".modifiers-button", async (ev, el) => {
+        let content = document.getElementById("modifiers-display-" + el.dataset.messageId);
         if (content.style.display === "block") {
             content.style.display = "none";
         } else {
             content.style.display = "block";
         }
-        game.messages.get(ev.currentTarget.dataset.messageId).render();
+        game.messages.get(el.dataset.messageId).render();
     })
 
-    html.on("click", ".damage-modifiers-button", async ev => {
-        let content = document.getElementById("damage-modifiers-display-" + ev.currentTarget.dataset.messageId);
+    _delegate("click", ".damage-modifiers-button", async (ev, el) => {
+        let content = document.getElementById("damage-modifiers-display-" + el.dataset.messageId);
         if (content.style.display === "block") {
             content.style.display = "none";
         } else {
             content.style.display = "block";
         }
-        game.messages.get(ev.currentTarget.dataset.messageId).render();
+        game.messages.get(el.dataset.messageId).render();
     })
 
-    html.on("click", ".apply-damage-button", async ev => {
+    _delegate("click", ".apply-damage-button", async (ev, el) => {
         ev.preventDefault();
-        let token = game.scenes.active.tokens.get(ev.currentTarget.dataset.tokenId);
+        let token = game.scenes.active.tokens.get(el.dataset.tokenId);
         let actor;
         if(typeof(token) === 'undefined' && token !== null) {
-            actor = game.scenes.active.tokens.get(ev.currentTarget.dataset.tokenId).actor;
+            actor = game.scenes.active.tokens.get(el.dataset.tokenId).actor;
         } else {
             actor = token?.actor;
         }
-        const result = ev.currentTarget.dataset.result;
-        const isVehicle = ev.currentTarget.dataset.isVehicle;
-        const messageId = ev.currentTarget.dataset.messageId;
+        const result = el.dataset.result;
+        const isVehicle = el.dataset.isVehicle;
+        const messageId = el.dataset.messageId;
         const update = {};
-        const stun = ev.currentTarget.dataset.stun;
+        const stun = el.dataset.stun;
         const msg = game.messages.get(messageId);
         const stunEffect = msg.getFlag('od6s', 'stunEffect');
 
@@ -352,13 +357,13 @@ Hooks.on('renderChatLog', (log, html, data) => {
         await msg.setFlag('od6s', 'applied', true);
     })
 
-    html.on("click", ".explosive-damage-button", async ev => {
+    _delegate("click", ".explosive-damage-button", async (ev, el) => {
         ev.preventDefault();
-        await od6sutilities.detonateExplosive(ev.currentTarget.dataset);
+        await od6sutilities.detonateExplosive(el.dataset);
     })
 
-    html.on('click', '.remove-template-button', async ev=> {
-        const message =  await game.messages.get(ev.currentTarget.dataset.messageId);
+    _delegate('click', '.remove-template-button', async (ev, el) => {
+        const message = await game.messages.get(el.dataset.messageId);
         const actor = message.speaker.token === null ?
             game.actors.get(message.speaker.actor) : game.scenes.active.tokens.get(message.speaker.token).actor;
         const item = actor.items.get(message.getFlag('od6s','itemId'));
@@ -366,12 +371,12 @@ Hooks.on('renderChatLog', (log, html, data) => {
         await template.setFlag('od6s','handled', true);
         await message.setFlag('od6s','handled', true);
         await canvas.scene.deleteEmbeddedDocuments('MeasuredTemplate', [template.id]);
-        msg.setFlag('od6s', 'applied', true);
+        message.setFlag('od6s', 'applied', true);
     })
 
-    html.on("click", ".damage-button", async ev => {
+    _delegate("click", ".damage-button", async (ev, el) => {
         ev.preventDefault();
-        const data = ev.currentTarget.dataset;
+        const data = el.dataset;
         const dice = {};
         dice.dice = data.damageDice;
         dice.pips = data.damagePips;
@@ -496,9 +501,9 @@ Hooks.on('renderChatLog', (log, html, data) => {
         }
     })
 
-    html.on("click", ".flavor-text", async ev => {
+    _delegate("click", ".flavor-text", async (ev, el) => {
         if (!game.user.isGM) return;
-        const message = game.messages.get(ev.currentTarget.dataset.messageId);
+        const message = game.messages.get(el.dataset.messageId);
         let actor;
         if (message.speaker.actor && message?.speaker.token) {
             actor = game.scenes.active?.tokens.get(message.speaker.token)?.actor;
@@ -508,10 +513,8 @@ Hooks.on('renderChatLog', (log, html, data) => {
         } else {
             actor = game.actors.get(message.speaker.actor)
         }
-        // Find the item
         let item = actor?.items.find(i => i.id === message.getFlag('od6s', 'itemId'));
         if (typeof (item) === "undefined" || item === "") {
-            // See if the actor is a crewmember
             if (typeof (actor?.system.vehicle.name) !== 'undefined') {
                 const vehicleActor = await od6sutilities.getActorFromUuid(actor.system.vehicle.uuid);
                 item = vehicleActor.items.find(i => i.id === message.getFlag('od6s', 'itemId'));
@@ -521,10 +524,10 @@ Hooks.on('renderChatLog', (log, html, data) => {
         item.sheet.render(true);
     })
 
-    html.on("click", ".select-actor", async ev => {
+    _delegate("click", ".select-actor", async (ev, el) => {
         if (!game.user.isGM) return;
         ev.preventDefault();
-        const message = game.messages.get(ev.currentTarget.dataset.messageId);
+        const message = game.messages.get(el.dataset.messageId);
         let actor;
         if (message.speaker.actor && message.speaker.token) {
             actor = game.scenes.active?.tokens.get(message.speaker.token)?.actor;
@@ -534,37 +537,34 @@ Hooks.on('renderChatLog', (log, html, data) => {
         if (actor) actor.sheet.render(true);
     })
 
-    html.on("click", ".edit-difficulty", async ev => {
+    _delegate("click", ".edit-difficulty", async (ev, el) => {
         let data = {};
-        const dataSet = ev.currentTarget.dataset;
-        data.messageId = dataSet.messageId;
-        const message = game.messages.get(dataSet.messageId);
+        data.messageId = el.dataset.messageId;
+        const message = game.messages.get(data.messageId);
         data.baseDifficulty = message.getFlag('od6s', 'baseDifficulty');
         data.modifiers = message.getFlag('od6s', 'modifiers');
         new OD6SEditDifficulty(data).render({force: true});
     })
 
-    html.on("click", ".edit-damage", async ev => {
+    _delegate("click", ".edit-damage", async (ev, el) => {
         ev.preventDefault();
         let data = {};
-        const dataSet = ev.currentTarget.dataset;
-        data.messageId = dataSet.messageId;
-        const message = game.messages.get(dataSet.messageId);
+        data.messageId = el.dataset.messageId;
+        const message = game.messages.get(data.messageId);
         data.damage = message.getFlag('od6s', 'damageScore');
         data.damageDice = message.getFlag('od6s', 'damageDice');
         new OD6SEditDamage(data).render({force: true});
     })
 
-    html.on("click", ".choose-target", async ev => {
+    _delegate("click", ".choose-target", async (ev, el) => {
         ev.preventDefault();
-        data = {};
+        const data = {};
         data.targets = [];
-        data.messageId = ev.currentTarget.dataset.messageId;
+        data.messageId = el.dataset.messageId;
         const message = game.messages.get(data.messageId);
 
         if (game.user.isGM) {
             data.isExplosive = message.getFlag('od6s','isExplosive');
-            // If in combat, only load tokens in combat.  Otherwise, load all tokens in scene
             if (game.combat) {
                 for (let t of game.combat.combatants) {
                     const target = {
@@ -572,7 +572,6 @@ Hooks.on('renderChatLog', (log, html, data) => {
                         "name": t.token.name
                     }
                     data.targets.push(target);
-
                 }
             } else {
                 data.targets = game.scenes.active.tokens;
@@ -583,20 +582,20 @@ Hooks.on('renderChatLog', (log, html, data) => {
         new OD6SChooseTarget(data).render({force: true});
     })
 
-    html.on("change", ".explosive-target-zone", async ev => {
-        const message = game.messages.get(ev.currentTarget.dataset.messageId);
+    _delegate("change", ".explosive-target-zone", async (ev, el) => {
+        const message = game.messages.get(el.dataset.messageId);
         const targets = Array.from(message.getFlag('od6s','targets'));
         for (const t in targets) {
-            if(ev.currentTarget.dataset.targetId === targets[t].id) {
+            if(el.dataset.targetId === targets[t].id) {
                 targets[t].zone = parseInt(ev.target.value);
             }
         }
         await message.setFlag('od6s','targets', targets);
     })
 
-    html.on("click", ".message-sender", async ev => {
+    _delegate("click", ".message-sender", async (ev, el) => {
         ev.preventDefault();
-        const message = await game.messages.get(ev.currentTarget.dataset.messageId);
+        const message = await game.messages.get(el.dataset.messageId);
         if (message.speaker?.token !== null && message.speaker?.token !== "") {
             const scene = game.scenes.get(message.speaker.scene);
             const token = scene.tokens.get(message.speaker.token);
@@ -608,18 +607,16 @@ Hooks.on('renderChatLog', (log, html, data) => {
         }
     })
 
-    html.on("click", ".wilddiegm", async ev => {
+    _delegate("click", ".wilddiegm", async (ev, el) => {
         ev.preventDefault();
-        // three choices: leave it as-is, remove the highest die from the roll, or cause a complication
         new OD6SHandleWildDieForm(ev).render({force: true});
     })
 
-    html.on("click", ".message-reveal", async ev => {
-        const message = game.messages.get(ev.currentTarget.dataset.messageId);
+    _delegate("click", ".message-reveal", async (ev, el) => {
+        const message = game.messages.get(el.dataset.messageId);
         await message.setFlag('od6s', 'isVisible', true);
         await message.setFlag('od6s', 'isKnown', true);
         if(message.getFlag('od6s','isExplosive') && game.settings.get('od6s','auto_explosive')) {
-            // Reveal the template
             const template = od6sutilities.getTemplateFromMessage(message).template;
             if(template !== 'undefined') {
                 const owner = game.users.get(template.getFlag('od6s', 'originalOwner'))
@@ -631,12 +628,11 @@ Hooks.on('renderChatLog', (log, html, data) => {
         }
     })
 
-    html.on("click", ".message-oppose", async ev => {
+    _delegate("click", ".message-oppose", async (ev, el) => {
         ev.preventDefault();
-        // Check if there are any opposed cards already in the pipe
         const data = {};
-        data.messageId = ev.currentTarget.dataset.messageId;
-        data.target = ev.currentTarget.dataset?.target;
+        data.messageId = el.dataset.messageId;
+        data.target = el.dataset?.target;
 
         if (OD6S.opposed.length > 0) {
             OD6S.opposed.push(data);
@@ -646,12 +642,12 @@ Hooks.on('renderChatLog', (log, html, data) => {
         }
     })
 
-    html.on("change", ".choose-difficulty", async ev => {
+    _delegate("change", ".choose-difficulty", async (ev, el) => {
         ev.preventDefault();
-        const message = game.messages.get(ev.currentTarget.dataset.messageId);
+        const message = game.messages.get(el.dataset.messageId);
         const flags = {
-            difficultyLevel: ev.currentTarget.value,
-            difficulty: await od6sutilities.getDifficultyFromLevel(ev.currentTarget.value)
+            difficultyLevel: el.value,
+            difficulty: await od6sutilities.getDifficultyFromLevel(el.value)
         }
 
         const update = {};

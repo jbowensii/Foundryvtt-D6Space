@@ -1,5 +1,4 @@
-<form>
-    {{#each skills as |skill key|}}
+{{#each skills as |skill key|}}
     <div>
         <b>{{skill.skill.name}}</b>
         {{#if (eq (showWildDie) true)}}
@@ -104,4 +103,3 @@
     </div>
         <hr>
     {{/each}}
-</form>

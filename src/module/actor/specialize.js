@@ -1,47 +1,75 @@
 import OD6S from "../config/config-od6s.js";
 import {od6sutilities} from "../system/utilities.js";
 
-export class SpecializeDialog extends Dialog {
+const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
-    constructor(newItemData, specializeTemplate, data, options) {
-        super(data, options);
-        this.newItemData = newItemData;
-        this.specializeTemplate = specializeTemplate;
+export class SpecializeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
+
+    static DEFAULT_OPTIONS = {
+        classes: ["od6s", "dialog"],
+        tag: "form",
+        position: { width: 400, height: "auto" },
+        window: { title: "OD6S.CREATE_SPECIALIZATION" },
+        form: { handler: SpecializeDialog.#onSubmit, closeOnSubmit: true }
+    };
+
+    static PARTS = {
+        form: { template: "systems/od6s/templates/actor/common/specialize.html" }
+    };
+
+    constructor(options = {}) {
+        super(options);
+        this.newItemData = options.newItemData;
+        this.actorSheet = options.actorSheet;
+        this.skillId = options.skillId;
     }
 
-    activateListeners(html) {
-        super.activateListeners(html);
+    async _prepareContext(options) {
+        return this.newItemData;
+    }
 
-        html.find('.freeadvancecheckbox').change( async () => {
-            /* Whenever this is toggled, reset cpcost */
-            this.newItemData.freeadvance = !(this.newItemData.freeadvance);
-            if (this.newItemData.freeadvance) {
-                this.newItemData.cpcost = 0;
-            } else {
-                this.newItemData.cpcost = this.newItemData.originalcpcost;
-            }
-            await this.updateDialog();
+    _onRender(context, options) {
+        this.element.querySelectorAll('.freeadvancecheckbox').forEach(el => {
+            el.addEventListener('change', async () => {
+                /* Whenever this is toggled, reset cpcost */
+                this.newItemData.freeadvance = !(this.newItemData.freeadvance);
+                if (this.newItemData.freeadvance) {
+                    this.newItemData.cpcost = 0;
+                } else {
+                    this.newItemData.cpcost = this.newItemData.originalcpcost;
+                }
+                this.render();
+            });
         });
-        
-        html.find('.specializationname').change(async ev => {
-            this.newItemData.specname = ev.target.value;
-            await this.updateDialog();
-        })
 
-        html.find('.dice').change(async ev => {
-            this.newItemData.dice = ev.target.value;
-            await this.updateDialog();
-        })
+        this.element.querySelectorAll('.specializationname').forEach(el => {
+            el.addEventListener('change', async ev => {
+                this.newItemData.specname = ev.target.value;
+                this.render();
+            });
+        });
 
-        html.find('.pips').change(async ev => {
-            this.newItemData.dice = ev.target.value;
-            await this.updateDialog();
-        })
+        this.element.querySelectorAll('.dice').forEach(el => {
+            el.addEventListener('change', async ev => {
+                this.newItemData.dice = ev.target.value;
+                this.render();
+            });
+        });
+
+        this.element.querySelectorAll('.pips').forEach(el => {
+            el.addEventListener('change', async ev => {
+                this.newItemData.pips = ev.target.value;
+                this.render();
+            });
+        });
     }
 
-    async updateDialog() {
-        this.data.content = await renderTemplate(this.specializeTemplate, this.newItemData);
-        this.render();
+    static async #onSubmit(event, form, formData) {
+        await od6sspecialize.addSpecialization(
+            this.actorSheet,
+            this.newItemData,
+            this.skillId
+        );
     }
 }
 
@@ -74,23 +102,12 @@ export class od6sspecialize {
             pips: od6sutilities.getDiceFromScore(derivedScore - 1).pips
         }
 
-        const specializeTemplate = "systems/od6s/templates/actor/common/specialize.html";
-        const html = await renderTemplate(specializeTemplate, newItemData);
-        new SpecializeDialog(newItemData, specializeTemplate, {
-            title: game.i18n.localize("OD6S.CREATE_SPECIALIZATION") + "!",
-            content: html,
-            buttons: {
-                submit: {
-                    label: game.i18n.localize("OD6S.CREATE_SPECIALIZATION"),
-                    callback: dlg => od6sspecialize.addSpecialization(
-                        this,
-                        newItemData,
-                        skill.id
-                       )
-                }
-            },
-            default: "submit"
-        }).render(true);
+        new SpecializeDialog({
+            newItemData: newItemData,
+            actorSheet: this,
+            skillId: skill.id,
+            window: { title: game.i18n.localize("OD6S.CREATE_SPECIALIZATION") + "!" }
+        }).render({ force: true });
 
     }
 

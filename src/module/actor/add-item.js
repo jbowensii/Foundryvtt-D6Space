@@ -1,90 +1,97 @@
 import {od6sutilities} from "../system/utilities.js";
 import {OD6SItem} from "../item/item.js";
 
-export class OD6SAddItem extends FormApplication {
+const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
-    constructor(object={}, options={}) {
+export class OD6SAddItem extends HandlebarsApplicationMixin(ApplicationV2) {
+
+    static DEFAULT_OPTIONS = {
+        id: "add-item",
+        classes: ["od6s"],
+        tag: "form",
+        position: { width: 300, height: 300 },
+        window: { title: "OD6S.ADD" },
+        form: { handler: OD6SAddItem.#onSubmit, closeOnSubmit: true }
+    };
+
+    static PARTS = {
+        form: { template: "systems/od6s/templates/actor/common/add-item.html" }
+    };
+
+    constructor(options = {}) {
         super(options);
-        this.object = object;
-        this.object.selected = 0;
-        this.object.description = this.object?.items[0]?.system?.description;
+        this.itemData = options.itemData;
+        this.itemData.selected = 0;
+        this.itemData.description = this.itemData?.items[0]?.system?.description;
         this.dice = 0;
         this.pips = 0;
-        if (typeof(this.object.description) === 'undefined') this.object.description = "";
+        if (typeof(this.itemData.description) === 'undefined') this.itemData.description = "";
     }
 
-    static get defaultOptions() {
-        const options = super.defaultOptions;
-        options.id = "add-item";
-        options.template = "systems/od6s/templates/actor/common/add-item.html";
-        options.height = 300;
-        options.width = 300;
-        options.minimizable = true;
-        options.title = game.i18n.localize("OD6S.ADD");
-        return options;
+    async _prepareContext(options) {
+        return { object: this.itemData };
     }
 
-    activateListeners(html) {
-        super.activateListeners(html);
+    _onRender(context, options) {
+        this.element.querySelectorAll('.select-skill').forEach(el => {
+            el.addEventListener('change', ev => {
+                this.itemData.selected = +ev.currentTarget.value;
+                this.itemData.description = this.itemData.items[this.itemData.selected].system?.description;
+                if (typeof(this.itemData.description) === 'undefined') this.itemData.description = "";
+                this.setPosition({ height: "auto" });
+                this.render();
+            });
+        });
 
-        html.find('.select-skill').change(ev => {
-            this.object.selected = +ev.currentTarget.value;
-            this.object.description = this.object.items[this.object.selected].system?.description;
-            if (typeof(this.object.description) === 'undefined') this.object.description = "";
-            this.setPosition({ height: "auto" })
-            this.render();
-        })
-
-        html.find('.addskill').change(ev => {
-            if(ev.target.id === 'dice') {
-                this.dice = +(ev.target.value);
-            } else if(ev.target.id === 'pips') {
-                this.pips = +(ev.target.value);
-            }
-        })
+        this.element.querySelectorAll('.addskill').forEach(el => {
+            el.addEventListener('change', ev => {
+                if(ev.target.id === 'dice') {
+                    this.dice = +(ev.target.value);
+                } else if(ev.target.id === 'pips') {
+                    this.pips = +(ev.target.value);
+                }
+            });
+        });
     }
 
-    getData() {
-        return super.getData();
-    }
-
-    async _updateObject(ev, formData) {
-        if (ev.submitter.value === 'cancel') {
+    static async #onSubmit(event, form, formData) {
+        const fd = formData.object;
+        if (event.submitter.value === 'cancel') {
             return;
         }
 
         let actor;
-        if(formData.token !== '') {
-            const token = game.scenes.active.tokens.get(formData.token);
+        if(fd.token !== '') {
+            const token = game.scenes.active.tokens.get(fd.token);
             actor = token.actor;
         } else {
-            actor = await game.actors.get(formData.actor);
+            actor = await game.actors.get(fd.actor);
         }
 
-        if (ev.submitter.value === 'selected') {
-            const items = JSON.parse(formData.serializeditems);
+        if (event.submitter.value === 'selected') {
+            const items = JSON.parse(fd.serializeditems);
 
-            if (items[formData['add-item']].type === "skill" || items[formData['add-item']].type === "specialization") {
-                items[formData['add-item']].system.base = (od6sutilities.getScoreFromDice(this.dice, this.pips))
+            if (items[fd['add-item']].type === "skill" || items[fd['add-item']].type === "specialization") {
+                items[fd['add-item']].system.base = (od6sutilities.getScoreFromDice(this.dice, this.pips))
             }
-            const result = await actor.createEmbeddedDocuments('Item', [items[formData['add-item']]]);
+            const result = await actor.createEmbeddedDocuments('Item', [items[fd['add-item']]]);
             await actor.sheet.getData();
-            this.object.caller.render(false);
+            this.itemData.caller.render(false);
         }
 
-        if (ev.submitter.value === 'empty') {
+        if (event.submitter.value === 'empty') {
             const itemData = {};
             itemData.system = {};
-            itemData.type = formData.type;
+            itemData.type = fd.type;
 
             if (itemData.type === "skill" || itemData.type === "specialization") {
-                itemData.system.attribute = formData.attrname;
+                itemData.system.attribute = fd.attrname;
             }
 
             itemData.name = game.i18n.localize('OD6S.NEW_ITEM');
             const item = await new OD6SItem(itemData);
             await actor.createEmbeddedDocuments('Item', [item.toObject()]);
-            this.caller?.render(false);
+            this.itemData.caller?.render(false);
         }
     }
 }

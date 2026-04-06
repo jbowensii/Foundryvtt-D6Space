@@ -2,55 +2,87 @@ import {od6sutilities} from "../system/utilities.js";
 import ExplosiveDialog from "./explosive-dialog.js";
 import OD6S from "../config/config-od6s.js";
 
-export class InitRollDialog extends Dialog {
-    constructor(caller, data, options) {
-        super(data, options);
-        this.rollData = caller.rollData;
+const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
+
+export class InitRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
+
+    static DEFAULT_OPTIONS = {
+        classes: ["od6s", "dialog"],
+        tag: "form",
+        position: { width: 400, height: "auto" },
+        window: { title: "OD6S.ROLL" },
+        form: { handler: InitRollDialog.#onSubmit, closeOnSubmit: true },
+        actions: {}
+    };
+
+    static PARTS = {
+        form: { template: "systems/od6s/templates/initRoll.html" }
+    };
+
+    constructor(options = {}) {
+        super(options);
+        this.rollData = options.rollData;
         this.cpLimit = OD6S.characterPointLimits.initiative;
+        this._onSubmitCallback = options.onSubmit;
     }
 
-    activateListeners(html) {
-        super.activateListeners(html);
+    async _prepareContext(options) {
+        return this.rollData;
+    }
 
-        html.find('.cpup').click(async () => {
-            if ((+this.rollData.characterpoints) >= this.cpLimit) {
-                ui.notifications.warn(game.i18n.localize("OD6S.MAX_CP"));
-            } else if ((+this.rollData.characterpoints) >= this.rollData.actor.system.characterpoints.value) {
-                ui.notifications.warn(game.i18n.localize("OD6S.NOT_ENOUGH_CP_ROLL"));
-            } else {
-                this.rollData.characterpoints++;
+    _onRender(context, options) {
+        this.element.querySelectorAll('.cpup').forEach(el => {
+            el.addEventListener('click', async () => {
+                if ((+this.rollData.characterpoints) >= this.cpLimit) {
+                    ui.notifications.warn(game.i18n.localize("OD6S.MAX_CP"));
+                } else if ((+this.rollData.characterpoints) >= this.rollData.actor.system.characterpoints.value) {
+                    ui.notifications.warn(game.i18n.localize("OD6S.NOT_ENOUGH_CP_ROLL"));
+                } else {
+                    this.rollData.characterpoints++;
+                    await this.updateDialog();
+                }
+            });
+        });
+
+        this.element.querySelectorAll('.bonusdice').forEach(el => {
+            el.addEventListener('change', async (ev) => {
+                this.rollData.bonusdice = (+ev.target.valueAsNumber);
+            });
+        });
+
+        this.element.querySelectorAll('.bonuspips').forEach(el => {
+            el.addEventListener('change', async (ev) => {
+                this.rollData.bonuspips = (+ev.target.valueAsNumber);
+            });
+        });
+
+        this.element.querySelectorAll('.cpdown').forEach(el => {
+            el.addEventListener('click', async () => {
+                if (this.rollData.characterpoints > 0) {
+                    this.rollData.characterpoints--;
+                }
                 await this.updateDialog();
-            }
+            });
         });
 
-        html.find('.bonusdice').change(async ev => {
-            this.rollData.bonusdice = (+ev.target.valueAsNumber);
-            //this.rollData.bonusdice = ev.currentTarget.dataset.bonusdice;
-        })
-
-        html.find('.bonuspips').change(async ev => {
-            this.rollData.bonuspips = (+ev.target.valueAsNumber);
-        })
-
-        html.find('.cpdown').click(async () => {
-            if (this.rollData.characterpoints > 0) {
-                this.rollData.characterpoints--;
-            }
-            await this.updateDialog();
-        });
-
-        html.find('.usewilddie').click(async () => {
-            this.rollData.wilddie = !Boolean(this.rollData.wilddie);
-            await this.updateDialog();
+        this.element.querySelectorAll('.usewilddie').forEach(el => {
+            el.addEventListener('click', async () => {
+                this.rollData.wilddie = !Boolean(this.rollData.wilddie);
+                await this.updateDialog();
+            });
         });
     }
 
     async updateDialog() {
         this.rollData.characterpoints > this.rollData.actor.system.characterpoints.value ? this.rollData.cpcostcolor = "red" :
             this.rollData.cpcostcolor = "black";
-        const initTemplate = "systems/od6s/templates/initRoll.html";
-        this.content = await renderTemplate(initTemplate, this.rollData);
         this.render();
+    }
+
+    static async #onSubmit(event, form, formData) {
+        if (this._onSubmitCallback) {
+            await this._onSubmitCallback();
+        }
     }
 }
 
@@ -85,20 +117,11 @@ export class od6sInitRoll {
             template: "systems/od6s/templates/initRoll.html"
         }
 
-        const html = await renderTemplate(this.rollData.template, this.rollData);
-        new InitRollDialog(this, {
-            title: game.i18n.localize("OD6S.ROLL") + "!",
-            content: html,
-            buttons: {
-                submit: {
-                    label: game.i18n.localize("OD6S.ROLL"),
-                    callback: () => od6sInitRoll.initRollAction(
-                        this
-                    )
-                }
-            },
-            default: "submit"
-        }).render(true);
+        new InitRollDialog({
+            rollData: this.rollData,
+            onSubmit: () => od6sInitRoll.initRollAction(this),
+            window: { title: game.i18n.localize("OD6S.ROLL") + "!" }
+        }).render({ force: true });
     }
 
     static async initRollAction(caller) {
@@ -162,245 +185,319 @@ export class od6sInitRoll {
     }
 }
 
-export class RollDialog extends Dialog {
+export class RollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 
-    constructor(actorSheet, data, options) {
-        super(data, options);
-        this.actorSheet = actorSheet;
-        this.rollData = this.actorSheet.rollData;
+    static DEFAULT_OPTIONS = {
+        classes: ["od6s", "dialog"],
+        tag: "form",
+        position: { width: 400, height: "auto" },
+        window: { title: "OD6S.ROLL" },
+        form: { handler: RollDialog.#onSubmit, closeOnSubmit: true },
+        actions: {}
+    };
+
+    static PARTS = {
+        form: { template: "systems/od6s/templates/roll.html" }
+    };
+
+    constructor(options = {}) {
+        super(options);
+        this.actorSheet = options.actorSheet;
+        this.rollData = options.rollData;
         this.cpLimit = OD6S.characterPointLimits;
+        this._onSubmitCallback = options.onSubmit;
     }
 
-    activateListeners(html) {
+    async _prepareContext(options) {
+        return this.rollData;
+    }
 
-        super.activateListeners(html);
-
-        html.find('.cpup').click(async () => {
-            let rollType = this.rollData.type;
-            let actor = this.rollData.actor;
-            if(rollType === 'weapon') {
-                const item = this.rollData.actor.items.find(i=>i.id===this.rollData.itemid);
-                const spec = item.system.specialization;
-                if (actor.items.find(i=>i.type === 'specialization' && i.name === spec)) {
-                    rollType = 'specialization'
-                } else if (actor.items.find(i=>i.type === 'skill' && i.name === item.skill)) {
-                    rollType = 'skill'
-                } else {
-                    rollType = 'attribute'
-                }
-            }
-
-            if (rollType === "skill") {
-                // Check if it is a dodge or parry
-                if (this.rollData.title.includes("Parry")) {
-                    rollType = "parry";
-                } else if (this.rollData.title.includes("Dodge")) {
-                    rollType = "dodge";
-                } else if (this.rollData.title.includes("Block")) {
-                    rollType = "block";
-                }
-            }
-
-            if (this.rollData.subtype === 'vehicledodge') {
-                rollType = "dodge";
-            }
-            if (this.rollData.subtype === 'parry') {
-                rollType = "parry";
-            }
-
-            if ((+this.rollData.characterpoints) >= this.cpLimit[rollType]) {
-                ui.notifications.warn(game.i18n.localize("OD6S.MAX_CP"));
-            } else if ((+this.rollData.characterpoints) >= this.rollData.actor.system.characterpoints.value) {
-                ui.notifications.warn(game.i18n.localize("OD6S.NOT_ENOUGH_CP_ROLL"));
-            } else {
-                this.rollData.characterpoints++;
-                await this.updateDialog();
-            }
-        });
-
-        html.find('.useattribute').change(async ev => {
-            // Player has changed the underlying attribute to use for the roll, recalculate
-            this.rollData.attribute = ev.target.value;
-            const attributeScore = this.rollData.actor.system.attributes[ev.target.value].score;
-            const skillScore = this.rollData.actor.items.filter(i => i.name === this.rollData.label)[0].system.score;
-            const newScore = (+attributeScore) + (+skillScore);
-            const newDice = od6sutilities.getDiceFromScore(newScore);
-            this.rollData.dice = newDice.dice;
-            this.rollData.pips = newDice.pips;
-            await this.updateDialog();
-        })
-
-        html.find('.scaledice').change(async ev => {
-            this.rollData.scaledice = (+ev.target.valueAsNumber);
-        })
-
-        html.find('.bonusdice').change(async ev => {
-            this.rollData.bonusdice = (+ev.target.valueAsNumber);
-            //this.rollData.bonusdice = ev.currentTarget.dataset.bonusdice;
-        })
-
-        html.find('.bonuspips').change(async ev => {
-            this.rollData.bonuspips = (+ev.target.valueAsNumber);
-        })
-
-        html.find('.cpdown').click(async () => {
-            if (this.rollData.characterpoints > 0) {
-                this.rollData.characterpoints--;
-            }
-            await this.updateDialog();
-        });
-
-        html.find('.timer').change(async ev => {
-            const item = this.rollData.actor.items.find(i=>i.id === this.rollData.itemid);
-            await item.setFlag('od6s','explosiveTimer', ev.target.valueAsNumber);
-            this.rollData.timer = ev.target.valueAsNumber;
-            await this.updateDialog();
-        })
-
-        html.find('.contact').change(async ev => {
-            const item = this.rollData.actor.items.find(i=>i.id === this.rollData.itemid);
-            await item.setFlag('od6s','explosiveTimer', 0);
-            this.rollData.contact = !this.rollData.contact;
-            this.rollData.timer = "";
-            await this.updateDialog();
-        })
-
-        html.find('.usefatepoint').click(async () => {
-            this.rollData.fatepoint = !Boolean(this.rollData.fatepoint);
-            if (this.rollData.fatepoint && (this.rollData.actor.system.fatepoints.value <= 0)) {
-                ui.notifications.warn(game.i18n.localize("OD6S.NOT_ENOUGH_FP_ROLL"));
-                this.rollData.fatepoint = !Boolean(this.rollData.fatepoint);
-            }
-            if (this.rollData.fatepoint) {
-                this.rollData.dice = this.rollData.dice * 2;
-                this.rollData.pips = this.rollData.pips * 2;
-            } else {
-                this.rollData.dice = this.rollData.originaldice;
-                this.rollData.pips = this.rollData.originalpips;
-            }
-            await this.updateDialog();
-        });
-
-        html.find('.usewilddie').click(async () => {
-            this.rollData.wilddie = !Boolean(this.rollData.wilddie);
-            await this.updateDialog();
-        });
-
-        html.find('.fulldefense').click(async () => {
-            this.rollData.fulldefense = !Boolean(this.rollData.fulldefense);
-            // Full defense negates stun on the following turn
-            if (this.rollData.actor.system.stuns.current) {
-                if (this.rollData.actor.system.stuns.rounds > 0) {
-                    if(this.rollData.fulldefense) {
-                        this.rollData.stunnedpenalty = 0;
+    _onRender(context, options) {
+        this.element.querySelectorAll('.cpup').forEach(el => {
+            el.addEventListener('click', async () => {
+                let rollType = this.rollData.type;
+                let actor = this.rollData.actor;
+                if(rollType === 'weapon') {
+                    const item = this.rollData.actor.items.find(i=>i.id===this.rollData.itemid);
+                    const spec = item.system.specialization;
+                    if (actor.items.find(i=>i.type === 'specialization' && i.name === spec)) {
+                        rollType = 'specialization'
+                    } else if (actor.items.find(i=>i.type === 'skill' && i.name === item.skill)) {
+                        rollType = 'skill'
                     } else {
-                        this.rollData.stunnedpenalty = this.rollData.actor.system.stuns.current;
+                        rollType = 'attribute'
                     }
                 }
-            }
-            await this.updateDialog();
+
+                if (rollType === "skill") {
+                    if (this.rollData.title.includes("Parry")) {
+                        rollType = "parry";
+                    } else if (this.rollData.title.includes("Dodge")) {
+                        rollType = "dodge";
+                    } else if (this.rollData.title.includes("Block")) {
+                        rollType = "block";
+                    }
+                }
+
+                if (this.rollData.subtype === 'vehicledodge') {
+                    rollType = "dodge";
+                }
+                if (this.rollData.subtype === 'parry') {
+                    rollType = "parry";
+                }
+
+                if ((+this.rollData.characterpoints) >= this.cpLimit[rollType]) {
+                    ui.notifications.warn(game.i18n.localize("OD6S.MAX_CP"));
+                } else if ((+this.rollData.characterpoints) >= this.rollData.actor.system.characterpoints.value) {
+                    ui.notifications.warn(game.i18n.localize("OD6S.NOT_ENOUGH_CP_ROLL"));
+                } else {
+                    this.rollData.characterpoints++;
+                    await this.updateDialog();
+                }
+            });
         });
 
-        html.find('.stun').click(async () => {
-            this.rollData.stun = !Boolean(this.rollData.stun);
-            await this.updateDialog;
-        })
+        this.element.querySelectorAll('.useattribute').forEach(el => {
+            el.addEventListener('change', async (ev) => {
+                this.rollData.attribute = ev.target.value;
+                const attributeScore = this.rollData.actor.system.attributes[ev.target.value].score;
+                const skillScore = this.rollData.actor.items.filter(i => i.name === this.rollData.label)[0].system.score;
+                const newScore = (+attributeScore) + (+skillScore);
+                const newDice = od6sutilities.getDiceFromScore(newScore);
+                this.rollData.dice = newDice.dice;
+                this.rollData.pips = newDice.pips;
+                await this.updateDialog();
+            });
+        });
 
-        html.find('.difficulty').change(async (ev) => {
-            this.rollData.difficulty = (+ev.target.valueAsNumber);
-            await this.updateDialog();
-        })
+        this.element.querySelectorAll('.scaledice').forEach(el => {
+            el.addEventListener('change', async (ev) => {
+                this.rollData.scaledice = (+ev.target.valueAsNumber);
+            });
+        });
 
-        html.find('.actionpenalty').change(async (ev) => {
-            this.rollData.actionpenalty = (+ev.target.valueAsNumber);
-            await this.updateDialog();
-        })
+        this.element.querySelectorAll('.bonusdice').forEach(el => {
+            el.addEventListener('change', async (ev) => {
+                this.rollData.bonusdice = (+ev.target.valueAsNumber);
+            });
+        });
 
-        html.find('.woundpenalty').change(async (ev) => {
-            this.rollData.woundpenalty = (+ev.target.valueAsNumber);
-            await this.updateDialog();
-        })
+        this.element.querySelectorAll('.bonuspips').forEach(el => {
+            el.addEventListener('change', async (ev) => {
+                this.rollData.bonuspips = (+ev.target.valueAsNumber);
+            });
+        });
 
-        html.find('.stunnedpenalty').change(async (ev) => {
-            this.rollData.stunnedpenalty = (+ev.target.valueAsNumber);
-            await this.updateDialog();
-        })
+        this.element.querySelectorAll('.cpdown').forEach(el => {
+            el.addEventListener('click', async () => {
+                if (this.rollData.characterpoints > 0) {
+                    this.rollData.characterpoints--;
+                }
+                await this.updateDialog();
+            });
+        });
 
-        html.find('.otherpenalty').change(async (ev) => {
-            this.rollData.otherpenalty = (+ev.target.valueAsNumber);
-            await this.updateDialog();
-        })
+        this.element.querySelectorAll('.timer').forEach(el => {
+            el.addEventListener('change', async (ev) => {
+                const item = this.rollData.actor.items.find(i=>i.id === this.rollData.itemid);
+                await item.setFlag('od6s','explosiveTimer', ev.target.valueAsNumber);
+                this.rollData.timer = ev.target.valueAsNumber;
+                await this.updateDialog();
+            });
+        });
 
-        html.find('.shots').change(async (ev) => {
-            this.rollData.shots = (+ev.target.valueAsNumber);
-            await this.updateDialog();
-        })
+        this.element.querySelectorAll('.contact').forEach(el => {
+            el.addEventListener('change', async (ev) => {
+                const item = this.rollData.actor.items.find(i=>i.id === this.rollData.itemid);
+                await item.setFlag('od6s','explosiveTimer', 0);
+                this.rollData.contact = !this.rollData.contact;
+                this.rollData.timer = "";
+                await this.updateDialog();
+            });
+        });
 
-        html.find('.target').change(async (ev) => {
-            this.rollData.target = ev.target.value;
-            await this.updateDialog();
-        })
+        this.element.querySelectorAll('.usefatepoint').forEach(el => {
+            el.addEventListener('click', async () => {
+                this.rollData.fatepoint = !Boolean(this.rollData.fatepoint);
+                if (this.rollData.fatepoint && (this.rollData.actor.system.fatepoints.value <= 0)) {
+                    ui.notifications.warn(game.i18n.localize("OD6S.NOT_ENOUGH_FP_ROLL"));
+                    this.rollData.fatepoint = !Boolean(this.rollData.fatepoint);
+                }
+                if (this.rollData.fatepoint) {
+                    this.rollData.dice = this.rollData.dice * 2;
+                    this.rollData.pips = this.rollData.pips * 2;
+                } else {
+                    this.rollData.dice = this.rollData.originaldice;
+                    this.rollData.pips = this.rollData.originalpips;
+                }
+                await this.updateDialog();
+            });
+        });
 
-        html.find('.difficultylevel').change(async (ev) => {
-            if (typeof (ev.currentTarget.dataset.skill) !== 'undefined') {
-                this.rollData.skills[ev.currentTarget.dataset.skill].difficulty = ev.target.value;
-            } else {
-                this.rollData.difficultylevel = ev.target.value;
-            }
-            await this.updateDialog();
-        })
+        this.element.querySelectorAll('.usewilddie').forEach(el => {
+            el.addEventListener('click', async () => {
+                this.rollData.wilddie = !Boolean(this.rollData.wilddie);
+                await this.updateDialog();
+            });
+        });
 
-        html.find('.range').change(async (ev) => {
-            this.rollData.modifiers.range = ev.target.value;
-            await this.updateDialog();
-        })
+        this.element.querySelectorAll('.fulldefense').forEach(el => {
+            el.addEventListener('click', async () => {
+                this.rollData.fulldefense = !Boolean(this.rollData.fulldefense);
+                if (this.rollData.actor.system.stuns.current) {
+                    if (this.rollData.actor.system.stuns.rounds > 0) {
+                        if(this.rollData.fulldefense) {
+                            this.rollData.stunnedpenalty = 0;
+                        } else {
+                            this.rollData.stunnedpenalty = this.rollData.actor.system.stuns.current;
+                        }
+                    }
+                }
+                await this.updateDialog();
+            });
+        });
 
-        html.find('.attackoption').change(async (ev) => {
-            this.rollData.multishot = ev.target.value === 'OD6S.ATTACK_RANGED_SINGLE_FIRE_AS_MULTI';
-            this.rollData.modifiers.attackoption = ev.target.value;
-            await this.updateDialog();
-        })
+        this.element.querySelectorAll('.stun').forEach(el => {
+            el.addEventListener('click', async () => {
+                this.rollData.stun = !Boolean(this.rollData.stun);
+                await this.updateDialog();
+            });
+        });
 
-        html.find('.calledshot').change(async (ev) => {
-            this.rollData.modifiers.calledshot = ev.target.value;
-            await this.updateDialog();
-        })
+        this.element.querySelectorAll('.difficulty').forEach(el => {
+            el.addEventListener('change', async (ev) => {
+                this.rollData.difficulty = (+ev.target.valueAsNumber);
+                await this.updateDialog();
+            });
+        });
 
-        html.find('.cover').change(async (ev) => {
-            this.rollData.modifiers.cover = ev.target.value;
-            await this.updateDialog();
-        })
+        this.element.querySelectorAll('.actionpenalty').forEach(el => {
+            el.addEventListener('change', async (ev) => {
+                this.rollData.actionpenalty = (+ev.target.valueAsNumber);
+                await this.updateDialog();
+            });
+        });
 
-        html.find('.coverlight').change(async (ev) => {
-            this.rollData.modifiers.coverlight = ev.target.value;
-            await this.updateDialog();
-        })
+        this.element.querySelectorAll('.woundpenalty').forEach(el => {
+            el.addEventListener('change', async (ev) => {
+                this.rollData.woundpenalty = (+ev.target.valueAsNumber);
+                await this.updateDialog();
+            });
+        });
 
-        html.find('.coversmoke').change(async (ev) => {
-            this.rollData.modifiers.coversmoke = ev.target.value;
-            await this.updateDialog();
-        })
+        this.element.querySelectorAll('.stunnedpenalty').forEach(el => {
+            el.addEventListener('change', async (ev) => {
+                this.rollData.stunnedpenalty = (+ev.target.valueAsNumber);
+                await this.updateDialog();
+            });
+        });
 
-        html.find('.miscmod').change(async (ev) => {
-            this.rollData.modifiers.miscmod = ev.target.value;
-            await this.updateDialog();
-        })
+        this.element.querySelectorAll('.otherpenalty').forEach(el => {
+            el.addEventListener('change', async (ev) => {
+                this.rollData.otherpenalty = (+ev.target.valueAsNumber);
+                await this.updateDialog();
+            });
+        });
 
-        html.find('.vehiclespeed').change(async (ev) => {
-            this.rollData.vehiclespeed = ev.target.value;
-        })
+        this.element.querySelectorAll('.shots').forEach(el => {
+            el.addEventListener('change', async (ev) => {
+                this.rollData.shots = (+ev.target.valueAsNumber);
+                await this.updateDialog();
+            });
+        });
 
-        html.find('.vehiclecollisiontype').change(async (ev) => {
-            this.rollData.vehiclecollisiontype = ev.target.value;
-        })
+        this.element.querySelectorAll('.target').forEach(el => {
+            el.addEventListener('change', async (ev) => {
+                this.rollData.target = ev.target.value;
+                await this.updateDialog();
+            });
+        });
 
-        html.find('.vehicleterraindifficulty').change(async (ev) => {
-            this.rollData.vehicleterraindifficulty = ev.target.value;
-        })
+        this.element.querySelectorAll('.difficultylevel').forEach(el => {
+            el.addEventListener('change', async (ev) => {
+                if (typeof (ev.currentTarget.dataset.skill) !== 'undefined') {
+                    this.rollData.skills[ev.currentTarget.dataset.skill].difficulty = ev.target.value;
+                } else {
+                    this.rollData.difficultylevel = ev.target.value;
+                }
+                await this.updateDialog();
+            });
+        });
 
-        html.closest('.window-app.dialog').find('.header-button.close').click(async (ev) => {
-                await od6sroll.cancelAction(ev);
-        })
+        this.element.querySelectorAll('.range').forEach(el => {
+            el.addEventListener('change', async (ev) => {
+                this.rollData.modifiers.range = ev.target.value;
+                await this.updateDialog();
+            });
+        });
+
+        this.element.querySelectorAll('.attackoption').forEach(el => {
+            el.addEventListener('change', async (ev) => {
+                this.rollData.multishot = ev.target.value === 'OD6S.ATTACK_RANGED_SINGLE_FIRE_AS_MULTI';
+                this.rollData.modifiers.attackoption = ev.target.value;
+                await this.updateDialog();
+            });
+        });
+
+        this.element.querySelectorAll('.calledshot').forEach(el => {
+            el.addEventListener('change', async (ev) => {
+                this.rollData.modifiers.calledshot = ev.target.value;
+                await this.updateDialog();
+            });
+        });
+
+        this.element.querySelectorAll('.cover').forEach(el => {
+            el.addEventListener('change', async (ev) => {
+                this.rollData.modifiers.cover = ev.target.value;
+                await this.updateDialog();
+            });
+        });
+
+        this.element.querySelectorAll('.coverlight').forEach(el => {
+            el.addEventListener('change', async (ev) => {
+                this.rollData.modifiers.coverlight = ev.target.value;
+                await this.updateDialog();
+            });
+        });
+
+        this.element.querySelectorAll('.coversmoke').forEach(el => {
+            el.addEventListener('change', async (ev) => {
+                this.rollData.modifiers.coversmoke = ev.target.value;
+                await this.updateDialog();
+            });
+        });
+
+        this.element.querySelectorAll('.miscmod').forEach(el => {
+            el.addEventListener('change', async (ev) => {
+                this.rollData.modifiers.miscmod = ev.target.value;
+                await this.updateDialog();
+            });
+        });
+
+        this.element.querySelectorAll('.vehiclespeed').forEach(el => {
+            el.addEventListener('change', async (ev) => {
+                this.rollData.vehiclespeed = ev.target.value;
+            });
+        });
+
+        this.element.querySelectorAll('.vehiclecollisiontype').forEach(el => {
+            el.addEventListener('change', async (ev) => {
+                this.rollData.vehiclecollisiontype = ev.target.value;
+            });
+        });
+
+        this.element.querySelectorAll('.vehicleterraindifficulty').forEach(el => {
+            el.addEventListener('change', async (ev) => {
+                this.rollData.vehicleterraindifficulty = ev.target.value;
+            });
+        });
+    }
+
+    async _onClose(options) {
+        if (!this._submitted) {
+            await od6sroll.cancelAction();
+        }
+        await super._onClose(options);
     }
 
     async updateDialog() {
@@ -408,9 +505,21 @@ export class RollDialog extends Dialog {
             this.rollData.characterpoints > this.rollData.actor.system.characterpoints.value ? this.rollData.cpcostcolor = "red" :
                 this.rollData.cpcostcolor = "black";
         }
-        this.data.content = await renderTemplate(this.rollData.template, this.rollData);
         this.render();
     }
+
+    static async #onSubmit(event, form, formData) {
+        this._submitted = true;
+        if (this._onSubmitCallback) {
+            await this._onSubmitCallback();
+        }
+    }
+}
+
+class MetaphysicsRollDialog extends RollDialog {
+    static PARTS = {
+        form: { template: "systems/od6s/templates/metaphysicsRoll.html" }
+    };
 }
 
 export class od6sroll {
@@ -519,19 +628,12 @@ export class od6sroll {
             template: "systems/od6s/templates/metaphysicsRoll.html"
         }
 
-        const html = await renderTemplate(this.rollData.template, this.rollData);
-
-        new RollDialog(this, {
-            title: game.i18n.localize("OD6S.ROLL") + " " + item.name + "!",
-            content: html,
-            buttons: {
-                submit: {
-                    label: game.i18n.localize("OD6S.ROLL"),
-                    callback: () => od6sroll.rollAction(this)
-                }
-            },
-            default: "submit"
-        }).render(true);
+        new MetaphysicsRollDialog({
+            actorSheet: this,
+            rollData: this.rollData,
+            onSubmit: () => od6sroll.rollAction(this),
+            window: { title: game.i18n.localize("OD6S.ROLL") + " " + item.name + "!" }
+        }).render({ force: true });
     }
 
     static async _onRollDialog(data) {
@@ -592,7 +694,7 @@ export class od6sroll {
                     exdata.type = 'OD6S.EXPLOSIVE_THROWN';
                     exdata.auto = game.settings.get('od6s', 'auto_explosive');
 
-                    await new ExplosiveDialog(exdata).render(true);
+                    await new ExplosiveDialog({ explosiveData: exdata }).render({ force: true });
                     return;
                 }
             }
@@ -1264,18 +1366,12 @@ export class od6sroll {
             }
         }
 
-        const html = await renderTemplate(this.rollData.template, this.rollData);
-        new RollDialog(this, {
-            title: game.i18n.localize("OD6S.ROLL") + "!",
-            content: html,
-            buttons: {
-                submit: {
-                    label: game.i18n.localize("OD6S.ROLL"),
-                    callback: () => od6sroll.rollAction()
-                }
-            },
-            default: "submit"
-        }).render(true);
+        new RollDialog({
+            actorSheet: this,
+            rollData: this.rollData,
+            onSubmit: () => od6sroll.rollAction(),
+            window: { title: game.i18n.localize("OD6S.ROLL") + "!" }
+        }).render({ force: true });
 
     }
 

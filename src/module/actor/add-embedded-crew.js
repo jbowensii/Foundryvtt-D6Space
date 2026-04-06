@@ -1,26 +1,37 @@
-export class OD6SAddEmbeddedCrew extends FormApplication {
-    static get defaultOptions() {
-        const options = super.defaultOptions;
-        options.id = "add-embedded-crew";
-        options.template = "systems/od6s/templates/actor/common/add-crew.html";
-        options.height = 200;
-        options.width = 300;
-        options.minimizable = true;
-        options.title = game.i18n.localize("OD6S.ADD_CREW");
-        return options;
+const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
+
+export class OD6SAddEmbeddedCrew extends HandlebarsApplicationMixin(ApplicationV2) {
+
+    static DEFAULT_OPTIONS = {
+        id: "add-embedded-crew",
+        classes: ["od6s"],
+        tag: "form",
+        position: { width: 300, height: 200 },
+        window: { title: "OD6S.ADD_CREW" },
+        form: { handler: OD6SAddEmbeddedCrew.#onSubmit, closeOnSubmit: true }
+    };
+
+    static PARTS = {
+        form: { template: "systems/od6s/templates/actor/common/add-crew.html" }
+    };
+
+    constructor(options = {}) {
+        super(options);
+        this.crewData = options.crewData;
     }
 
-    getData() {
-        return super.getData();
+    async _prepareContext(options) {
+        return { object: this.crewData };
     }
 
-    async _updateObject(ev, formData) {
-        if (ev.submitter.value === 'cancel') {
+    static async #onSubmit(event, form, formData) {
+        const fd = formData.object;
+        if (event.submitter.value === 'cancel') {
             return;
         }
 
-        const document = await fromUuid(formData.actor);
-        const crew = await fromUuid(formData.addcrew);
+        const document = await fromUuid(fd.actor);
+        const crew = await fromUuid(fd.addcrew);
         if(document.documentName === 'Actor') {
             await document.addEmbeddedPilot(crew);
             document.sheet.render();

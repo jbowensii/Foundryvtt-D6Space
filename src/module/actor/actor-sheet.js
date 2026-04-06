@@ -425,7 +425,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 const data = {};
                 data.targets = game.collections.get('Actor').filter(a => a.type === 'npc' && !a.isToken);
                 data.actor = this.actor.uuid;
-                await new OD6SAddEmbeddedCrew(data).render('true');
+                await new OD6SAddEmbeddedCrew({ crewData: data }).render({ force: true });
             }));
 
         this.element.querySelectorAll('.embedded-pilot-remove').forEach(el =>
@@ -899,7 +899,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
             data.targets = tokens;
             data.actor = this.actor.uuid;
             data.type = this.actor.type;
-            new OD6SAddCrew(data).render(true);
+            new OD6SAddCrew({ crewData: data }).render({ force: true });
         }));
 
         this.element.querySelectorAll('.crew-delete').forEach(el =>
@@ -1273,7 +1273,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
             data.score = 0;
         }
         data.caller = caller;
-        await new OD6SAddItem(data).render(true);
+        await new OD6SAddItem({ itemData: data }).render({ force: true });
     }
 
     /**
