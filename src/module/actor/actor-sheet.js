@@ -11,32 +11,74 @@ import OD6SItemInfo from "../apps/item-info.js";
 import OD6S from "../config/config-od6s.js";
 import OD6SCreateCharacter from "../apps/character-creation.js";
 
+const { HandlebarsApplicationMixin } = foundry.applications.api;
+const { ActorSheetV2 } = foundry.applications.sheets;
+
 /**
  * Extend the basic ActorSheet with some very simple modifications
- * @extends {ActorSheet}
+ * @extends {ActorSheetV2}
  */
-export class OD6SActorSheet extends ActorSheet {
+export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
+
+    static DEFAULT_OPTIONS = {
+        classes: ["od6s", "sheet", "actor"],
+        position: { width: 915, height: 800 },
+        window: { resizable: true },
+        form: { submitOnChange: true, closeOnSubmit: false },
+        actions: {}
+    };
+
+    static PARTS = {
+        sheet: {
+            template: "systems/od6s/templates/actor/common/actor-sheet.html",
+            scrollable: [".sheet-body"]
+        }
+    };
 
     /** @override */
-    static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
-            classes: ["od6s", "sheet", "actor"],
-            width: 915,
-            height: 800,
-            tabs: [{navSelector: ".sheet-tabs", contentSelector: ".sheet-body", initial: "attributes"}]
-        });
+    _configureRenderOptions(options) {
+        super._configureRenderOptions(options);
+        if (!options.parts?.length) {
+            options.parts = ["sheet"];
+        }
     }
 
-    /** @override */
-    get template() {
-        return `systems/od6s/templates/actor/common/actor-sheet.html`;
+    /**
+     * Initialize tab navigation after first render.
+     * AppV2 does not use the AppV1 Tabs helper automatically, so we
+     * wire it up manually to preserve the existing template structure.
+     */
+    _initializeTabs() {
+        if (this._sheetTabs) return;
+        this._sheetTabs = new Tabs({
+            navSelector: ".sheet-tabs",
+            contentSelector: ".sheet-body",
+            initial: "attributes",
+            callback: () => {}
+        });
     }
 
     /* -------------------------------------------- */
 
     /** @override */
-    getData(options = {}) {
-        const data = super.getData(options);
+    async _prepareContext(options) {
+        const data = {
+            actor: this.actor,
+            source: this.actor.toObject(),
+            system: this.actor.system,
+            items: this.actor.items.map(i => {
+                const itemObj = i.toObject();
+                itemObj.id = i.id;
+                itemObj.img = itemObj.img || CONST.DEFAULT_TOKEN;
+                return itemObj;
+            }),
+            effects: this.actor.effects,
+            owner: this.actor.isOwner,
+            limited: this.actor.limited,
+            editable: this.isEditable,
+            cssClass: this.isEditable ? "editable" : "locked",
+            config: CONFIG,
+        };
         data.dtypes = ["String", "Number", "Boolean"];
 
         if (this.actor.type === 'character') {
@@ -75,6 +117,35 @@ export class OD6SActorSheet extends ActorSheet {
         }
 
         return data;
+    }
+
+    /** @override */
+    _onFirstRender(context, options) {
+        super._onFirstRender(context, options);
+        // Set up drag-drop for AppV2
+        this._createDragDropHandlers();
+    }
+
+    /**
+     * Create drag-drop handlers for AppV2.
+     * AppV2 does not automatically create DragDrop instances, so we
+     * instantiate them ourselves and bind to the sheet element.
+     */
+    _createDragDropHandlers() {
+        const dd = new DragDrop({
+            dragSelector: "[data-drag]",
+            dropSelector: null,
+            permissions: {
+                dragstart: () => this.actor.isOwner,
+                drop: () => this.actor.isOwner
+            },
+            callbacks: {
+                dragstart: this._onDragStart.bind(this),
+                drop: this._onDrop.bind(this)
+            }
+        });
+        dd.bind(this.element);
+        this._dragDrop = [dd];
     }
 
     _setCommonFlags() {
@@ -314,16 +385,23 @@ export class OD6SActorSheet extends ActorSheet {
     /* -------------------------------------------- */
 
     /** @override */
-    activateListeners(html) {
-        super.activateListeners(html);
+    _onRender(context, options) {
+        super._onRender(context, options);
+
+        // Initialize and bind tab navigation for the existing template
+        this._initializeTabs();
+        this._sheetTabs.bind(this.element);
+
+        // Wrap the element in jQuery for transitional compatibility
+        const html = $(this.element);
 
         // Everything below here is only needed if the sheet is editable
-        if (!this.options.editable) return;
+        if (!this.isEditable) return;
 
         // Alpha sort items
         html.find('.alpha-item-sort-button').click(async ev => {
             await this._alphaSortAllItems();
-            await this.getData();
+            this.render();
         })
 
 
@@ -1076,13 +1154,13 @@ export class OD6SActorSheet extends ActorSheet {
                 content: confirmText,
                 callback: async () => {
                     await this.actor.deleteEmbeddedDocuments('Item', [itemId]);
-                    this.render(false);
+                    this.render();
                 }
             })
         } else {
             const li = $(ev.currentTarget).parents(".item");
             await this.actor.deleteEmbeddedDocuments('Item', [ev.currentTarget.dataset.itemId]);
-            this.render(false);
+            this.render();
         }
     }
 
