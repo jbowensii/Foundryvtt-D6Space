@@ -77,6 +77,14 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
         };
         // backward compat — templates may reference {{data.xxx}}
         context.data = context;
+        // Debug: log context to verify data is available
+        console.log(`OD6SItemSheet._prepareContext for ${item.type} "${item.name}":`, {
+            hasSystem: !!item.system,
+            systemKeys: item.system ? Object.keys(item.system) : [],
+            name: item.name,
+            type: item.type,
+            img: item.img
+        });
         return context;
     }
 
