@@ -541,7 +541,7 @@ Hooks.on('renderChatLog', (log, html, data) => {
         const message = game.messages.get(dataSet.messageId);
         data.baseDifficulty = message.getFlag('od6s', 'baseDifficulty');
         data.modifiers = message.getFlag('od6s', 'modifiers');
-        new OD6SEditDifficulty(data).render(true);
+        new OD6SEditDifficulty(data).render({force: true});
     })
 
     html.on("click", ".edit-damage", async ev => {
@@ -552,7 +552,7 @@ Hooks.on('renderChatLog', (log, html, data) => {
         const message = game.messages.get(dataSet.messageId);
         data.damage = message.getFlag('od6s', 'damageScore');
         data.damageDice = message.getFlag('od6s', 'damageDice');
-        new OD6SEditDamage(data).render(true);
+        new OD6SEditDamage(data).render({force: true});
     })
 
     html.on("click", ".choose-target", async ev => {
@@ -580,7 +580,7 @@ Hooks.on('renderChatLog', (log, html, data) => {
         } else {
             return;
         }
-        new OD6SChooseTarget(data).render(true);
+        new OD6SChooseTarget(data).render({force: true});
     })
 
     html.on("change", ".explosive-target-zone", async ev => {
@@ -611,7 +611,7 @@ Hooks.on('renderChatLog', (log, html, data) => {
     html.on("click", ".wilddiegm", async ev => {
         ev.preventDefault();
         // three choices: leave it as-is, remove the highest die from the roll, or cause a complication
-        new OD6SHandleWildDieForm(ev).render(true);
+        new OD6SHandleWildDieForm(ev).render({force: true});
     })
 
     html.on("click", ".message-reveal", async ev => {

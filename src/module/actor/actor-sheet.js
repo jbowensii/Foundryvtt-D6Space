@@ -372,8 +372,10 @@ export class OD6SActorSheet extends ActorSheet {
 
         // Character Creation
         html.find('.create-character').click(async ev => {
-            let newChar = new OD6SCreateCharacter(this.actor,
-                od6sutilities.getAllItemsByType('character-template'));
+            let newChar = new OD6SCreateCharacter({
+                actor: this.actor,
+                templates: od6sutilities.getAllItemsByType('character-template')
+            });
             newChar.render({force: true});
             await this.close();
         })
@@ -901,17 +903,17 @@ export class OD6SActorSheet extends ActorSheet {
             ev.preventDefault();
             let item = game.actors.get(ev.currentTarget.dataset.actorId).items.get(ev.currentTarget.dataset.itemId);
             if (typeof (item) !== 'undefined') {
-                new OD6SItemInfo(item).render(true);
+                new OD6SItemInfo(item).render({force: true});
             } else {
                 const itemName = ev.currentTarget.dataset.itemName;
                 item = await od6sutilities._getItemFromWorld(itemName);
                 if (typeof (item) !== 'undefined') {
-                    new OD6SItemInfo(item.data).render(true);
+                    new OD6SItemInfo(item.data).render({force: true});
                 } else {
                     // Check compendia
                     item = await od6sutilities._getItemFromCompendium(itemName);
                     if (typeof (item) !== 'undefined') {
-                        new OD6SItemInfo(item.data).render(true);
+                        new OD6SItemInfo(item.data).render({force: true});
                     }
                 }
             }

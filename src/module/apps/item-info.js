@@ -1,21 +1,22 @@
-export default class OD6SItemInfo extends FormApplication {
-    static get defaultOptions() {
-        const options = super.defaultOptions;
-        options.id = "item-info";
-        options.template = "systems/od6s/templates/item/item-info.html";
-        options.width = 320;
-        options.minimizable = true;
-        options.resizable = true;
-        options.classes =["od6s bordered", "od6s boxed", "od6s item-info-ok-button",
-            "od6s .align-form-header","od6s align-center-header"];
-        options.title = game.i18n.localize("OD6S.ITEM_INFO");
-        return options;
-    }
+const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
-    getData() {
-        return super.getData();
-    }
+export default class OD6SItemInfo extends HandlebarsApplicationMixin(ApplicationV2) {
 
-    async _updateObject(event, formData) {
+    static DEFAULT_OPTIONS = {
+        id: "item-info",
+        classes: ["od6s", "bordered", "boxed", "item-info-ok-button", "align-form-header", "align-center-header"],
+        position: { width: 320, height: "auto" },
+        window: {
+            title: "OD6S.ITEM_INFO",
+            resizable: true,
+        }
+    };
+
+    static PARTS = {
+        form: { template: "systems/od6s/templates/item/item-info.html" }
+    };
+
+    async _prepareContext(options) {
+        return this.options;
     }
 }
