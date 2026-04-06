@@ -3,7 +3,7 @@ const prefix = require('gulp-autoprefixer');
 const sass = require('gulp-sass')(require('sass'));
 const through2 = require("through2");
 const yaml = require("js-yaml");
-const Datastore = require("@seald-io/nedb");
+const { compilePack } = require("@foundryvtt/foundryvtt-cli");
 const mergeStream = require("merge-stream");
 const clean = require("gulp-clean");
 const fs = require("fs");
@@ -79,32 +79,55 @@ async function createTranslationsBase() {
 }
 
 /* ----------------------------------------- */
-/*  Compile Compendia
+/*  Compile Compendia (LevelDB via Foundry CLI)
 /* ----------------------------------------- */
 
-async function compilePacks() {
-    // determine the source folders to process
+async function compilePacks_task() {
     const folders = fs.readdirSync(PACK_SRC).filter((file) => {
         return fs.statSync(path.join(PACK_SRC, file)).isDirectory();
     });
 
-    // process each folder into a compendium db
-    const packs = folders.map((folder) => {
-        const db = new Datastore({ filename: path.resolve(__dirname, 'src', "packs", `${folder}.db`), autoload: true });
-        return gulp.src(path.join(PACK_SRC, folder, "/**/*.yaml")).pipe(
-            through2.obj((file, enc, cb) => {
-                let json = yaml.loadAll(file.contents.toString());
-                db.insert(json);
-                cb(null, file);
-            })
-        );
-    });
-    return mergeStream.call(null, packs);
+    // The upstream YAML files use multi-document format (--- separators).
+    // The Foundry CLI expects one document per file.
+    // Split each multi-doc YAML into individual files in a temp directory,
+    // then compile with the Foundry CLI.
+    const tmpBase = path.join(__dirname, '_tmp_packs');
+
+    for (const folder of folders) {
+        const srcDir = path.join(PACK_SRC, folder);
+        const tmpDir = path.join(tmpBase, folder);
+        const destDir = path.join("src", "packs", folder);
+
+        // Create temp directory for split YAML files
+        fs.mkdirSync(tmpDir, { recursive: true });
+
+        // Read and split each YAML file
+        const yamlFiles = fs.readdirSync(srcDir).filter(f => f.endsWith('.yaml'));
+        let docIndex = 0;
+        for (const yamlFile of yamlFiles) {
+            const content = fs.readFileSync(path.join(srcDir, yamlFile), 'utf8');
+            const docs = yaml.loadAll(content);
+            for (const doc of docs) {
+                if (!doc) continue;
+                // Generate a stable filename from the document name or index
+                const safeName = (doc.name || `doc_${docIndex}`).replace(/[^a-zA-Z0-9_-]/g, '_');
+                const outPath = path.join(tmpDir, `${safeName}_${docIndex}.yaml`);
+                fs.writeFileSync(outPath, yaml.dump(doc), 'utf8');
+                docIndex++;
+            }
+        }
+
+        console.log(`Compiling pack: ${folder} (${docIndex} documents)`);
+        await compilePack(tmpDir, destDir, { yaml: true });
+    }
+
+    // Clean up temp directory
+    fs.rmSync(tmpBase, { recursive: true, force: true });
 }
 
 function watchUpdates() {
     gulp.watch("scss/**/*", gulp.series(compileScss));
-    gulp.watch("compendia/**/*", gulp.series(cleanBuild,compilePacks,createTranslationsBase));
+    gulp.watch("compendia/**/*", gulp.series(cleanBuild, compilePacks_task, createTranslationsBase));
 }
 
 function cleanBuild() {
@@ -115,6 +138,6 @@ function cleanBuild() {
 /*  Export Tasks
 /* ----------------------------------------- */
 
-exports.build = gulp.series(cleanBuild, compileScss, compilePacks, createTranslationsBase);
-exports.default = gulp.series(cleanBuild,compileScss, compilePacks, createTranslationsBase, watchUpdates);
+exports.build = gulp.series(cleanBuild, compileScss, compilePacks_task, createTranslationsBase);
+exports.default = gulp.series(cleanBuild, compileScss, compilePacks_task, createTranslationsBase, watchUpdates);
 exports.css = css;
