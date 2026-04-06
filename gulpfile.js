@@ -4,10 +4,10 @@ const sass = require('gulp-sass')(require('sass'));
 const through2 = require("through2");
 const yaml = require("js-yaml");
 const { compilePack } = require("@foundryvtt/foundryvtt-cli");
-const mergeStream = require("merge-stream");
 const clean = require("gulp-clean");
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 const SYSTEM_SCSS = ["scss/**/*.scss"];
 const PACK_SRC = "./compendia";
 const jsonFile = require('jsonfile');
@@ -16,14 +16,12 @@ const jsonFile = require('jsonfile');
 /*  Compile Sass
 /* ----------------------------------------- */
 
-// Small error handler helper function.
 function handleError(err) {
     console.log(err.toString());
     this.emit('end');
 }
 
 function compileScss() {
-    // Configure options for sass output. For example, 'expanded' or 'nested'
     let options = {
         outputStyle: 'expanded'
     };
@@ -82,15 +80,33 @@ async function createTranslationsBase() {
 /*  Compile Compendia (LevelDB via Foundry CLI)
 /* ----------------------------------------- */
 
+/**
+ * Generate a deterministic 16-char hex ID from pack name + document name.
+ * This ensures IDs are stable across rebuilds.
+ */
+function generateId(packName, docName) {
+    return crypto.createHash('md5')
+        .update(`${packName}/${docName}`)
+        .digest('hex')
+        .substring(0, 16);
+}
+
+// Map folder names to Foundry document types for _key generation
+const PACK_TYPES = {};
+try {
+    const sysJson = JSON.parse(fs.readFileSync(path.join(__dirname, 'src', 'system.json'), 'utf8'));
+    for (const pack of sysJson.packs) {
+        // Map the folder name (from path) to the document type
+        const folderName = pack.path.replace('packs/', '');
+        PACK_TYPES[folderName] = pack.type.toLowerCase() + 's'; // Item→items, Actor→actors, Macro→macros
+    }
+} catch (e) { /* system.json not found yet */ }
+
 async function compilePacks_task() {
     const folders = fs.readdirSync(PACK_SRC).filter((file) => {
         return fs.statSync(path.join(PACK_SRC, file)).isDirectory();
     });
 
-    // The upstream YAML files use multi-document format (--- separators).
-    // The Foundry CLI expects one document per file.
-    // Split each multi-doc YAML into individual files in a temp directory,
-    // then compile with the Foundry CLI.
     const tmpBase = path.join(__dirname, '_tmp_packs');
 
     for (const folder of folders) {
@@ -98,30 +114,73 @@ async function compilePacks_task() {
         const tmpDir = path.join(tmpBase, folder);
         const destDir = path.join("src", "packs", folder);
 
-        // Create temp directory for split YAML files
         fs.mkdirSync(tmpDir, { recursive: true });
 
-        // Read and split each YAML file
+        // Determine the document collection type for _key (e.g., "items", "actors", "macros")
+        const collectionType = PACK_TYPES[folder] || 'items';
+
         const yamlFiles = fs.readdirSync(srcDir).filter(f => f.endsWith('.yaml'));
         let docIndex = 0;
         for (const yamlFile of yamlFiles) {
             const content = fs.readFileSync(path.join(srcDir, yamlFile), 'utf8');
             const docs = yaml.loadAll(content);
             for (const doc of docs) {
-                if (!doc) continue;
-                // Generate a stable filename from the document name or index
-                const safeName = (doc.name || `doc_${docIndex}`).replace(/[^a-zA-Z0-9_-]/g, '_');
-                const outPath = path.join(tmpDir, `${safeName}_${docIndex}.yaml`);
+                if (!doc || typeof doc !== 'object') continue;
+                if (!doc.name && !doc.type) continue; // Skip empty/invalid documents
+                // Generate a stable _id if not present
+                if (!doc._id) {
+                    doc._id = generateId(folder, doc.name || `doc_${docIndex}`);
+                }
+                // Add _key field required by Foundry CLI LevelDB compiler
+                if (!doc._key) {
+                    doc._key = `!${collectionType}!${doc._id}`;
+                }
+                // Process embedded effects — add _id, _key, and fix label→name
+                if (Array.isArray(doc.effects)) {
+                    for (let ei = 0; ei < doc.effects.length; ei++) {
+                        const effect = doc.effects[ei];
+                        if (!effect._id) {
+                            effect._id = generateId(folder, `${doc.name}_effect_${ei}`);
+                        }
+                        if (!effect._key) {
+                            effect._key = `!${collectionType}.effects!${doc._id}.${effect._id}`;
+                        }
+                        // Migrate ActiveEffect label → name (label removed in v13)
+                        if (effect.label && !effect.name) {
+                            effect.name = effect.label;
+                            delete effect.label;
+                        }
+                    }
+                }
+                const safeName = (doc.name || `doc_${docIndex}`).replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 60);
+                // Use .yml extension (required by Foundry CLI)
+                const outPath = path.join(tmpDir, `${safeName}_${String(docIndex).padStart(4, '0')}.yml`);
                 fs.writeFileSync(outPath, yaml.dump(doc), 'utf8');
                 docIndex++;
             }
         }
 
-        console.log(`Compiling pack: ${folder} (${docIndex} documents)`);
-        await compilePack(tmpDir, destDir, { yaml: true });
+        console.log(`Compiling pack: ${folder} (${docIndex} ${collectionType})`);
+        if (docIndex > 0) {
+            try {
+                await compilePack(tmpDir, destDir, { yaml: true });
+            } catch (e) {
+                console.error(`  ERROR compiling ${folder}: ${e.message}`);
+                // List problematic files
+                const tmpFiles = fs.readdirSync(tmpDir);
+                for (const tf of tmpFiles) {
+                    const content = fs.readFileSync(path.join(tmpDir, tf), 'utf8');
+                    if (!content.includes('_key:') || !content.includes('_id:')) {
+                        console.error(`  Missing _key or _id in ${tf}`);
+                    }
+                }
+                throw e;
+            }
+        } else {
+            fs.mkdirSync(destDir, { recursive: true });
+        }
     }
 
-    // Clean up temp directory
     fs.rmSync(tmpBase, { recursive: true, force: true });
 }
 

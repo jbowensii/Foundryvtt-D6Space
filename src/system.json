@@ -2,7 +2,7 @@
   "id": "od6s",
   "title": "OpenD6 Space",
   "description": "OpenD6 Space System for FoundryVTT",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "templateVersion": 2,
   "compatibility": {
     "minimum": "13",
@@ -91,34 +91,6 @@
       "name": "cybernetics",
       "label": "Cybernetics",
       "path": "packs/cybernetics",
-      "type": "Item",
-      "system": "od6s"
-    },
-    {
-      "name": "vehicle-weapons",
-      "label": "Vehicle Weapons",
-      "path": "packs/vehicle-weapons",
-      "type": "Item",
-      "system": "od6s"
-    },
-    {
-      "name": "vehicle-gear",
-      "label": "Vehicle Gear",
-      "path": "packs/vehicle-gear",
-      "type": "Item",
-      "system": "od6s"
-    },
-    {
-      "name": "starship-weapons",
-      "label": "Starship Weapons",
-      "path": "packs/starship-weapons",
-      "type": "Item",
-      "system": "od6s"
-    },
-    {
-      "name": "starship-gear",
-      "label": "Starship Gear",
-      "path": "packs/starship-gear",
       "type": "Item",
       "system": "od6s"
     },
