@@ -53,7 +53,18 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 
     /** @override */
     async _prepareContext(options) {
-        return super._prepareContext(options);
+        const context = await super._prepareContext(options);
+        context.item = this.document;
+        context.source = this.document.toObject();
+        context.system = this.document.system;
+        context.flags = this.document.flags;
+        context.config = CONFIG;
+        context.editable = this.isEditable;
+        context.owner = this.document.isOwner;
+        context.limited = this.document.limited;
+        context.cssClass = this.isEditable ? "editable" : "locked";
+        context.data = context; // backward compat for templates using {{data.xxx}}
+        return context;
     }
 
     /* -------------------------------------------- */

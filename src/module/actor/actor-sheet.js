@@ -50,7 +50,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
      */
     _initializeTabs() {
         if (this._sheetTabs) return;
-        this._sheetTabs = new Tabs({
+        this._sheetTabs = new foundry.applications.ux.Tabs({
             navSelector: ".sheet-tabs",
             contentSelector: ".sheet-body",
             initial: "attributes",
@@ -132,7 +132,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
      * instantiate them ourselves and bind to the sheet element.
      */
     _createDragDropHandlers() {
-        const dd = new DragDrop({
+        const dd = new foundry.applications.ux.DragDrop.implementation({
             dragSelector: "[data-drag]",
             dropSelector: null,
             permissions: {
