@@ -53,17 +53,30 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 
     /** @override */
     async _prepareContext(options) {
-        const context = await super._prepareContext(options);
-        context.item = this.document;
-        context.source = this.document.toObject();
-        context.system = this.document.system;
-        context.flags = this.document.flags;
-        context.config = CONFIG;
-        context.editable = this.isEditable;
-        context.owner = this.document.isOwner;
-        context.limited = this.document.limited;
-        context.cssClass = this.isEditable ? "editable" : "locked";
-        context.data = context; // backward compat for templates using {{data.xxx}}
+        // Replicate the data structure from the old AppV1 ItemSheet.getData()
+        const item = this.document;
+        const source = item.toObject();
+        const context = {
+            item: item,
+            source: source,
+            system: item.system,
+            flags: item.flags,
+            config: CONFIG,
+            editable: this.isEditable,
+            owner: item.isOwner,
+            limited: item.limited,
+            options: this.options,
+            cssClass: this.isEditable ? "editable" : "locked",
+            type: item.type,
+            name: item.name,
+            img: item.img,
+            // Provide effects list
+            effects: item.effects?.contents || [],
+            // Provide rollData for templates that use it
+            rollData: item.getRollData ? item.getRollData() : {},
+        };
+        // backward compat — templates may reference {{data.xxx}}
+        context.data = context;
         return context;
     }
 
