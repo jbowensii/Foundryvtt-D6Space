@@ -34,19 +34,21 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
         form: { template: "systems/od6s/templates/item/item-skill-sheet.html" }
     };
 
-    /** @override */
-    _getHeaderControls() {
-        return super._getHeaderControls();
+    /** @override — use the correct template for this item's type */
+    async _preparePartContext(partId, context) {
+        context = await super._preparePartContext(partId, context);
+        return context;
     }
 
-    /** @override */
+    /** @override — render correct template for this item type, bypassing cached PARTS */
     async _renderHTML(context, options) {
-        // Dynamically set template based on item type before rendering
-        this.constructor.PARTS.form = {
-            ...this.constructor.PARTS.form,
-            template: `systems/od6s/templates/item/item-${this.document.type}-sheet.html`
-        };
-        return super._renderHTML(context, options);
+        const template = `systems/od6s/templates/item/item-${this.document.type}-sheet.html`;
+        const partContext = await this._preparePartContext("form", { ...context });
+        const htmlString = await foundry.applications.handlebars.renderTemplate(template, partContext);
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlString, "text/html");
+        const element = doc.body.firstElementChild;
+        return { form: element };
     }
 
     /* -------------------------------------------- */
