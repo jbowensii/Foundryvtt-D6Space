@@ -1,84 +1,125 @@
 import {od6sutilities} from "../system/utilities.js";
 import OD6S from "../config/config-od6s.js";
 
+const { HandlebarsApplicationMixin } = foundry.applications.api;
+const { ItemSheetV2 } = foundry.applications.sheets;
+
 /**
- * Extend the basic ItemSheet with some very simple modifications
- * @extends {ItemSheet}
+ * Extend the basic ItemSheetV2 with some very simple modifications
+ * @extends {HandlebarsApplicationMixin(ItemSheetV2)}
  */
-export class OD6SItemSheet extends ItemSheet {
+export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 
-    /** @override */
-    static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
-            classes: ["od6s", "sheet", "item"],
-            width: 520,
-            height: 480,
-            tabs: [{navSelector: ".sheet-tabs", contentSelector: ".sheet-body", initial: "description"}],
-            dragDrop: [{dragSelector: ".item-list .item", dropSelector: null}]
-        });
-    }
+    static DEFAULT_OPTIONS = {
+        classes: ["od6s", "sheet", "item"],
+        position: { width: 520, height: 480 },
+        window: { resizable: true },
+        form: { submitOnChange: true, closeOnSubmit: false },
+        actions: {
+            editTemplateAttribute: OD6SItemSheet.#onEditTemplateAttribute,
+            addTemplateItem: OD6SItemSheet.#onAddTemplateItem,
+            editTemplateItem: OD6SItemSheet.#onEditTemplateItem,
+            deleteTemplateItem: OD6SItemSheet.#onDeleteTemplateItem,
+            addEffect: OD6SItemSheet.#onAddEffect,
+            editEffect: OD6SItemSheet.#onEditEffect,
+            deleteEffect: OD6SItemSheet.#onDeleteEffect,
+            addLabel: OD6SItemSheet.#onAddLabel,
+            deleteLabel: OD6SItemSheet.#onDeleteLabel,
+            addActorType: OD6SItemSheet.#onAddActorType,
+            deleteActorType: OD6SItemSheet.#onDeleteActorType,
+        }
+    };
 
-    /** @override */
-    get template() {
-        const path = "systems/od6s/templates/item";
-        return `${path}/item-${this.item.type}-sheet.html`;
-    }
+    static PARTS = {
+        form: { template: "" }
+    };
 
-    /* -------------------------------------------- */
-
-    /** @override */
-    getData() {
-        return super.getData();
-    }
-
-    /* -------------------------------------------- */
-
-    /** @override */
-    setPosition(options = {}) {
-        const position = super.setPosition(options);
-        const sheetBody = this.element.find(".sheet-body");
-        const bodyHeight = position.height - 192;
-        sheetBody.css("height", bodyHeight);
-        return position;
+    _configureRenderOptions(options) {
+        super._configureRenderOptions(options);
+        options.parts = ["form"];
+        this.options.parts ??= {};
+        OD6SItemSheet.PARTS.form.template = `systems/od6s/templates/item/item-${this.document.type}-sheet.html`;
     }
 
     /* -------------------------------------------- */
 
     /** @override */
-    activateListeners(html) {
-        super.activateListeners(html);
+    async _prepareContext(options) {
+        return super._prepareContext(options);
+    }
+
+    /* -------------------------------------------- */
+
+    /** @override */
+    _onRender(context, options) {
+        super._onRender(context, options);
 
         // Everything below here is only needed if the sheet is editable
-        if (!this.options.editable) return;
+        if (!this.isEditable) return;
 
-        // Roll handlers, click handlers, etc. would go here.
-        html.find('.editskill').change(this._editSkill.bind(this));
-        html.find('.editspecialization').change(this._editSpecialization.bind(this));
-        html.find('.editweapondamage').change(this._editWeaponDamage.bind(this));
-        html.find('.editweaponstun').change(this._editWeaponStunDamage.bind(this));
-        html.find('.editweaponfirecontrol').change(this._editWeaponFireControl.bind(this));
-        html.find('.editarmor').change(this._editArmor.bind(this));
-        html.find('.edittemplateattribute').click(this._editTemplateAttribute.bind(this));
-        html.find('.template-item-add').click(this._addTemplateItem.bind(this));
-        html.find('.template-item-edit').click(this._editTemplateItem.bind(this));
-        html.find('.template-item-delete').click(this._deleteTemplateItem.bind(this));
-        html.find('.effect-add').click(this._addEffect.bind(this));
-        html.find('.effect-edit').click(this._editEffect.bind(this));
-        html.find('.effect-delete').click(this._deleteEffect.bind(this));
+        // Change event listeners bound via native DOM
+        this.element.querySelector('.editskill')?.addEventListener('change', this._editSkill.bind(this));
+        this.element.querySelector('.editspecialization')?.addEventListener('change', this._editSpecialization.bind(this));
+        this.element.querySelector('.editweapondamage')?.addEventListener('change', this._editWeaponDamage.bind(this));
+        this.element.querySelector('.editweaponstun')?.addEventListener('change', this._editWeaponStunDamage.bind(this));
+        this.element.querySelector('.editweaponfirecontrol')?.addEventListener('change', this._editWeaponFireControl.bind(this));
+        this.element.querySelector('.editarmor')?.addEventListener('change', this._editArmor.bind(this));
 
-        html.find('.label-add').click(this._addLabel.bind(this));
-        html.find('.label-edit').change(this._editLabel.bind(this));
-        html.find('.label-delete').click(this._deleteLabel.bind(this));
-
-        html.find('.add-actor-type').click(this._addActorType.bind(this));
-        html.find('.delete-actor-type').click(this._deleteActorType.bind(this));
-
-        html.find('li.item').each((i, li) => {
-            if (li.classList.contains("inventory-header")) return;
-            li.setAttribute("draggable", true);
-            li.addEventListener("dragstart", handler, false);
-        })
+        // Change listener for label editing
+        this.element.querySelector('.label-edit')?.addEventListener('change', this._editLabel.bind(this));
     }
+
+    /* -------------------------------------------- */
+    /* Action Handlers (static, for click actions)  */
+    /* -------------------------------------------- */
+
+    static #onEditTemplateAttribute(event, target) {
+        this._editTemplateAttribute(event);
+    }
+
+    static #onAddTemplateItem(event, target) {
+        this._addTemplateItem(event);
+    }
+
+    static #onEditTemplateItem(event, target) {
+        this._editTemplateItem(event);
+    }
+
+    static #onDeleteTemplateItem(event, target) {
+        this._deleteTemplateItem(event);
+    }
+
+    static #onAddEffect(event, target) {
+        this._addEffect();
+    }
+
+    static #onEditEffect(event, target) {
+        this._editEffect(event);
+    }
+
+    static #onDeleteEffect(event, target) {
+        this._deleteEffect(event);
+    }
+
+    static #onAddLabel(event, target) {
+        this._addLabel(event);
+    }
+
+    static #onDeleteLabel(event, target) {
+        this._deleteLabel(event);
+    }
+
+    static #onAddActorType(event, target) {
+        this._addActorType();
+    }
+
+    static #onDeleteActorType(event, target) {
+        this._deleteActorType(event);
+    }
+
+    /* -------------------------------------------- */
+    /* Instance Methods                             */
+    /* -------------------------------------------- */
 
     async _addActorType() {
         const data =
