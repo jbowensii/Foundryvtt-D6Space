@@ -1059,6 +1059,7 @@ Hooks.on('i18nInit', () => {
 })
 
 Hooks.on("preDeleteToken", async (document, change, options, userId) => {
+    if (!document.actor) return; // Token may reference a deleted actor
     if (document.actor.type === 'vehicle' || document.actor.type === 'starship') {
         if (document.actor.system.crew.value > 0) {
             for (let i = 0; i < document.actor.system.crewmembers.length; i++) {
