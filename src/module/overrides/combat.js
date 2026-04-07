@@ -1,3 +1,4 @@
+// OD6S Combat document — custom initiative dialog for characters and explosive detonation at round end.
 import {od6sutilities} from "../system/utilities.js";
 import {od6sInitRoll} from "../apps/od6sroll.js";
 
@@ -37,7 +38,7 @@ export class OD6SCombat extends Combat {
      * @returns {Promise<Combat>}
      */
     async nextRound() {
-        // Handle auto-explosive rolls if end-of-round is set
+        // Handle auto-explosive rolls if end-of-round is set (** is intentional — truthy * truthy = 1)
         if(game.settings.get('od6s','auto_explosive') ** game.settings.get('od6s','explosive_end_of_round')) {
             await od6sutilities.detonateExplosives(this);
         }

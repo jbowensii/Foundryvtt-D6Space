@@ -1,3 +1,4 @@
+// OD6S Character creation wizard — multi-step template selection, attribute assignment, and skill allocation.
 import {od6sutilities} from "../system/utilities.js";
 import OD6S from "../config/config-od6s.js";
 import OD6SAddItem from "../actor/add-item.js";
@@ -99,6 +100,7 @@ export default class OD6SCreateCharacter extends HandlebarsApplicationMixin(Appl
             context.attrs = [];
         }
 
+        // Wizard is considered complete when all skill and spec pips have been spent
         this.done = (this.skillScore === 0 && this.specScore === 0);
 
         context.done = this.done;
@@ -182,6 +184,7 @@ export default class OD6SCreateCharacter extends HandlebarsApplicationMixin(Appl
 
     static async #onSpecDelete(event, target) {
         event.preventDefault();
+        // Refund the spec pips above the parent skill base; if all spec pips returned, convert back to skill dice
         const spec = this.actor.items.find(s => s._id === target.dataset.itemId);
         const skill = this.actor.items.find(s => s.name === spec.system.skill);
         this.specScore = this.specScore + spec.system.base - skill.system.base;
@@ -324,6 +327,7 @@ export default class OD6SCreateCharacter extends HandlebarsApplicationMixin(Appl
         this.render();
     }
 
+    // Convert 1 skill die into specialization pips (1 die = pipsPerDice * 3 spec pips)
     static #onAddSpecDice(event, target) {
         event.preventDefault();
         if (this.skillScore < OD6S.pipsPerDice) {
@@ -395,6 +399,7 @@ export default class OD6SCreateCharacter extends HandlebarsApplicationMixin(Appl
         this.render();
     }
 
+    // On close: if wizard was completed, render the sheet; otherwise revert all changes
     async close(options = {}) {
         await super.close(options);
         if (this.done) {

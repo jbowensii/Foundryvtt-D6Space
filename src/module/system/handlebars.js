@@ -1,3 +1,4 @@
+// OD6S Handlebars helpers — registers all custom helpers for sheet and chat card templates.
 import '../config/settings-od6s.js';
 import OD6S from "../config/config-od6s.js";
 import {od6sutilities} from "./utilities.js";
@@ -173,6 +174,7 @@ export default function od6sHandlebars() {
             }
         })
 
+        // Resolve pilot maneuver total: spec > skill > attribute fallback chain + maneuverability
         Handlebars.registerHelper('getPilotManeuverTotal', function (actor) {
             let found = false;
             let score = actor.system.maneuverability.score;
@@ -215,6 +217,7 @@ export default function od6sHandlebars() {
             return score;
         })
 
+        // Resolve vehicle weapon total: fire control + spec > skill > attribute fallback chain
         Handlebars.registerHelper('getPilotWeaponTotal', function (actor, weapon) {
             let found = false;
             let score = weapon.system.fire_control.score;
@@ -358,8 +361,8 @@ export default function od6sHandlebars() {
             return success ? game.i18n.localize('OD6S.HITS') : game.i18n.localize('OD6S.MISSES');
         })
 
+        // Walk the result table to find the highest success tier where roll-target >= difference
         Handlebars.registerHelper('onSuccess', function (success, roll, target) {
-            //Get the level of success and return the message
             let resultMessage = '';
             if (success) {
                 const difference = roll - target;
@@ -492,6 +495,7 @@ export default function od6sHandlebars() {
             }
         });
 
+        // Bitwise check: each actor type is a bit position in the bitmask
         Handlebars.registerHelper('getActorTypeConfig', function (value, type) {
             return ((value >> OD6S.actorMasks[type]) % 2 != 0);
         })
@@ -773,6 +777,7 @@ export default function od6sHandlebars() {
             }
         })
 
+        // Bitmask check: determine if a custom field is enabled for a given actor type
         Handlebars.registerHelper('isCustomFieldUsed', function (fieldNum, type) {
             const field = 'custom_field_' + fieldNum + '_actor_types';
             const actorTypes = game.settings.get('od6s', field);
@@ -1009,6 +1014,7 @@ export default function od6sHandlebars() {
             return string;
         })
 
+        // Compute vehicle maneuverability total using spec > skill > attribute fallback chain
         Handlebars.registerHelper('sumManeuverability', function (actor, m, type) {
             if (typeof (m) === 'undefined' || Object.keys(m).length === 0) return;
             const data = {};
@@ -1156,13 +1162,12 @@ export default function od6sHandlebars() {
             return game.user.character.id;
         })
 
+        // Logical AND/OR helpers — strip Handlebars' trailing options hash before evaluating
         Handlebars.registerHelper('and', function () {
-            // Get function args and remove last one (meta object); every(Boolean) checks AND
             return Array.prototype.slice.call(arguments, 0, arguments.length - 1).every(Boolean);
         });
 
         Handlebars.registerHelper('or', function () {
-            // Get function args and remove last one (meta object); some(Boolean) checks OR
             return Array.prototype.slice.call(arguments, 0, arguments.length - 1).some(Boolean);
         });
 

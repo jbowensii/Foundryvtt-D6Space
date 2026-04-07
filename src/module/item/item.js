@@ -1,3 +1,4 @@
+// OD6S Item document — extends core Item with D6 System scoring, active effects, and roll logic.
 import {od6sroll} from "../apps/od6sroll.js";
 import {od6sutilities} from "../system/utilities.js";
 import OD6S from "../config/config-od6s.js";
@@ -48,8 +49,10 @@ export class OD6SItem extends Item {
         }
     }
 
+    // Find and apply active effects that target this specific item via regex key matching
     findActiveEffects() {
         const changes = [];
+        // Escape regex specials in type/name so they can be used in the key-matching pattern
         const type = this.type.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const name = this.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const itemRegex = new RegExp(`^(system)?.?(items)?\.?${type}s?\.${name}\.`);
@@ -75,6 +78,7 @@ export class OD6SItem extends Item {
         }
     }
 
+    // Resolve total score: attribute + skill/spec, or weapon skill chain (spec > skill > attribute)
     getScore() {
         if (this.type.match(/^(skill|specialization)/)) {
             if (this.actor) {
@@ -150,6 +154,7 @@ export class OD6SItem extends Item {
         const label = game.i18n.localize(this.metadata.label);
         const title = game.i18n.format("DOCUMENT.Create", {type: label});
 
+        // Hide internal-only item types from the Create dialog
         types = types.filter(function (value, index, arr) {
             return value !== 'action' && value !== 'vehicle' && value !== 'base';
         });
@@ -216,12 +221,14 @@ export class OD6SItem extends Item {
         const rollData = {};
         rollData.token = this.parent.sheet.token;
 
+        // Build rollData.score based on item type, resolving the skill chain for weapons/actions
         switch (item.type) {
             case 'attribute': {
                 return;
             }
             case 'skill':
             case 'specialization': {
+                // flatSkills mode: attribute goes in rollData.score, pips added separately
                 if (OD6S.flatSkills) {
                     rollData.score = +(actorData.attributes[itemData.attribute.toLowerCase()].score);
                     flatPips = (+itemData.score)
@@ -306,6 +313,7 @@ export class OD6SItem extends Item {
                 break;
             }
             case 'action': {
+                // Actions delegate to linked items or resolve via skill/compendium/config fallback chain
                 let name = '';
                 if ((itemData.subtype === 'rangedattack' || itemData.subtype === 'meleeattack') && itemData.itemId !== '') {
                     // Roll is linked to an inventory item, roll that instead

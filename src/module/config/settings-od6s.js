@@ -1,4 +1,4 @@
-// System Settings
+// OD6S settings registration — registers all system settings menus and individual settings with Foundry.
 import OD6S from "./config-od6s.js";
 import od6sCustomLabelsConfiguration from "../apps/config-labels.js";
 import od6sWildDieConfiguration from "../apps/config-wild-die.js";
@@ -16,6 +16,7 @@ import od6sAttributesSortingConfiguration from "../apps/config-attributes-sortin
 import {od6sutilities} from "../system/utilities.js";
 import {createOD6SMacro} from "../od6s.js"
 
+// When reroll_initiative is toggled off, also disable the dependent auto-reroll settings
 export async function updateRerollInitiative(value) {
     if (value) {
         OD6S.initiative.reroll_character = game.settings.get('od6s', 'auto_reroll_character');
@@ -29,6 +30,7 @@ export async function updateRerollInitiative(value) {
 }
 
 export default function od6sSettings() {
+    // Register on init, i18nInit (for localized labels), and renderSettingsConfig (for dynamic menus)
     Hooks.once('init', async function () {
         await registerSettings();
     });

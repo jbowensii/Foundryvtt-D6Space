@@ -1,7 +1,9 @@
+// OD6S Socket handler — GM-only message handlers for roll updates, initiative, and vehicle crew management.
 import {od6sutilities} from "./utilities.js";
 
 export default class OD6SSocketHandler {
 
+    // Players send roll updates via socket; only the GM can modify chat messages
     static async updateRollMessage(data) {
         if (game.user.isGM) {
             const message = game.messages.get(data.message._id);

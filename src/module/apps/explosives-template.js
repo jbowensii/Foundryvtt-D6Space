@@ -1,3 +1,4 @@
+// OD6S Explosive measured template — interactive canvas placement with range line, wall collision, and snap-to-grid.
 import {od6sutilities} from "../system/utilities.js";
 import OD6S from "../config/config-od6s.js";
 
@@ -128,10 +129,11 @@ export default class ExplosivesTemplate extends foundry.canvas.placeables.Measur
         this.rangeMeasure.style.fill = 0xFFFFFF;
         this.rangeMeasure.text = distance + " M";
 
+        // Check both movement and sight walls to prevent placing explosives through barriers
         const collisionCheck =
             CONFIG.Canvas.polygonBackends.move.testCollision(
                 origin, this.center,
-                {type: "move", mode: "any"})  || 
+                {type: "move", mode: "any"})  ||
 	        CONFIG.Canvas.polygonBackends.sight.testCollision(
                 origin, this.center,
                 {type: "sight", mode: "any"});

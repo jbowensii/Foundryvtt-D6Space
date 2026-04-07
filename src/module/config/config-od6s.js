@@ -1,3 +1,4 @@
+// OD6S system configuration — all runtime constants, lookup tables, and default values for the D6 System.
 const OD6S = {};
 
 OD6S.startCombat = false;
@@ -190,6 +191,7 @@ OD6S.cargo_hold = [
     "starship-gear"
 ]
 
+// Wound tracks keyed by deadliness level (1=gritty/many wound steps, 5=heroic/few wound steps)
 OD6S.deadliness = {
     1: {
         0: {
@@ -697,6 +699,7 @@ OD6S.terrain_difficulty = {
     }
 }
 
+// Success tiers — keyed by minimum difference between roll total and target number
 OD6S.result = {
     "OD6S.FAILURE": {
         "description": "OD6S.FAILURE",
@@ -844,9 +847,10 @@ OD6S.misc = {
     }
 }
 
-// attack: subtraction or addition to hit difficulty (negative numbers are in effect a bonus)
-// damage: bonus or penalty to damage
-// multi: whether an attack needs a ROF selection by the character for number of shots in a round
+// Attack options per weapon category:
+//   attack: modifier to hit difficulty (negative = bonus)
+//   damage: bonus/penalty dice to damage
+//   multi: whether the attack requires rate-of-fire selection
 OD6S.rangedAttackOptions = {
     "OD6S.ATTACK_STANDARD": {
         "attack": 0,
@@ -935,6 +939,7 @@ OD6S.brawlAttackOptions = {
     }
 }
 
+// Core + custom attributes (ca1-ca4). Names/shortNames populated at runtime from settings.
 OD6S.attributes = {
     "agi": {
         "name": '',
@@ -1188,6 +1193,7 @@ OD6S.data_tab = {
     }
 }
 
+// Status effects hidden from non-owners on tokens (wound levels are private)
 OD6S.hiddenStatusEffects = [
   "stunned",
   "wounded",

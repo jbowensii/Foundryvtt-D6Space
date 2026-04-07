@@ -1,3 +1,4 @@
+// OD6S Explosive dialog — handles explosive type selection, template placement, and detonation workflow.
 import ExplosivesTemplate from "./explosives-template.js";
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
@@ -90,6 +91,7 @@ export  default class ExplosiveDialog extends HandlebarsApplicationMixin(Applica
     async placeTemplate() {
     }
 
+    // Start interactive template placement; rejection means the player cancelled (right-click)
     createTemplate(explosiveTemplate) {
         const result = explosiveTemplate.drawPreview();
         Promise.resolve(result).then((template) => {
@@ -103,11 +105,11 @@ export  default class ExplosiveDialog extends HandlebarsApplicationMixin(Applica
 
     }
 
+    // After template placement: measure range, store flags linking template to weapon, and trigger hit roll
     async handleResult(template) {
         this.data.stage += 1;
 
         if (this.data.stage === 1 && this.data.type === 'OD6S.EXPLOSIVE_THROWN') {
-            // Calculate Range
             const range = "";
             const distance = Math.floor(canvas.grid.measureDistance({x: this.token.center.x, y: this.token.center.y},
                 {x: template[0].x, y: template[0].y}, {gridSpaces: false}))

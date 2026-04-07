@@ -1,3 +1,8 @@
+/**
+ * Utility functions for OD6S. Includes dice/score encoding (score = dice * pipsPerDice + pips),
+ * explosive scatter mechanics, opposed roll resolution, wound/injury lookup, weapon range
+ * calculation, difficulty generation, and active effect evaluation.
+ */
 import OD6S from "../config/config-od6s.js";
 //import * as math from 'mathjs';
 
@@ -10,12 +15,9 @@ export class od6sutilities {
     }
 
     /**
-     * Function that looks up a weapon item's range and determines if it needs to be calculated based off of an attribute
-     * @param item
-     */
-    /*static checkWeaponRange(actor, item) {
-
-     * Return range values for ranged weapons
+     * Return range values for ranged weapons. If range fields contain attribute names
+     * (e.g. "str+2"), the attribute score is resolved and either rolled or statically
+     * calculated to determine the actual range in meters.
      * @param actor
      * @param item
      * @returns {{}|boolean}
@@ -130,6 +132,9 @@ export class od6sutilities {
         }
     }
 
+    // Scatter mechanic for missed explosive throws: rolls 1d6 for direction (mapped to angles
+    // relative to the throw line) and 1-3d6 for distance (more dice at longer ranges). The
+    // scattered position is clamped to wall boundaries via collision detection.
     static async scatterExplosive(range, origin, templateId) {
         let distance = 0;
         let distanceTerms = '';
@@ -176,6 +181,8 @@ export class od6sutilities {
         //distance = (distanceRoll.total * game.scenes.active.SceneDimensions.size)/game.scenes.active.SceneDimensions.distance;
         distance = distanceRoll.total * (canvas.dimensions.distancePixels);
 
+        // Map d6 scatter result to angle offset from the throw direction:
+        // 1=behind, 2=hard left, 3=slight left, 4=straight ahead, 5=slight right, 6=hard right
         switch(scatter) {
             case 1:
                 angle = 180 * (Math.PI/180);
@@ -203,14 +210,13 @@ export class od6sutilities {
 
         const destRay = Ray.fromAngle(template.x, template.y, newAngle, distance);
 
-        // Check if it would collide with a wall and stop it there
+        // Stop the scattered explosive at wall boundaries (offset 5px to stay on origin side)
         const checkCollision = CONFIG.Canvas.polygonBackends.move.testCollision(
             destRay.A, destRay.B,
             {type: "move", mode: "closest"});
 
         let update = {};
         if(checkCollision !== null) {
-            // Get the distance to the collision point, reduce by 5 pixes to ensure it stays on the origin side of the wall
             const distanceToCollision = (canvas.grid.measureDistance(destRay.A, checkCollision)
                 * canvas.dimensions.distancePixels) - 5;
             const collisionRay = Ray.fromAngle(template.x, template.y, newAngle, distanceToCollision);
@@ -460,9 +466,9 @@ export class od6sutilities {
                 if(actor.dodge > message.getFlag('od6s','total')) {
                     damage = 0;
                 } else {
+                    // Blast zone damage falloff: zone 1 = full, zone 2 = half, zone 3 = quarter
                     switch(target.zone) {
                         case 1:
-                            // full damage
                             break;
                         case 2:
                             damage = Math.floor(damage * 0.5);
@@ -508,8 +514,8 @@ export class od6sutilities {
     }
 
     /**
-     * Function which returns a number of dice and pips from a raw score.
-     * e.g. a score of 14 translates to "4D+2", a score of 15 is "5D+0".
+     * Decode a raw score into dice and pips using the D6 encoding: score = dice * pipsPerDice + pips.
+     * With default pipsPerDice=3: score 14 -> 4D+2, score 15 -> 5D+0, score 7 -> 2D+1.
      * @param score
      * @returns {{dice: number, pips: number}}
      */
@@ -527,7 +533,7 @@ export class od6sutilities {
     }
 
     /**
-     * Get a score from a number of dice and pips.
+     * Encode dice and pips back into a raw score. Inverse of getDiceFromScore.
      * @param dice
      * @param pips
      * @returns {number}
@@ -536,6 +542,8 @@ export class od6sutilities {
         return (+dice * OD6S.pipsPerDice) + (+pips);
     }
 
+    // Generates a target number from a difficulty level. In random mode, either rolls dice
+    // or picks a random value within the level's min/max range. In static mode, uses the max.
     static async getDifficultyFromLevel(level) {
         let difficulty = 0;
 
@@ -881,7 +889,9 @@ export class od6sutilities {
     }
 
     /**
-     * Search for a spec, skill, or attribute and return the score
+     * Search for a spec, skill, or attribute and return the total score.
+     * Uses priority fallthrough: specialization > skill > raw attribute.
+     * The attribute score is always added as the base regardless of which was found.
      * @param actor
      * @param spec
      * @param skill
@@ -891,7 +901,6 @@ export class od6sutilities {
     static getScoreFromSkill(actor, spec, skill, attribute) {
         let score = 0;
         let found = false;
-        // Look for a spec, then a skill, then finally attribute
         if (typeof (spec) !== "undefined" && spec !== '') {
             const foundSpec = actor.items.find(s => s.name === spec && s.type === 'specialization');
             if (foundSpec) {
@@ -929,6 +938,9 @@ export class od6sutilities {
         return (+score) + od6sutilities.getScoreFromSkill(actor, '', skillName, 'mec');
     }
 
+    // Opposed roll linking: pairs damage/explosive messages with resistance messages in sequence.
+    // Waits for wild die resolution before proceeding. Once both messages are queued in
+    // OD6S.opposed[], handleOpposedRoll() compares totals and determines the outcome.
     static async autoOpposeRoll(msg) {
         if (msg.getFlag('od6s','opposedRollDone')) return;
         if (game.settings.get('od6s', 'use_wild_die')
@@ -940,7 +952,7 @@ export class od6sutilities {
         }
         if (OD6S.opposed.length > 0) {
             if (msg.getFlag('od6s', 'type') === 'damage'||msg.getFlag('od6s', 'type') === 'explosive') {
-                // Shouldn't be here, damage needs to come before resistance.
+                // Reset queue -- damage must always be first in the pair
                 OD6S.opposed = [];
                 OD6S.opposed.push({
                     messageId: msg.id
@@ -962,6 +974,8 @@ export class od6sutilities {
         }
     }
 
+    // Resolves an opposed roll by comparing two queued messages (damage vs resistance, or any vs any).
+    // Determines winner/loser, calculates the margin of success, and maps it to injury/damage results.
     static
     async handleOpposedRoll() {
         let type = '';
@@ -1075,6 +1089,7 @@ export class od6sutilities {
                 if (this.boolCheck(stun)) {
                     data.content = winner.alias + " " + damageFlavor + " " + loser.flavorName;
                     stunned = true;
+                    // Stun scaling: 3x resistance = unconscious, 2x = -2D penalty, else -1D penalty
                     if (OD6S.stunScaling) {
                         if (winner.rolls[0].total >= (3 * loser.rolls[0].total)) {
                             stunEffect = 'unconscious';
@@ -1210,6 +1225,9 @@ export class od6sutilities {
         }
     }
 
+    // Maps a numeric damage margin to a wound/damage result string by walking the damage
+    // threshold table until the margin falls below a threshold. Uses separate tables for
+    // vehicles (damage levels) vs characters (wound levels).
     static getInjury(damage, actorType) {
         let resultMessage = '';
         if (actorType === "vehicle" || actorType === "starship") {
@@ -1284,6 +1302,9 @@ export class od6sutilities {
         }
     }
 
+    // Evaluates active effect change values that may contain @-delimited variable references
+    // (e.g. "@system.attributes.str.score@"). Resolves item references (skill/spec/weapon)
+    // and actor properties, then evaluates the resulting expression via mathjs.
     static evaluateChange(change, caller) {
         let ctx = {};
         if (caller.documentName === 'Actor') {
@@ -1292,7 +1313,6 @@ export class od6sutilities {
             ctx = caller.actor;
         }
         let newValue = change.value;
-        // Pull all variables from string
         const regex = new RegExp(/@.*?@/g)
         const matches = change.value.matchAll(regex);
         for (const m of matches) {

@@ -1,4 +1,14 @@
-// Import Modules
+/**
+ * Main system entry point for od6s (OpenD6 Space) FoundryVTT system.
+ *
+ * Registers document classes, sheet applications, custom dice terms, and all
+ * Foundry hooks that drive the system's runtime behavior: combat turn management,
+ * wound/stun tracking with auto-status effects, explosive template lifecycle,
+ * chat message interactivity (damage buttons, opposed rolls, wild die handling),
+ * vehicle crew synchronization, and Dice So Nice integration.
+ *
+ * Also exports hotbar macro helpers and socketlib callback registrations.
+ */
 import {OD6SActor} from "./actor/actor.js";
 import {OD6SActorSheet} from "./actor/actor-sheet.js";
 import {OD6SItem} from "./item/item.js";
@@ -36,6 +46,8 @@ Hooks.once('init', async function () {
 
     //CONFIG.debug.hooks = true
 
+    // Native socket handler for operations that predate socketlib integration.
+    // Newer GM-only operations use socketlib (registered in socketlib.ready hook below).
     game.socket.on('system.od6s', (data) => {
         if (data.operation === 'updateRollMessage') OD6SSocketHandler.updateRollMessage(data);
         if (data.operation === 'updateInitRoll') OD6SSocketHandler.updateInitRoll(data);
@@ -76,9 +88,10 @@ Hooks.once('init', async function () {
     foundry.documents.collections.Items.registerSheet("od6s", OD6SItemSheet, {makeDefault: true});
 });
 
-// update measuredTemplate hook
+// When an explosive template is moved on the canvas (e.g., GM repositioning),
+// recalculate which tokens fall within the blast radius and update the linked
+// chat message's target list so damage buttons reflect the new positions.
 Hooks.on('updateMeasuredTemplate', async (template, change) => {
-    // If the template has a message attached, update the targets in the message
     if (game.user.isGM) {
         if (change.flags?.od6s.messageId ) {
             return;
@@ -104,10 +117,11 @@ Hooks.on('updateMeasuredTemplate', async (template, change) => {
     }
 })
 
+// Cleanup crew links when deleting actors. Vehicles disembark all crew;
+// characters/NPCs remove themselves from any vehicle they're crewing.
 Hooks.on('preDeleteDocument', async (document, options, userId) => {
     if (['starship','vehicle'].includes(document.type)) {
         if (document.system.crewmembers.length > 0) {
-            // Iterate through crew and disembark
             if(game.user.isGM) {
                 for (const c in document.system.crewmembers) {
                     const actor = od6sutilities.getActorFromUuid(document.system.crewmembers[c].uuid);
@@ -127,11 +141,11 @@ Hooks.on('preDeleteDocument', async (document, options, userId) => {
     }
 })
 
-//Delete template hook
+// When an explosive template is removed from the canvas, clean up all related
+// flags on the source item and delete the linked chat message if unhandled.
 Hooks.on('deleteMeasuredTemplate', async (template) => {
     if (game.settings.get('od6s', 'auto_explosive') && game.user.isGM) {
         if (template.getFlag('od6s', 'explosive')) {
-            // Delete the flags from the item that generated the template
             let actor;
             if(template.getFlag('od6s','token')) {
                 const token = game.scenes.active.tokens.get(template.getFlag('od6s', 'token'));
@@ -191,7 +205,11 @@ Hooks.on("preDeleteChatMessage", async (message, data, diff, id) => {
     }
 })
 
+// Handles explosive attack resolution: when the GM sets success/failure on an
+// explosive roll message, the template either scatters (miss) or snaps back to
+// its original position (hit), then targets are recalculated for the new position.
 Hooks.on("updateChatMessage", async (message, data, diff, id) => {
+    // Un-hide messages that are no longer blind
     if (data.blind === false) {
         const messageLi = document.querySelector(`.message[data-message-id="${data._id}"]`);
         if (messageLi) messageLi.style.display = '';
@@ -209,7 +227,7 @@ Hooks.on("updateChatMessage", async (message, data, diff, id) => {
                 let updateTargets = false;
 
                 if (!data.flags.od6s.success && OD6S.autoExplosive) {
-                    // Missed, scatter it
+                    // Miss: scatter the template randomly based on range
                     if (message.getFlag('od6s', 'isExplosive')) {
                         await od6sutilities.scatterExplosive(message.getFlag('od6s', 'range'), item.getFlag('od6s', 'explosiveOrigin'), template.id);
                         await od6sutilities.wait(100);
@@ -218,7 +236,7 @@ Hooks.on("updateChatMessage", async (message, data, diff, id) => {
                 }
 
                 if (data.flags.od6s.success) {
-                    // Hit, un-scatter the template
+                    // Hit: restore template to its original aimed position
                     const update = {
                         x: template.getFlag('od6s', 'originalX'),
                         y: template.getFlag('od6s', 'originalY')
@@ -246,8 +264,11 @@ Hooks.on("updateChatMessage", async (message, data, diff, id) => {
     await promptResistanceRolls(message);
 });
 
+// Chat log event delegation. All interactive chat message buttons (damage, difficulty,
+// wild die handling, opposed rolls, etc.) are wired up here via event delegation on the
+// chat log container, rather than per-message listeners.
 Hooks.on('renderChatLog', (log, html, data) => {
-    // Native DOM event delegation helper — replaces jQuery html.on(event, selector, handler)
+    // Native DOM event delegation helper -- replaces jQuery html.on(event, selector, handler)
     function _delegate(eventType, selector, handler) {
         html.addEventListener(eventType, (ev) => {
             const target = ev.target.closest(selector);
@@ -283,6 +304,10 @@ Hooks.on('renderChatLog', (log, html, data) => {
         game.messages.get(el.dataset.messageId).render();
     })
 
+    // Apply damage from a chat message to a target token. Handles three damage paths:
+    // 1. Stun damage: applies stun counters and status effects (unconscious/-1D/-2D)
+    // 2. Wound-level system (bodypoints=0): delegates to applyWounds/applyDamage
+    // 3. Body-points system: subtracts numeric HP, optionally deriving wound level
     _delegate("click", ".apply-damage-button", async (ev, el) => {
         ev.preventDefault();
         const token = game.scenes.active.tokens.get(el.dataset.tokenId);
@@ -373,6 +398,9 @@ Hooks.on('renderChatLog', (log, html, data) => {
         message.setFlag('od6s', 'applied', true);
     })
 
+    // Roll damage dice from a chat message button. Builds a roll string from damage dice/pips,
+    // substituting one die for a wild die if enabled. Scale bonuses are added as flat modifiers
+    // unless the "dice_for_scale" setting converts them to extra dice instead.
     _delegate("click", ".damage-button", async (ev, el) => {
         ev.preventDefault();
         const data = el.dataset;
@@ -465,6 +493,9 @@ Hooks.on('renderChatLog', (log, html, data) => {
             rollMode: rollMode, create: true
         });
 
+        // Wild die penalty (wildDieOneDefault=2): when the wild die rolls 1, find the highest
+        // normal die and discard it, reducing the total. This is the "remove highest" penalty
+        // variant. Non-GM players emit a socket message since they can't update others' rolls.
         if (flags.wild === true && OD6S.wildDieOneDefault === 2 && OD6S.wildDieOneAuto === 0) {
             const replacementRoll = JSON.parse(JSON.stringify(rollMessage.rolls[0].toJSON()));
             let highest = 0;
@@ -627,6 +658,8 @@ Hooks.on('renderChatLog', (log, html, data) => {
         }
     })
 
+    // Opposed roll pairing: the first click queues the attacker's message,
+    // the second click provides the defender's message and triggers resolution.
     _delegate("click", ".message-oppose", async (ev, el) => {
         ev.preventDefault();
         const data = {};
@@ -641,6 +674,8 @@ Hooks.on('renderChatLog', (log, html, data) => {
         }
     })
 
+    // GM difficulty selector: sets the target number on a roll message and recalculates
+    // success/failure. For purchase rolls, a success immediately triggers the item transfer.
     _delegate("change", ".choose-difficulty", async (ev, el) => {
         ev.preventDefault();
         const message = game.messages.get(el.dataset.messageId);
@@ -735,8 +770,9 @@ Hooks.on('deleteActiveEffect', async (effect) => {
     await od6sutilities.handleEffectChange(effect);
 })
 
+// On scene load, re-sync vehicle data to all crew members so their sheets
+// reflect the current vehicle state (shields, weapons, maneuverability, etc.)
 Hooks.on("canvasReady", async () => {
-    //Loop through all vehicle actors/tokens and sync vehicle data
     if (game.user.isGM) {
         if (typeof (game.scenes.active && game.scenes.active.tokens.size > 0) !== 'undefined') {
             for (const t in game.scenes.active.tokens) {
@@ -752,6 +788,9 @@ Hooks.on("getOD6SChatLogEntryContext", async (html, options) => {
     await OD6SChat.chatContextMenu(html, options);
 })
 
+// Sync stun state with wound level changes (wound-level mode only):
+// - Wound increasing to "stunned" level: increment stun counter and set 1-round duration
+// - Wound decreasing back to healthy: clear all stun state
 Hooks.on("preUpdateActor", async (document, change, options, userId) => {
     if (change.system?.wounds && change.system.wounds.value > document.system.wounds.value) {
         if (game.settings.get('od6s', 'bodypoints') === 0) {
@@ -779,16 +818,20 @@ Hooks.on("preUpdateActor", async (document, change, options, userId) => {
     }
 })
 
+// Post-update actor hook: syncs vehicle data to crew, checks stun thresholds,
+// and manages auto-status effects based on wound level changes.
 Hooks.on("updateActor", async (document, change, options, userId) => {
+    // Vehicle/starship data must propagate to all crew members after any update
     if ((document.type === "vehicle" || document.type === "starship") && document.system.crewmembers.length > 0) {
         await document.sendVehicleData();
     }
 
+    // Stun tracking: if total stuns >= Strength dice, actor goes unconscious.
+    // A 2d6 roll determines how many rounds they stay down.
     if(change.system?.stuns?.value) {
         if(game.settings.get('od6s','track_stuns')) {
             if (game.user.isGM) {
                 if (document.system.stuns.value >= od6sutilities.getDiceFromScore(document.system.attributes.str.score).dice) {
-                    // Actor has become unconscious
                     const roll = await new Roll("2d6").evaluate();
                     const flavor = document.name +
                         game.i18n.localize('OD6S.CHAT_UNCONSCIOUS_01') +
@@ -809,6 +852,9 @@ Hooks.on("updateActor", async (document, change, options, userId) => {
         }
     }
 
+    // Auto-status: when wound level changes, remove all wound status effects then
+    // apply only the current one. Handles player-owned and GM-owned actors separately
+    // since only the GM can toggle effects on NPC tokens.
     if (change.system?.wounds?.value) {
         if(game.settings.get('od6s','auto_status')) {
             const status = OD6S.woundsId[od6sutilities.getWoundLevel(change.system.wounds.value, document)];
@@ -816,6 +862,7 @@ Hooks.on("updateActor", async (document, change, options, userId) => {
                 let tokens;
                 tokens ??= document.getActiveTokens(true, false);
 
+                // Clear all wound-related status effects first
                 for (const s in OD6S.woundsId) {
                     const id = OD6S.woundsId[s]
                     if (id === 'healthy') continue;
@@ -830,6 +877,7 @@ Hooks.on("updateActor", async (document, change, options, userId) => {
                     }
                 }
 
+                // Apply the current wound level's status effect
                 for (const token of tokens) {
                     if (status === 'healthy') continue;
                     if (game.user.isGM) {
@@ -981,6 +1029,8 @@ Hooks.on("renderActorSheet", async (sheet) => {
     }
 })
 
+// Prevent containers and uncrewed vehicles from being added to the combat tracker.
+// Vehicles with embedded pilots are allowed since they roll their own initiative.
 Hooks.on("preCreateCombatant", (combatant) => {
     if (combatant.actor.type === "container") return false;
     if ((combatant.actor.type === "vehicle" || combatant.actor.type === "starship") &&
@@ -989,9 +1039,11 @@ Hooks.on("preCreateCombatant", (combatant) => {
     }
 })
 
+// Turn start: reset the active combatant's defensive scores (dodge/parry/block)
+// and fate point effect. If the combatant is crewing a vehicle and was the one
+// who set the vehicle's dodge, clear the vehicle's dodge too.
 Hooks.on("updateCombat", async (Combat, data, options, userId) => {
     if (game.user.isGM && Combat.round === 1 && Combat.turn === 0 && Combat.active && OD6S.startCombat) {
-        // At the start of a new combat, make sure all actor's action lists are cleared
         OD6S.startCombat = false;
         for (let i = 0; i < Combat.combatants.length; i++) {
             await clearActionList(Combat.combatants[i].actor);
@@ -999,14 +1051,13 @@ Hooks.on("updateCombat", async (Combat, data, options, userId) => {
     }
 
     if (game.user.isGM && Combat.round !== 0 && Combat.turn === 0 && Combat.active && !OD6S.startCombat) {
-        // New round
+        // New round placeholder
     }
-
-    // Actor has started their turn, clear their action list and defensive bonuses/penalties
 
     if (typeof (Combat.combatant.actor) !== 'undefined') {
         if (game.user.isGM) {
 
+            // Reset defensive bonuses unless reaction_skills mode is on (that resets at round end instead)
             if (!game.settings.get('od6s', 'reaction_skills')) {
                 const update = {};
                 update.id = Combat.combatant.actor.id;
@@ -1019,6 +1070,7 @@ Hooks.on("updateCombat", async (Combat, data, options, userId) => {
                 update.system.block.score = 0;
                 await Combat.combatant.actor.update(update, {'diff': true});
 
+                // If this crew member set the vehicle's dodge, clear it too
                 if (Combat.combatant.actor.isCrewMember()) {
                     if (Combat.combatant.actor.system.vehicle.dodge.score > 0) {
                         const vehicleId = Combat.combatant.actor.getFlag('od6s', 'crew');
@@ -1043,10 +1095,12 @@ Hooks.on("updateCombat", async (Combat, data, options, userId) => {
     }
 })
 
+// End-of-round processing: runs before the combat turn resets to 0.
+// For each combatant: clear action lists, tick down stun durations (removing
+// the stunned status when expired), reset defensive scores if using reaction_skills
+// mode, clear fate point effects, and trigger mortally wounded checks.
 Hooks.on("preUpdateCombat", async (Combat, data, options, userId) => {
-    // End-of-round stuff here
     if (data.turn === 0) {
-        // Initiative
         if (game.user.isGM && game.settings.get('od6s', 'reroll_initiative')) {
             await OD6SInitiative._onPreUpdateCombat(Combat, data, options, userId);
         }
@@ -1062,9 +1116,8 @@ Hooks.on("preUpdateCombat", async (Combat, data, options, userId) => {
                     update.id = combatant.id;
                     update.system = {};
 
-                    // Check if stun needs to be removed
+                    // Stun duration expired: remove the stunned AE and reset counters
                     if (rounds < 1) {
-                        // Remove any stun status effects
                         const effect = combatant.actor.effects.contents.find(
                             i => i.name === game.i18n.localize(CONFIG.statusEffects.find(
                                 e => e.id === 'stunned').name));
@@ -1077,10 +1130,12 @@ Hooks.on("preUpdateCombat", async (Combat, data, options, userId) => {
                         update.system.stuns.current = 0;
                         update.system.stuns.value = combatant.actor.system.stuns.value;
                     } else if (rounds > 0) {
+                        // Decrement remaining stun rounds
                         update.system.stuns = {};
                         update.system.stuns.rounds = rounds - 1;
                     }
 
+                    // reaction_skills mode: defensive scores reset at round end instead of turn start
                     if (game.settings.get('od6s', 'reaction_skills')) {
                         update.system.parry = {};
                         update.system.parry.score = 0;
@@ -1106,6 +1161,8 @@ Hooks.on("preUpdateCombat", async (Combat, data, options, userId) => {
                         await combatant.actor.setFlag('od6s', 'fatepointeffect', false);
                     }
 
+                    // Mortally wounded actors must roll each round to survive.
+                    // Player-owned actors have the roll triggered via socket on their client.
                     if (game.settings.get('od6s', 'auto_mortally_wounded')) {
                         if (combatant.actor.getFlag('od6s', 'mortally_wounded') !== undefined) {
                             await combatant.actor.setFlag('od6s', 'mortally_wounded',
@@ -1144,6 +1201,10 @@ Hooks.on("deleteCombat", async function (Combat) {
     }
 })
 
+// Auto-opposed roll handling: when a damage/resistance/explosive message is created
+// and autoOpposed is enabled, automatically generate the opposing roll. For explosives,
+// each target in the blast area gets an individual opposed roll, processed sequentially
+// to avoid race conditions with the OD6S.opposed queue.
 Hooks.on('createChatMessage', async function (msg) {
 
     if (game.user.isGM) {
@@ -1155,8 +1216,8 @@ Hooks.on('createChatMessage', async function (msg) {
             } else if (msg.getFlag('od6s', 'type') === 'explosive') {
                 const targets = msg.getFlag('od6s', 'targets');
                 for (const target in targets) {
+                    // Wait for previous opposed roll to complete before starting the next
                     while (OD6S.opposed.length > 0) {
-                        // Loop until the previous message is handled
                         await new Promise(r => setTimeout(r, 100));
                     }
                     OD6S.opposed[0] = {
@@ -1411,6 +1472,7 @@ async function simpleRoll() {
                         rollMode: rollMode, create: true
                     });
 
+                    // Same "remove highest" wild die penalty as the damage-button handler above
                     if (flags.wild === true && OD6S.wildDieOneDefault === 2 && OD6S.wildDieOneAuto === 0) {
                         const replacementRoll = JSON.parse(JSON.stringify(rollMessage.rolls[0].toJSON()));
                         let highest = 0;
@@ -1451,6 +1513,10 @@ async function simpleRoll() {
     }).render(true);
 }
 
+// Custom die terms registered in CONFIG.Dice.terms. Both are d6 with the "x6"
+// modifier (explode on 6). The denomination letter is used in roll formulas:
+// "1dw" = wild die, "1db" = character point die. Dice So Nice uses these to
+// apply distinct colorsets (white for wild, black for CP).
 export class WildDie extends foundry.dice.terms.Die {
     constructor(termData) {
         termData.faces = 6;
@@ -1607,6 +1673,10 @@ export async function getActorFromUuid(uuid) {
     return od6sutilities.getActorFromUuid(uuid);
 }
 
+// Auto-prompt player resistance rolls: when a damage message targets a player-owned
+// token, automatically open the resistance roll dialog on that player's client.
+// For vehicles, the first crew member rolls vehicle toughness instead.
+// Skipped for GMs (they handle NPC resistance via autoOpposed) and while wild die is unresolved.
 export async function promptResistanceRolls(msg) {
     if(game.user.isGM) return;
     if (msg.getFlag('od6s','type') === 'damage' && OD6S.autoPromptPlayerResistance) {

@@ -1,3 +1,4 @@
+// OD6S Item sheet (AppV2) — renders per-type templates and handles dice/pip editing for skills, weapons, and armor.
 import {od6sutilities} from "../system/utilities.js";
 import OD6S from "../config/config-od6s.js";
 
@@ -40,7 +41,11 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
         return context;
     }
 
-    /** @override — render correct template for this item type, bypassing cached PARTS */
+    /**
+     * @override — AppV2 workaround: bypass the static PARTS template cache so each item type
+     * renders its own template (item-skill-sheet, item-weapon-sheet, etc.) instead of the
+     * single template declared in PARTS.
+     */
     async _renderHTML(context, options) {
         const template = `systems/od6s/templates/item/item-${this.document.type}-sheet.html`;
         // Pass the full context directly — no need for _preparePartContext spread
@@ -77,7 +82,7 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
             // Provide rollData for templates that use it
             rollData: item.getRollData ? item.getRollData() : {},
         };
-        // backward compat — templates may reference {{data.xxx}}
+        // Backward compat — templates may reference {{data.xxx}} from the AppV1 era
         context.data = context;
         return context;
     }
@@ -88,7 +93,7 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
     _onRender(context, options) {
         super._onRender(context, options);
 
-        // Initialize tabs — AppV2 doesn't auto-initialize AppV1-style tabs
+        // AppV2 workaround: manually init AppV1-style tab navigation since AppV2 doesn't do it
         if (!this._sheetTabs) {
             this._sheetTabs = new foundry.applications.ux.Tabs({
                 navSelector: ".sheet-tabs",
@@ -202,7 +207,7 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
         update.id = this.item.id;
         update.system = {};
         update.system.actor_types = this.item.system.actor_types.filter(i => i !== type);
-        // Remove all items that are no longer allowed
+        // Prune template items that are no longer valid for the remaining actor types
         update.system.items = [];
         for (const i of this.item.system.items) {
             for (const t of update.system.actor_types) {
@@ -259,6 +264,7 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
         const update = {};
         update.id = this.item.id;
         update.system = this.item.system;
+        // Foundry convention: `-=key` with null value deletes a key from an object
         update[`system.labels.-=${ev.currentTarget.dataset.key}`] = null;
         await this.item.update(update);
     }

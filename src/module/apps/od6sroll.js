@@ -1,3 +1,8 @@
+/**
+ * Dice rolling system for OD6S. Handles initiative rolls, skill/attribute/combat rolls,
+ * difficulty calculation, damage resolution, wild die logic, and character/fate point spending.
+ * Uses custom die types: d6 (base), dw (wild, explodes on 6), db (character point, explodes on 6).
+ */
 import {od6sutilities} from "../system/utilities.js";
 import ExplosiveDialog from "./explosive-dialog.js";
 import OD6S from "../config/config-od6s.js";
@@ -158,7 +163,8 @@ export class od6sInitRoll {
             rollString += "+" + rollData.bonuspips;
         }
 
-        // Add fraction of AGI and mods to break ties
+        // Tiebreaker: add PER + init mod + AGI as a fractional bonus (e.g. score 12 -> 0.12) so
+        // identical die totals resolve deterministically without affecting the integer result
         const fraction = ((+rollData.actor.system.attributes.per.score) * 0.01 +
             (+rollData.actor.system.initiative.mod) * 0.01 +
             (+rollData.actor.system.attributes.agi.score) * 0.01).toPrecision(2);
@@ -316,6 +322,7 @@ export class RollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
             });
         });
 
+        // Fate point toggle: spending a fate point doubles all dice AND pips for the roll
         this.element.querySelectorAll('.usefatepoint').forEach(el => {
             el.addEventListener('click', async () => {
                 this.rollData.fatepoint = !Boolean(this.rollData.fatepoint);
@@ -341,6 +348,7 @@ export class RollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
             });
         });
 
+        // Full defense negates the stunned penalty since the character is dedicating their action to defense
         this.element.querySelectorAll('.fulldefense').forEach(el => {
             el.addEventListener('click', async () => {
                 this.rollData.fulldefense = !Boolean(this.rollData.fulldefense);
@@ -1100,8 +1108,9 @@ export class od6sroll {
 
         let fatepointeffect = false;
 
+        // Persistent fate point effect: if a fate point was spent on a prior roll this round,
+        // the doubling continues to apply to all subsequent rolls until the effect expires
         if (data.actor.getFlag('od6s', 'fatepointeffect') && canUseFp) {
-            // Double all dice while fate point is active
             rollValues.dice = (+rollValues.dice) * 2;
             rollValues.pips = (+rollValues.pips) * 2;
 
@@ -1213,6 +1222,8 @@ export class od6sroll {
             bonusmod += (+data.actor.system.block.mod);
         }
 
+        // Flat skills mode: skill scores add as flat pip bonuses instead of converting to dice+pips.
+        // In normal mode, bonus mods are converted through the score encoding (score = dice * pipsPerDice + pips).
         if (OD6S.flatSkills) {
             bonusdice.dice = 0;
             bonusdice.pips = (+bonusmod);
@@ -1221,7 +1232,7 @@ export class od6sroll {
         }
 
         if (od6sutilities.getScoreFromDice(bonusdice.dice, bonusdice.pips) < 0) {
-            // Turn into into a penalty
+            // Negative bonus becomes a penalty applied as dice subtracted from the roll
             penaltydice = bonusdice.dice * -1;
             bonusdice.dice = 0;
             bonusdice.pips = 0;
@@ -1428,7 +1439,8 @@ export class od6sroll {
 
         rollData.isknown = true;
         let rollMode = 'roll';
-        // Using a fate point doubles the dice and pips of the roll
+        // Fate point: doubles the original (pre-modifier) dice and pips, and sets a persistent
+        // flag so the doubling carries over to all rolls for the remainder of the round
         if (rollData.fatepoint) {
             rollData.dice = (+rollData.originaldice * 2);
             rollData.pips = (+rollData.originalpips * 2);
@@ -1709,7 +1721,8 @@ export class od6sroll {
                     }
                 }
             }
-            if (rollMin > 0) {
+            // Skills with a minimum enforce a floor on the roll total (can't roll below the skill's base dice value)
+        if (rollMin > 0) {
                 rollString = "max(" + rollString + "," + rollMin + ")";
             }
         }
@@ -1760,6 +1773,8 @@ export class od6sroll {
             }
         }
 
+        // Wild die "complication" check: if the wild die rolled a 1, flag it for special handling.
+        // wildDieOneDefault controls the penalty mode; wildDieOneAuto=0 means the GM decides.
         if (useWildDie && rollMin < 1) {
             const wildFlavor = game.i18n.localize('OD6S.WILD_DIE_FLAVOR').replace(/[\[\]]/g, "");
             if (roll.terms.find(d => d.flavor === wildFlavor).total === 1) {
@@ -1845,6 +1860,8 @@ export class od6sroll {
             {rollMode: rollMode, create: true}
         );
 
+        // Wild die "critical failure" handling (mode 2): discard the highest normal die AND
+        // subtract the wild die's 1, effectively removing two dice worth of value from the total
         if (flags.wild === true && parseInt(OD6S.wildDieOneDefault) === 2 && parseInt(OD6S.wildDieOneAuto) === 0) {
             await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -1857,6 +1874,7 @@ export class od6sroll {
             }
             replacementRoll.terms[0].results[highest].discarded = true;
             replacementRoll.terms[0].results[highest].active = false;
+            // Remove the highest die result plus the wild die's 1 from the total
             replacementRoll.total -= (+replacementRoll.terms[0].results[highest].result) + 1;
             flags.total = replacementRoll.total;
             const rollMessageUpdate = {};
@@ -1926,6 +1944,8 @@ export class od6sroll {
             }
         }
 
+        // Store the defense roll result so attackers can use it as their difficulty number.
+        // Full defense adds the base attack difficulty on top of the roll total.
         if (rollData.subtype === 'dodge' || rollData.subtype === 'parry' || rollData.subtype === 'block') {
             doUpdate = true;
             if (rollData.fulldefense) {

@@ -1,3 +1,4 @@
+// OD6S Specialization creation — dialog and logic for creating new specializations from existing skills.
 import OD6S from "../config/config-od6s.js";
 import {od6sutilities} from "../system/utilities.js";
 
@@ -85,6 +86,7 @@ export class od6sspecialize {
         // Create the specialization item, tied to the correct attribute/skill
         const skill = this.actor.getEmbeddedDocument("Item",
             event.currentTarget.dataset.itemId, true);
+        // Specialization starts at parent skill score + 1 pip; CP cost = floor(dice/2)
         const derivedScore = (+skill.system.score) + (+this.actor.system.attributes[skill.system.attribute.toLowerCase()].score) + 1
         const cpCost = Math.floor(Math.floor(derivedScore/OD6S.pipsPerDice)/2);
         const newItemData = {

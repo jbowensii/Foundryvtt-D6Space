@@ -1,3 +1,4 @@
+// OD6S Character advancement — dialog and logic for spending character points to raise attributes, skills, and specs.
 import {od6sutilities} from "../system/utilities.js";
 import OD6S from "../config/config-od6s.js";
 
@@ -80,9 +81,7 @@ export class AdvanceDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         }
     }
 
-    /*
-         Changed to allow custom advancements costs.
-     */
+    // Calculate CP cost for a single pip increment/decrement based on type and current dice
     cpCost(up) {
         if (this.advanceData.freeadvance) {
             return
@@ -99,6 +98,7 @@ export class AdvanceDialog extends HandlebarsApplicationMixin(ApplicationV2) {
             teacherCostMultiplier = 1;
         }
 
+        // flatSkills uses raw pip count; standard mode converts score to dice+pips for cost calc
         let score;
         OD6S.flatSkills ? score = this.advanceData.base :
             score = od6sutilities.getDiceFromScore(this.advanceData.score);
@@ -166,6 +166,7 @@ export class AdvanceDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         }
     }
 
+    // Increment score by 1 pip, enforcing skill-used, single-advance, and attribute max constraints
     pipUp() {
         // First meta advance goes straight to 1D
         const item = this.actorSheet.actor.items.get(this.advanceData.itemid);
@@ -371,6 +372,7 @@ export class od6sadvance {
         }
     }
 
+    // Apply the advancement: update attribute/skill/spec scores and deduct CP from the actor
     static async advanceAction(actor, advanceData, event, dice, pips) {
 
         const actorData = actor.system;
@@ -405,7 +407,7 @@ export class od6sadvance {
             const skill = actor.items.get(advanceData.itemid);
 
             if(OD6S.specLink) {
-                /* Also advance any specializations derived from this skill */
+                // specLink: linked specializations advance in lockstep with their parent skill
                 specs = actor.items.filter(i => i.type === 'specialization' &&
                     i.system.skill === skill.name);
             }

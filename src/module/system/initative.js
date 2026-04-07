@@ -1,4 +1,6 @@
+// OD6S Initiative — auto-rerolls initiative each round based on system settings.
 export class OD6SInitiative {
+    // Hook handler for preUpdateCombat: rerolls initiative at round start if configured
     static async _onPreUpdateCombat(combat, data, options, userId) {
         if(game.settings.get('od6s', 'reroll_initiative')) {
 
@@ -10,6 +12,7 @@ export class OD6SInitiative {
             if (!gmUserId) return;
             await combat.resetAll();
 
+            // Temporarily disable Dice So Nice animations to avoid flooding 3D dice on bulk reroll
             if (game.modules.get("dice-so-nice")?.active &&
                 game.settings.get('od6s','auto_init_dsn')) {
                 game.dice3d.messageHookDisabled=true;

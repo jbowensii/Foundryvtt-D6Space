@@ -1,3 +1,4 @@
+// OD6S Token rendering — prevents dragging containers and hides wound status icons from non-owners.
 import OD6S from "../config/config-od6s.js";
 
 export class OD6SToken extends foundry.canvas.placeables.Token {
@@ -33,7 +34,7 @@ export class OD6SToken extends foundry.canvas.placeables.Token {
             const promises = [];
 
 
-            // Draw actor effects first
+            // Draw actor effects first, skipping wound statuses for non-owners
             for ( const f of actorEffects ) {
                 const status = [...f.statuses][0];
                 if ( !f.icon ) continue;

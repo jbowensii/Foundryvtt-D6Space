@@ -1,3 +1,4 @@
+// OD6S Chat applications — context menu for character points, and AppV2 forms for editing difficulty, damage, targets, and wild die results.
 import {od6sutilities} from "../system/utilities.js";
 import OD6S from "../config/config-od6s.js";
 
@@ -5,6 +6,7 @@ const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
 export class OD6SChat {
 
+    // Add "Use a Character Point" option to the chat message right-click context menu
     static chatContextMenu(html, options) {
         const canApplyCharacterPoint = function (li) {
             const result = false;
@@ -82,6 +84,7 @@ export default class OD6SEditDifficulty extends HandlebarsApplicationMixin(Appli
         return context;
     }
 
+    // Recalculate difficulty by applying the delta between old and new base difficulty
     static async #onSubmit(event, form, formData) {
         const data = formData.object;
         const message = game.messages.get(data.messageId);
@@ -179,6 +182,7 @@ export class OD6SChooseTarget extends HandlebarsApplicationMixin(ApplicationV2) 
     static async #onSubmit(event, form, formData) {
         const data = formData.object;
         const message = game.messages.get(data.messageId);
+        // Explosives support multiple targets with zone info; standard attacks use a single target
         if (message.getFlag('od6s', 'isExplosive')) {
             const targets = [];
             const currentTargets = message.getFlag('od6s', 'targets');
@@ -240,6 +244,7 @@ export class OD6SHandleWildDieForm extends HandlebarsApplicationMixin(Applicatio
         return context;
     }
 
+    // Handle wild die result: 0=ignore, 1=remove highest die from roll, 2=complication narrative
     static async #onSubmit(event, form, formData) {
         const data = formData.object;
         const message = game.messages.get(data.messageId);
@@ -248,6 +253,7 @@ export class OD6SHandleWildDieForm extends HandlebarsApplicationMixin(Applicatio
                 await message.setFlag('od6s', 'wild', false);
                 break;
             case '1':
+                // Deep-copy the roll, find the highest die, mark it discarded, and subtract from total
                 await message.setFlag('od6s', 'wildResult', 'OD6S.REMOVE_HIGHEST_DIE');
                 const replacementRoll = JSON.parse(JSON.stringify(message.rolls[0]));
                 let highest = 0;

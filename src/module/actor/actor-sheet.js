@@ -1,3 +1,14 @@
+/**
+ * Actor sheet for the od6s system (AppV2 / ActorSheetV2).
+ *
+ * Handles character, NPC, creature, vehicle, starship, and container actor types.
+ * Each type has its own item-preparation pipeline and different subsets of UI
+ * event listeners (combat actions, crew management, shield allocation, etc.).
+ *
+ * Uses HandlebarsApplicationMixin for single-part template rendering and wires
+ * up tab navigation, drag-drop, and all interactive controls manually in
+ * _onRender(), since AppV2 does not provide the same automatic wiring as AppV1.
+ */
 import {od6sroll} from "../apps/od6sroll.js";
 import {od6sInitRoll} from "../apps/od6sroll.js";
 import {od6sadvance} from "./advance.js";
@@ -15,7 +26,6 @@ const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
 
 /**
- * Extend the basic ActorSheet with some very simple modifications
  * @extends {ActorSheetV2}
  */
 export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
@@ -81,16 +91,15 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         };
         data.dtypes = ["String", "Number", "Boolean"];
 
+        // Character-like types (character/npc/creature) share the same item prep and flags.
+        // Vehicles and starships have separate item categories (weapons, cargo hold, etc.).
         if (this.actor.type === 'character') {
-            // Prepare items.
             this._prepareCharacterItems(data);
             this._setCommonFlags();
         } else if (this.actor.type === 'npc') {
-            // Prepare items.
             this._prepareCharacterItems(data);
             this._setCommonFlags();
         } else if (this.actor.type === 'creature') {
-            // Prepare items.
             this._prepareCharacterItems(data);
             this._setCommonFlags();
         } else if (this.actor.type === 'vehicle') {
@@ -104,6 +113,8 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         data.items = data.items.sort((a, b) => (a.sort || 0) - (b.sort || 0));
         data.system = this.actor.system;
 
+        // Merge config-defined attribute metadata (sort order, active flag) with actor attribute data.
+        // Containers have no attributes.
         if (this.actor.type !== 'container') {
             const attributes = [];
             for (const i in OD6S.attributes) {
@@ -148,6 +159,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         this._dragDrop = [dd];
     }
 
+    // Ensure runtime flags exist with default values so downstream code can assume they are set.
     _setCommonFlags() {
         if (typeof (this.actor.getFlag('od6s', 'fatepointeffect')) === 'undefined') {
             this.actor.setFlag('od6s', 'fatepointeffect', false);
@@ -190,7 +202,8 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 gear.push(i);
             }
 
-            // Append to skills.
+            // In non-flat mode, total skill score = skill pips + parent attribute score.
+            // Advanced skills are exempt (they don't inherit from their attribute).
             else if (i.type === 'skill') {
                 if (!OD6S.flatSkills &&
                     typeof (i.system.score) !== 'undefined' &&
@@ -203,7 +216,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 skills.push(i);
             }
 
-            // Append to specializations
+            // Specializations always add attribute score in non-flat mode
             else if (i.type === 'specialization') {
                 if (!OD6S.flatSkills)
                     i.system.score = (+i.system.score) +
@@ -507,7 +520,9 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 this.render();
             }));
 
-        // Edit funds
+        // Edit funds: D6 system stores scores as a single integer (pips total).
+        // When the user edits the dice or pips field separately, recombine them
+        // into the unified score using getScoreFromDice(dice, pips).
         this.element.querySelectorAll('.edit-funds').forEach(el =>
             el.addEventListener('change', async ev => {
                 const newScore = {};
@@ -588,7 +603,9 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 await item.update(update);
             }));
 
-        // Use a consumable
+        // Use a consumable: decrement quantity and enable any disabled ActiveEffects
+        // originating from this item. The origin path format differs for token actors
+        // (Scene.id.Token.id.Item.id) vs world actors (Actor.id.Item.id), so both are handled.
         this.element.querySelectorAll('.use-consumable').forEach(el =>
             el.addEventListener('click', async ev => {
                 const item = await this.actor.items.get(ev.currentTarget.dataset.itemId);
@@ -602,6 +619,8 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 if (actorEffectsList.size > 0) {
                     const actorUpdate = [];
                     actorEffectsList.forEach(e => {
+                        // Parse effect origin to find the source item ID.
+                        // Token-based actors have a longer origin path with Scene/Token segments.
                         let [parentType, parentId, documentType, documentId] = e.origin?.split(".") ?? [];
                         if (parentType === "Scene") {
                             let actorType, actorId;
@@ -623,17 +642,15 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 }
             }));
 
-        // Activate a manifestation
+        // Toggle manifestation active state. Attack manifestations are skipped (rolled separately).
+        // When toggled, syncs ActiveEffect disabled state to match the manifestation's active flag,
+        // but only for non-consumable manifestation effects.
         this.element.querySelectorAll('.active-checkbox').forEach(el =>
             el.addEventListener('click', async ev => {
             ev.preventDefault();
             const item = this.actor.items.find(i => i.id === ev.currentTarget.dataset.itemId);
 
             if (item) {
-
-                /*if (item.system.attack || (item.system.roll && !item.system.active)) {
-                    return od6sroll._metaphysicsRollDialog(item, this.actor);
-                }*/
 
                 if (item.system.attack) {
                     return;
@@ -672,7 +689,10 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
             this.render();
         }));
 
-        // Equip an item
+        // Toggle equip state and sync ActiveEffects accordingly.
+        // When un-equipping: any AE with an OVERRIDE change (mode 2) targeting a skill
+        // needs its skill modifier zeroed out, since the effect is about to be disabled.
+        // The AE origin path is parsed to match effects back to their source item.
         this.element.querySelectorAll('.equip-checkbox').forEach(el =>
             el.addEventListener('change', async ev => {
             const item = this.actor.items.find(i => i.id === ev.currentTarget.dataset.itemId);
@@ -699,6 +719,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                             if (effectItem && !effectItem.system.consumable &&
                                 OD6S.equippable.includes(effectItem.type)) {
                                 if (e.disabled === effectItem.system.equipped.value) {
+                                    // When un-equipping, zero out skill mods from OVERRIDE changes
                                     if (!effectItem.system.equipped.value) {
                                         for (let i = 0; i < e.changes.length; i++) {
                                             const c = e.changes[i];
@@ -854,7 +875,10 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 if (actor.testUserPermission(game.user, "OWNER")) actor.sheet.render('true')
             }));
 
-        // Add/remove crew to vehicles
+        // Add crew to vehicles. Multi-step token filtering:
+        // 1. Only tokens with valid actors  2. Exclude vehicles/starships
+        // 3. GMs see all available tokens; players only see friendly, uncrewed tokens.
+        // Player crew-status checks go through socketlib since players can't read other actors' flags.
         this.element.querySelectorAll('.crew-add').forEach(el =>
             el.addEventListener('click', async ev => {
             ev.preventDefault();
@@ -870,17 +894,14 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 return;
             }
 
-            // Filter out tokens who are a vehicle
             tokens = tokens.filter(t => t.actor.type !== "vehicle" && t.actor.type !== "starship");
 
             if (game.user.isGM) {
-                // Filter out tokens who are already crew members in a vehicle
                 tokens = tokens.filter((t) => !t.actor.isCrewMember());
             } else {
-                // If a player, filter out hostile/neutral tokens
                 tokens = tokens.filter(t => t.disposition === CONST.TOKEN_DISPOSITIONS.FRIENDLY);
 
-                // Filter out already-crewed tokens
+                // Players must ask the GM to check crew status via socket
                 const crewed = [];
                 for (let i = 0; i < tokens.length; i++) {
                     if (await OD6S.socket.executeAsGM("checkCrewStatus", tokens[i].actor.uuid)) {
@@ -955,10 +976,10 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 await this._editEffect(ev);
             }));
 
-        // Fate point in effect checkbox
+        // Fate point toggle: spending a fate point doubles all dice for the round.
+        // Activating deducts one FP immediately; deactivation does not refund.
         this.element.querySelectorAll('.fatepointeffect').forEach(el =>
             el.addEventListener('change', async () => {
-            // Don't allow if actor has 0 points
             if (this.actor.system.fatepoints.value < 1) {
                 await this.actor.setFlag('od6s', 'fatepointeffect', false)
                 this.render();
@@ -979,7 +1000,9 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
             }
         }));
 
-        // Vehicle shield allocation
+        // Vehicle shield allocation: shields have a total pool (value) that the player
+        // distributes across arcs (front/back/left/right). "allocated" tracks how many
+        // points are currently assigned; can't exceed the pool total.
         this.element.querySelectorAll('.arc').forEach(el =>
             el.addEventListener('click', async (ev) => {
             const arc = ev.currentTarget.dataset.arc;
@@ -1018,7 +1041,9 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
             }
         }));
 
-        // Show item details
+        // Show item details: tries actor's owned item first, then falls back to
+        // world items, then compendia. This cascading lookup lets templates and
+        // character-creation items display info even when not owned by the actor.
         this.element.querySelectorAll('.show-item-details').forEach(el =>
             el.addEventListener('click', async (ev) => {
             ev.preventDefault();
@@ -1031,7 +1056,6 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 if (typeof (item) !== 'undefined') {
                     new OD6SItemInfo(item.data).render({force: true});
                 } else {
-                    // Check compendia
                     item = await od6sutilities._getItemFromCompendium(itemName);
                     if (typeof (item) !== 'undefined') {
                         new OD6SItemInfo(item.data).render({force: true});
@@ -1075,7 +1099,9 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 await this.actor.updateEmbeddedDocuments('Item', [update]);
             }));
 
-        // Vehicle shield allocation by crew member
+        // Shield allocation from a crew member's sheet. Same logic as vehicle .arc handler,
+        // but reads from the synced vehicle data on the character and routes updates through
+        // the vehicle actor. Non-GM players use modifyShields() which goes via socketlib.
         this.element.querySelectorAll('.c-arc').forEach(el =>
             el.addEventListener('click', async (ev) => {
             const actor = await od6sutilities.getActorFromUuid(ev.currentTarget.dataset.uuid);
@@ -1212,6 +1238,9 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         }
     }
 
+    // Build an item picker dialog. Merges items from world and compendia into a single
+    // sorted list, deduplicating by name (world items take priority over compendium items).
+    // Skills are filtered by attribute and exclude any the actor already owns.
     async addItem(ev, caller=this) {
         const data = {};
         data.type = ev.currentTarget.dataset.type;
@@ -1242,13 +1271,12 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
             }
         }
 
-        //if it is a skill, do not include skills the actor already has
         if(data.type === 'skill') {
             worldItems = worldItems.filter(i => !this.actor.items.find(r => r.name === i.name));
             compendiumItems = compendiumItems.filter(i => !this.actor.items.find(r => r.name === i.name));
         }
 
-        // Prefer world items
+        // World items shadow compendium items with the same name
         compendiumItems = compendiumItems.filter(i => !worldItems.find(r => r.name === i.name));
 
         data.items = [...worldItems, ...compendiumItems].sort(function (a, b) {
@@ -1486,11 +1514,13 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     }
 
     /**
-     * Override
+     * Override _onDrop to handle system-specific drop types beyond standard Items/Actors.
+     * Custom drop types: character-template, species-template, item-group (batch item add),
+     * availableaction (combat action drag from palette), assignedaction (reorder assigned actions),
+     * and crewmember (reorder crew list). Skills and specializations are validated before drop.
      */
     async _onDrop(event) {
         event.preventDefault();
-        // Try to extract the data
 
         let data;
         try {
@@ -1500,11 +1530,9 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         }
 
         const actor = this.actor;
-        // Handle the drop with a Hooked function
         const allowed = Hooks.call("dropActorSheetData", actor, this, data);
         if (allowed === false) return;
 
-        // Handle different data types
         switch (data.type) {
             case "ActiveEffect":
                 return this._onDropActiveEffect(event, data);
@@ -1520,6 +1548,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                     case "species-template":
                         return this._onDropSpeciesTemplate(event, item, data);
                     case "skill":
+                        // Skills must have an attribute assigned before they can be added
                         if (typeof (item.system.attribute) === 'undefined' || item.system.attribute === '') {
                             ui.notifications.error(game.i18n.localize('OD6S.MISSING_ATTRIBUTE'))
                             return;
@@ -1527,6 +1556,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                             return this._onDropItem(event, data);
                         }
                     case "specialization":
+                        // Specializations require both attribute and parent skill, and the actor must own the skill
                         if (typeof (item.system.attribute) === 'undefined' || item.system.attribute === '') {
                             ui.notifications.error(game.i18n.localize('OD6S.MISSING_ATTRIBUTE'))
                             return;
@@ -1547,6 +1577,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
             case "availableaction":
                 return await this._createAction(data);
             case "assignedaction":
+                // Reorder an already-assigned action via sort
                 data.type = "action";
                 data._id = data.itemId;
                 return await this._onSortItem(event, data);
@@ -1556,20 +1587,24 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         this.render();
     }
 
-    /* Override */
+    // Override _onDropItem with actor-type-aware equip/effect logic:
+    // - Characters: disable AEs on drop (must equip to activate), except cybernetics/advantages/etc.
+    // - Containers: always un-equip on drop.
+    // - Vehicles/starships: auto-equip native item types, disable effects for cargo hold items.
+    // Sheet-to-sheet drags move the item (create + delete from source).
     async _onDropItem(event, data) {
         if (!this.actor.isOwner) return false;
         const item = await Item.implementation.fromDropData(data);
         const itemData = item.toObject();
 
-        // Verify the actor can have the item type
+        // Vehicles and starships accept any item type (native goes to weapons/gear, others to cargo)
         if (this.actor.type !== 'starship' && this.actor.type !== 'vehicle') {
             if (!OD6S.allowedItemTypes[this.actor.type].includes(itemData.type)) {
                 return false;
             }
         }
 
-        //Set any active effects on characters to disabled until the item is equipped unless the item is a cybernetic
+        // Characters: AEs start disabled until equipped, except always-on types
         if (this.actor.type === 'character') {
             if (itemData.type !== 'cybernetic' &&
                 itemData.type !== 'advantage' &&
@@ -1584,7 +1619,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 itemData.system.equipped.value = false;
             }
         } else {
-            // Do not equip cargo hold items
+            // Vehicles: native item types auto-equip; cargo items stay unequipped with effects disabled
             if (OD6S.allowedItemTypes[this.actor.type].includes(itemData.type)) {
                 if (this._isEquippable(itemData.type)) {
                     itemData.system.equipped.value = true;
@@ -1600,7 +1635,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
             }
         }
 
-        // Handle item sorting within the same Actor
+        // Intra-actor drop = reorder
         if (item.parent !== null && data.uuid.startsWith(item.parent.uuid)) {
             if (this.actor.type === 'starship' || this.actor.type === 'vehicle' &&
                 !OD6S.allowedItemTypes[this.actor.type].includes(itemData.type)) {
@@ -1612,7 +1647,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 await this._onSortItem(event, itemData);
             }
         } else {
-            // Could be dragging from sheet to sheet
+            // Cross-actor drop: create on target, delete from source (if owned)
             let sourceActor;
             if (typeof (data.actorId) !== 'undefined' && data.actorId !== null && data.actor !== '') {
                 if (typeof (data.tokenId) !== 'undefined' && data.tokenId !== null && data.tokenId !== '') {
@@ -1934,10 +1969,11 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     }
 
     /**
-     * Roll an available vehicle action
-     * @param ev
-     * @returns {Promise<void>}
-     * @private
+     * Roll a vehicle action from a crew member's sheet. Score calculation varies by action type:
+     * - Maneuver/ram/dodge: pilot skill + vehicle maneuverability bonus
+     * - Sensors: sensor operator skill + sensor score
+     * - Shields: shields operator skill
+     * - Weapons: gunnery skill + fire control bonus, with weapon-specific scale/damage
      */
     async _rollAvailableVehicleAction(ev) {
         const rollData = {};
@@ -1960,7 +1996,6 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
             rollData.score = od6sutilities.getScoreFromSkill(this.actor, '',
                 actorData.vehicle.shields.skill.value, OD6S.vehicle_actions[data.id].base)
         } else {
-            // Item
             const item = actorData.vehicle.vehicle_weapons.find(i => i.id === data.id);
             if (item !== null && typeof (item) !== 'undefined') {
                 rollData.score = od6sutilities.getScoreFromSkill(this.actor, item.system.specialization.value,
@@ -2019,7 +2054,11 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
             name = game.i18n.localize(name);
         }
 
-        // Create roll data
+        // Build roll score via cascading lookup:
+        // 1. Actor's owned skill (uses full score in non-flat mode, or attribute + flat pips)
+        // 2. World item skill (use parent attribute only, actor doesn't own the skill)
+        // 3. Compendium skill (same as world fallback)
+        // 4. Default attribute from OD6S.actions config (last resort)
         if (data.type === 'attribute') {
             name = data.name;
             rollData.attribute = data.id;
@@ -2034,7 +2073,6 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                         (+this.actor.system.attributes[skill.system.attribute.toLowerCase()].score);
                 }
             } else {
-                // Search compendia for the skill and use the attribute
                 skill = await od6sutilities._getItemFromWorld(name);
                 if (skill !== null && typeof (skill) !== 'undefined') {
                     rollData.score = (+this.actor.system.attributes[skill.system.attribute.toLowerCase()].score);
@@ -2043,7 +2081,6 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                     if (skill !== null && typeof (skill) !== 'undefined') {
                         rollData.score = (+this.actor.system.attributes[skill.system.attribute.toLowerCase()].score);
                     } else {
-                        // Cannot find, use defaults for the type
                         for (const a in OD6S.actions) {
                             if (OD6S.actions[a].type === ev.currentTarget.dataset.type) {
                                 rollData.score = (+this.actor.system.attributes[OD6S.actions[a].base].score);
@@ -2201,6 +2238,8 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         return await this.actor.updateEmbeddedDocuments("Item", updateData);
     }
 
+    // Roll body points: Strength dice + pips + 20 base. This is the D6 system's
+    // alternative to wound levels, where characters have a numeric HP pool instead.
     async _rollBodyPoints() {
         const strDice = od6sutilities.getDiceFromScore(this.actor.system.attributes.str.score +
             this.actor.system.attributes.str.mod)

@@ -1,3 +1,8 @@
+/**
+ * OD6S Actor data model. Manages derived stats (initiative, resistance, strength damage),
+ * wound/stun tracking with configurable deadliness tables, vehicle crew linkage,
+ * and active effect application for characters, NPCs, creatures, and vehicles.
+ */
 import {od6sutilities} from "../system/utilities.js";
 import {od6sroll} from "../apps/od6sroll.js";
 import OD6S from "../config/config-od6s.js";
@@ -125,6 +130,8 @@ export class OD6SActor extends Actor {
         }
     }
 
+    // Calculates vehicle action scores by combining vehicle stats with pilot skill/spec/attribute.
+    // Priority order: specialization > skill > raw attribute (best available is used).
     getVehicleActionScore(action) {
         let vehicle;
         let pilot;
@@ -142,6 +149,7 @@ export class OD6SActor extends Actor {
         }
 
         if(action === 'maneuver') {
+            // Maneuver = vehicle maneuverability + best of (spec, skill, or attribute) from pilot
             let score = vehicle.maneuverability.score;
             if (pilot) {
                 let found = false;
@@ -184,6 +192,8 @@ export class OD6SActor extends Actor {
         const actorData = this.system;
 
         if(this.type.match(/^(character|npc|creature)/)) {
+            // Body points mode: reverse-lookup the wound level key from the deadliness table
+            // by matching the body point ratio to a wound description
             if (OD6S.woundConfig === 1) {
                 actorData.wounds.value =
                     Object.keys(Object.fromEntries(Object.entries(OD6S.deadliness[3]).filter(([k, v]) => v.description === this.getWoundLevelFromBodyPoints())))[0];
@@ -302,11 +312,12 @@ export class OD6SActor extends Actor {
         const base = liftSkill ? liftSkill.system.score + this.system.attributes.str.score : this.system.attributes.str.score;
 
         if (game.settings.get('od6s', 'od6_bonus')) {
-            // Use base directly multiplied by the multiplier
+            // OD6 mode: multiply raw score by the configurable multiplier (default 0.5 for half)
             const modifiedBase = base * OD6S.strDamMultiplier;
             damage = OD6S.strDamRound ? Math.floor(modifiedBase) : Math.ceil(modifiedBase);
         } else {
-            // Calculate based on dice conversion and then apply half dice logic
+            // Standard D6 mode: convert score to whole dice, halve the dice count, then
+            // convert back to score. This gives "half dice" of STR/Lift as damage bonus.
             const dice = Math.ceil(base / OD6S.pipsPerDice);
             const halfDice = OD6S.strDamRound ? Math.floor(dice / 2) : Math.ceil(dice / 2);
             damage = (halfDice * OD6S.pipsPerDice) + this.system.strengthdamage.mod;
@@ -334,7 +345,9 @@ export class OD6SActor extends Actor {
         // 0.7.3 add an option to change the base attribute
         const score = this.system.attributes[OD6S.initiative.attribute].score + this.system.initiative.mod;
         const dice = od6sutilities.getDiceFromScore(score);
+        // Fractional tiebreaker from PER+AGI (e.g. PER=9, AGI=12 -> 0.21) ensures unique initiative order
         const tiebreaker = (+(this.system.attributes.per.score / 100 + this.system.attributes.agi.score / 100).toPrecision(2));
+        // One die is removed from the pool and replaced with an exploding wild die (d6x6)
         dice.dice--;
         formula = dice.dice + "d6[Base]" + "+" + dice.pips + "+1d6x6[Wild]+" + tiebreaker;
         this.system.initiative.formula = formula;
@@ -547,6 +560,8 @@ export class OD6SActor extends Actor {
         await this.update(update);
     }
 
+    // Vehicle damage stacking: same-or-lower severity keeps current level, higher severity
+    // applies directly, but cumulative damage can escalate (e.g. Light + Light = Heavy)
     calculateNewDamageLevel(damage) {
         if (damage === 'OD6S.DAMAGE_DESTROYED') return damage;
         const currentDamageLevel = this.system.damage.value;
@@ -696,15 +711,16 @@ export class OD6SActor extends Actor {
         }
     }
 
+    // Wound stacking logic: new wounds combine with current wound level by advancing through
+    // the deadliness table. Same-or-lower severity increments by 1 step; higher severity jumps
+    // to that level. Missing wound levels in a table get promoted to the next available severity.
     calculateNewWoundLevel(wound) {
         const deadlinessTable = OD6S.deadliness[OD6S.deadlinessLevel[this.type]];
         const currentWoundLevel = this.system.wounds.value;
         const currentWoundCore = deadlinessTable[currentWoundLevel].core;
         if (wound === 'OD6S.WOUNDS_DEAD') return this.findFirstWoundLevel(deadlinessTable, wound);
-        // If the wound table has no "stunned" result promote it to a Wound
         if (wound === 'OD6S.WOUNDS_STUNNED' && !this.findFirstWoundLevel(deadlinessTable, wound))
             wound = 'OD6S.WOUNDS_WOUNDED';
-        // No incapacitated, promote it to Mortally Wounded
         if (wound === 'OD6S.WOUNDS_INCAPACITATED' && !this.findFirstWoundLevel(deadlinessTable, wound)) wound = 'OD6S.WOUNDS_MORTALLY_WOUNDED';
 
         if (currentWoundCore === 'OD6S.WOUNDS_HEALTHY') {
@@ -754,6 +770,8 @@ export class OD6SActor extends Actor {
         }
     }
 
+    // Maps current body points to a wound level by calculating the remaining HP as a percentage
+    // and comparing against configured thresholds in OD6S.bodyPointLevels
     getWoundLevelFromBodyPoints(bp) {
         if (this.type === 'vehicle' || this.type === 'starship') return;
         let bodyPointsCurrent;
@@ -788,7 +806,9 @@ export class OD6SActor extends Actor {
         await this.update(update);
     }
 
-    // Changed to allow for custom skill and multiplier.
+    // Calculates damage resistance: sum of equipped armor DR (reduced by armor damage) plus
+    // either STR-based resistance or a custom skill-based resistance with configurable multiplier.
+    // 'noArmor' type skips armor DR entirely for unarmored resistance checks.
     setResistance(type) {
         let dr = 0;
         if (['vehicle', 'starship', 'container', 'base'].includes(this.type)) return 0;
@@ -935,10 +955,9 @@ export class OD6SActor extends Actor {
         return this.getFlag('od6s', 'crew');
     }
 
+    // Post-roll character point spending: rolls 1d6x6 (exploding on 6) and adds the result
+    // to an existing roll message, deducting 1 CP from the actor. Updates defense scores if applicable.
     async useCharacterPointOnRoll(message) {
-        // Roll 1d6x6 and deduct a character point from the actor
-        //const actor = game.actors.get(message.speaker.actor);
-        // Bail if out of character points
         if (this.system.characterpoints.value < 1) {
             ui.notifications.warn(game.i18n.localize("OD6S.NOT_ENOUGH_CP_ROLL"));
             return;
