@@ -183,7 +183,7 @@ export class od6sInitRoll {
         const messageOptions = {
             'flags.od6s.canUseCp': true
         };
-        if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) messageOptions.messageMode = "private";
+        if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) messageOptions.rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
         await game.combats.active.rollInitiative(rollData.combatantId, {
             "formula": rollString,
             "messageOptions": messageOptions
@@ -1438,7 +1438,7 @@ export class od6sroll {
 
 
         rollData.isknown = true;
-        let messageMode = "public";
+        let messageMode = CONST.DICE_ROLL_MODES.PUBLIC;
         // Fate point: doubles the original (pre-modifier) dice and pips, and sets a persistent
         // flag so the doubling carries over to all rolls for the remainder of the round
         if (rollData.fatepoint) {
@@ -1850,14 +1850,14 @@ export class od6sroll {
         }
 
         if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) {
-            messageMode = "private";
+            messageMode = CONST.DICE_ROLL_MODES.PRIVATE;
         }
         const rollMessage = await roll.toMessage({
                 speaker: ChatMessage.getSpeaker({actor: actor}),
                 flavor: label,
                 flags: {od6s: flags}
             },
-            {messageMode: messageMode, create: true}
+            {rollMode: messageMode, create: true}
         );
 
         // Wild die "critical failure" handling (mode 2): discard the highest normal die AND

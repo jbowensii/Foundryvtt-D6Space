@@ -1,6 +1,6 @@
 {
   "name": "opend6-space",
-  "version": "2.8.3",
+  "version": "2.8.4",
   "description": "This is a system intended for playing OpenD6 Space on Foundry VTT. It uses the rules from the OpenD6 Project SRD found at http://opend6project.org. Content comes from the OpenD6 Space System, of which a PDF rulebook can be found at https://ogc.rpglibrary.org/index.php?title=OpenD6. The ruleset has been released under the terms of the OGL v1.0a.",
   "main": "gulpfile.js",
   "scripts": {

@@ -1137,8 +1137,8 @@ export class OD6SActor extends Actor {
                             }
                         }
 
-                        let messageMode = "public";
-                        if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) messageMode = "private";
+                        let rollMode = CONST.DICE_ROLL_MODES.PUBLIC;
+                        if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
 
                         const rollMessage = await roll.toMessage({
                             speaker: ChatMessage.getSpeaker({actor: game.actors.find(a => a.id === this.id)}),
@@ -1146,7 +1146,7 @@ export class OD6SActor extends Actor {
                             flags: {
                                 od6s: flags
                             },
-                            messageMode: messageMode, create: true
+                            rollMode: rollMode, create: true
                         });
 
                         if (flags.wild === true && OD6S.wildDieOneDefault === 2 && OD6S.wildDieOneAuto === 0) {

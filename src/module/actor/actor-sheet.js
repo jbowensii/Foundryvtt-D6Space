@@ -2275,13 +2275,13 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
         const label = game.i18n.localize('OD6S.ROLLING') + " " + game.i18n.localize(OD6S.bodyPointsName);
 
-        let messageMode = 0;
-        if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) messageMode = "private";
+        let rollMode = CONST.DICE_ROLL_MODES.PUBLIC;
+        if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
         const roll = await new Roll(rollString).evaluate();
         await roll.toMessage({
             speaker: ChatMessage.getSpeaker(),
             flavor: label,
-            messageMode: messageMode, create: true
+            rollMode: rollMode, create: true
         });
 
         const update = {};
