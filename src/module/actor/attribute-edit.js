@@ -12,7 +12,7 @@ export class od6sattributeedit {
         const editData = { score };
 
         const advanceTemplate = "systems/od6s/templates/actor/common/attribute-edit.html";
-        const html = await renderTemplate(advanceTemplate, editData);
+        const html = await foundry.applications.handlebars.renderTemplate(advanceTemplate, editData);
 
         await foundry.applications.api.DialogV2.prompt({
             window: { title: game.i18n.localize("OD6S.EDIT") + " " + label + "!" },
