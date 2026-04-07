@@ -9,11 +9,9 @@
         <div>
             <label for="itemtype"><b>{{localize 'OD6S.TYPE'}}</b>:</label>
             <select name="itemtype" id="itemtype">
-                {{#select this.type}}
-                    {{#each (templateItemTypes this.type) as |itemType itemKey|}}
-                        <option value="{{itemKey}}">{{localize itemType.label}}</option>
-                    {{/each}}
-                {{/select}}
+                {{#each (templateItemTypes this.type) as |itemType itemKey|}}
+                    <option value="{{itemKey}}" {{#if (eq itemKey ../this.type)}}selected{{/if}}>{{localize itemType.label}}</option>
+                {{/each}}
             </select>
         </div>
     {{/if}}

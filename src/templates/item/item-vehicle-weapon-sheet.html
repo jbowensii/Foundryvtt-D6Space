@@ -15,13 +15,11 @@
                         <div class="resource">
                             <label class="resource-label" for="item.system.price">{{localize 'OD6S.PRICE'}}</label>
                             <select name="system.price" id="item.system.price">
-                                {{#select item.system.price}}
-                                    {{#each (getPrices) as |price key|}}
-                                        <option value="{{ key }}">
-                                            {{key}}: {{localize price}}
-                                        </option>
-                                    {{/each}}
-                                {{/select}}
+                                {{#each (getPrices) as |price key|}}
+                                    <option value="{{ key }}" {{#if (eq key ../item.system.price)}}selected{{/if}}>
+                                        {{key}}: {{localize price}}
+                                    </option>
+                                {{/each}}
                             </select>
                         </div>
                     {{else}}
@@ -35,13 +33,11 @@
                         <div class="resource">
                             <label class="resource-label" for="item.system.damaged">{{localize 'OD6S.DAMAGE'}}</label>
                             <select name="system.damaged" id="item.system.damaged">
-                                {{#select item.system.damaged}}
-                                    {{#each (getWeaponDamageLevels) as |level key|}}
-                                        <option value="{{ key }}">
-                                            {{localize level}}
-                                        </option>
-                                    {{/each}}
-                                {{/select}}
+                                {{#each (getWeaponDamageLevels) as |level key|}}
+                                    <option value="{{ key }}" {{#if (eq key ../item.system.damaged)}}selected{{/if}}>
+                                        {{localize level}}
+                                    </option>
+                                {{/each}}
                             </select>
                         </div>
                     {{/if}}
@@ -105,13 +101,11 @@
                         <div class="flexrow flex-group-left" title="{{localize 'OD6S.DAMAGE_TYPE'}}">
                             <label for="item.system.damage.type"></label>
                             <select name="system.damage.type" id="item.system.damage.type">
-                                {{#select item.system.damage.type }}
-                                    {{#each (getDamageTypes) as |damagetype key|}}
-                                        <option value="{{ key }}">
-                                            {{localize damagetype}}
-                                        </option>
-                                    {{/each}}
-                                {{/select}}
+                                {{#each (getDamageTypes) as |damagetype key|}}
+                                    <option value="{{ key }}" {{#if (eq key ../item.system.damage.type)}}selected{{/if}}>
+                                        {{localize damagetype}}
+                                    </option>
+                                {{/each}}
                             </select>
                         </div>
                     </div>

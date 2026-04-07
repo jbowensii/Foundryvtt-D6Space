@@ -33,15 +33,13 @@
                 <div class="flexrow" data-attribute="{{item.system.attribute}}">
                 <label for="item.system.attribute">{{localize 'OD6S.ATTRIBUTE'}}:</label>
                 <select name="system.attribute" id="item.system.attribute" style="width: 70px;">
-                    {{#select item.system.attribute}}
-                        {{#each (getAttributes) as |attribute key|}}
-                            {{#if attribute.active }}
-                            <option value="{{ key }}">
-                                {{localize attribute.name}}
-                            </option>
-                            {{/if}}
-                        {{/each}}
-                    {{/select}}
+                    {{#each (getAttributes) as |attribute key|}}
+                        {{#if attribute.active }}
+                        <option value="{{ key }}" {{#if (eq key ../item.system.attribute)}}selected{{/if}}>
+                            {{localize attribute.name}}
+                        </option>
+                        {{/if}}
+                    {{/each}}
                 </select>
             </div>
             <div class="flexrow flex-group-left">

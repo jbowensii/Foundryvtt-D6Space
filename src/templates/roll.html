@@ -15,11 +15,9 @@
                 <div class="flexrow flex-group-left target" data-target="{{target}}">
                     <label for="target">{{localize 'OD6S.TARGET'}}</label>
                     <select name="target" id="target">
-                        {{#select target}}
-                            {{#each targets as |target|}}
-                                <option value="{{target}}">{{target.name}}</option>
+                        {{#each targets as |target|}}
+                                <option value="{{target}}" {{#if (eq target ../target)}}selected{{/if}}>{{target.name}}</option>
                             {{/each}}
-                        {{/select}}
                     </select>
                 </div>
             {{/if}}
@@ -61,28 +59,24 @@
                      data-speed="{{vehiclespeed}}">
                     <label for="vehiclespeed">{{localize 'OD6S.VEHICLE_ATTACK_SPEED'}}</label>
                     <select name="vehiclespeed" id="vehiclespeed" style="width: 70px;">
-                        {{#select vehiclespeed}}
-                            {{#each (getVehicleSpeeds) as |vehiclespeed key|}}
+                        {{#each (getVehicleSpeeds) as |vehiclespeed key|}}
                                 <option value="{{key}}"
-                                        {{#if (eq key vehiclespeed)}}selected{{/if}}>
+                                        {{#if (eq key ../vehiclespeed)}}selected{{/if}}>
                                     {{localize vehiclespeed.name}}
                                 </option>
                             {{/each}}
-                        {{/select}}
                     </select>
                 </div>
                 <div class="flexrow flex-group-left vehicleterraindifficulty" data-type="vehicleterraindifficulty"
                      data-speed="{{vehicleterraindifficulty}}">
                     <label for="vehicleterraindifficulty">{{localize 'OD6S.TERRAIN_DIFFICULTY'}}</label>
                     <select name="vehicleterraindifficulty" id="vehicleterraindifficulty" style="width: 70px;">
-                        {{#select vehicleterraindifficulty}}
-                            {{#each (getTerrainDifficulties) as |vehicleterraindifficulty key|}}
+                        {{#each (getTerrainDifficulties) as |vehicleterraindifficulty key|}}
                                 <option value="{{key}}"
-                                        {{#if (eq key vehicleterraindifficulty)}}selected{{/if}}>
+                                        {{#if (eq key ../vehicleterraindifficulty)}}selected{{/if}}>
                                     {{localize key}}
                                 </option>
                             {{/each}}
-                        {{/select}}
                     </select>
                 </div>
             {{else}}
@@ -91,11 +85,9 @@
                         <div class="flexrow flex-group-left difficultylevel" data-difficultylevel="{{difficultylevel}}">
                             <label for="difficultylevel">{{localize 'OD6S.DIFFICULTY'}}</label>
                             <select name="difficultylevel" id="difficultylevel">
-                                {{#select difficultylevel}}
-                                    {{#each (getDifficulties) as |difficultylevel key|}}
-                                        <option value="{{key}}">{{localize key}}</option>
+                                {{#each (getDifficulties) as |difficultylevel key|}}
+                                        <option value="{{key}}" {{#if (eq key ../difficultylevel)}}selected{{/if}}>{{localize key}}</option>
                                     {{/each}}
-                                {{/select}}
                             </select>
                         </div>
                         {{#if (eq difficultylevel "OD6S.DIFFICULTY_CUSTOM")}}
@@ -115,11 +107,9 @@
             <div class="flexrow flex-group-left useattribute" data-attribute="{{attribute}}">
                 <label for="useattribute">{{localize 'OD6S.ATTRIBUTE'}}</label>
                 <select name="useattribute" id="useattribute" style="width: 70px;">
-                    {{#select attribute}}
-                        {{#each actor.system.attributes as |attribute key|}}
-                            <option value="{{key}}">{{getAttributeName key}}</option>
+                    {{#each actor.system.attributes as |attribute key|}}
+                            <option value="{{key}}" {{#if (eq key ../attribute)}}selected{{/if}}>{{getAttributeName key}}</option>
                         {{/each}}
-                    {{/select}}
                 </select>
             </div>
         {{/if}}
@@ -237,15 +227,13 @@
                     <div class="flexrow flex-group-left difficultylevel" data-difficultylevel="{{difficultylevel}}">
                         <label for="difficultylevel">{{localize 'OD6S.DIFFICULTY'}}</label>
                         <select name="difficultylevel" id="difficultylevel">
-                            {{#select difficultylevel}}
-                                {{#each (getDifficulties) as |difficultylevel key|}}
+                            {{#each (getDifficulties) as |difficultylevel key|}}
 
                                     <option value="{{key}}"
-                                            {{#if (eq key ../difficulty)}}selected{{/if}}>
+                                            {{#if (eq key ../difficultylevel)}}selected{{/if}}>
                                         {{localize key}}
                                     </option>
                                 {{/each}}
-                            {{/select}}
                         </select>
                     </div>
                     {{#if (eq difficultylevel "OD6S.DIFFICULTY_CUSTOM")}}
@@ -266,42 +254,36 @@
                      data-speed="{{vehiclespeed}}">
                     <label for="vehiclespeed">{{localize 'OD6S.VEHICLE_ATTACK_SPEED'}}</label>
                     <select name="vehiclespeed" id="vehiclespeed" style="width: 70px;">
-                        {{#select vehiclespeed}}
-                            {{#each (getVehicleSpeeds) as |vehiclespeed key|}}
+                        {{#each (getVehicleSpeeds) as |vehiclespeed key|}}
                                 <option value="{{key}}"
-                                        {{#if (eq key vehiclespeed)}}selected{{/if}}>
+                                        {{#if (eq key ../vehiclespeed)}}selected{{/if}}>
                                     {{localize vehiclespeed.name}}
                                 </option>
                             {{/each}}
-                        {{/select}}
                     </select>
                 </div>
                 <div class="flexrow flex-group-left vehiclecollisiontype" data-type="vehiclecollisiontype"
                      data-speed="{{vehiclecollisiontype}}">
                     <label for="vehiclecollisiontype">{{localize 'OD6S.VEHICLE_COLLISION_TYPE'}}</label>
                     <select name="vehiclecollisiontype" id="vehiclecollisiontype" style="width: 70px;">
-                        {{#select vehiclecollisiontype}}
-                            {{#each (getCollisionTypes) as |vehiclecollisiontype key|}}
+                        {{#each (getCollisionTypes) as |vehiclecollisiontype key|}}
                                 <option value="{{key}}"
-                                        {{#if (eq key vehiclecollisiontype)}}selected{{/if}}>
+                                        {{#if (eq key ../vehiclecollisiontype)}}selected{{/if}}>
                                     {{localize vehiclecollisiontype.name}}
                                 </option>
                             {{/each}}
-                        {{/select}}
                     </select>
                 </div>
                 <div class="flexrow flex-group-left vehicleterraindifficulty" data-type="vehicleterraindifficulty"
                      data-speed="{{vehicleterraindifficulty}}">
                     <label for="vehicleterraindifficulty">{{localize 'OD6S.TERRAIN_DIFFICULTY'}}</label>
                     <select name="vehicleterraindifficulty" id="vehicleterraindifficulty" style="width: 70px;">
-                        {{#select vehicleterraindifficulty}}
-                            {{#each (getTerrainDifficulties) as |vehicleterraindifficulty key|}}
+                        {{#each (getTerrainDifficulties) as |vehicleterraindifficulty key|}}
                                 <option value="{{key}}"
-                                        {{#if (eq key vehicleterraindifficulty)}}selected{{/if}}>
+                                        {{#if (eq key ../vehicleterraindifficulty)}}selected{{/if}}>
                                     {{localize key}}
                                 </option>
                             {{/each}}
-                        {{/select}}
                     </select>
                 </div>
             {{else}}
@@ -312,14 +294,12 @@
                             <div class="flexrow flex-group-left range" data-range="{{range}}">
                                 <label for="range">{{localize 'OD6S.RANGE'}}</label>
                                 <select name="range" id="range" style="width:50px">
-                                    {{#select modifiers.range}}
-                                        {{#each (getRanges) as |range key|}}
+                                    {{#each (getRanges) as |range key|}}
                                             <option value="{{key}}" title="{{localize range.name}}"
-                                                    {{#if (eq key range)}}selected{{/if}}>
+                                                    {{#if (eq key ../modifiers.range)}}selected{{/if}}>
                                                 {{localize range.name}}
                                             </option>
                                         {{/each}}
-                                    {{/select}}
                                 </select>
                             </div>
                         {{/unless}}
@@ -328,14 +308,12 @@
                             <div class="flexrow flex-group-left attackoption modifier" data-type="attackoption">
                                 <label for="attackoption">{{localize 'OD6S.ATTACK_OPTIONS'}}</label>
                                 <select name="attackoption" id="attackoption" style="width: 50px;">
-                                    {{#select modifiers.attackoption}}
-                                        {{#each (getAttackOptions "rangedattack") as |option key|}}
+                                    {{#each (getAttackOptions "rangedattack") as |option key|}}
                                             <option value="{{key}}" title="{{localize (concat key "_DESCRIPTION")}}"
-                                                    {{#if (eq key attackoption)}}selected{{/if}}>
+                                                    {{#if (eq key ../modifiers.attackoption)}}selected{{/if}}>
                                                 {{localize key}}
                                             </option>
                                         {{/each}}
-                                    {{/select}}
                                 </select>
                             </div>
                             {{#if multishot }}
@@ -351,14 +329,12 @@
                             <div class="flexrow flex-group-left attackoption modifier">
                                 <label for="attackoption">{{localize 'OD6S.ATTACK_OPTIONS'}}</label>
                                 <select name="attackoption" id="attackoption" style="width: 70px;">
-                                    {{#select modifiers.attackoption}}
-                                        {{#each (getAttackOptions "meleeattack") as |option key|}}
+                                    {{#each (getAttackOptions "meleeattack") as |option key|}}
                                             <option value="{{key}}" title="{{localize (concat key "_DESCRIPTION")}}"
-                                                    {{#if (eq key attackoption)}}selected{{/if}}>
+                                                    {{#if (eq key ../modifiers.attackoption)}}selected{{/if}}>
                                                 {{localize key}}
                                             </option>
                                         {{/each}}
-                                    {{/select}}
                                 </select>
                             </div>
                         {{/if}}
@@ -366,14 +342,12 @@
                             <div class="flexrow flex-group-left attackoption modifier" data-type="attackoption">
                                 <label for="attackoption">{{localize 'OD6S.ATTACK_OPTIONS'}}</label>
                                 <select name="attackoption" id="attackoption" style="width: 70px;">
-                                    {{#select modifiers.attackoption}}
-                                        {{#each (getAttackOptions "brawlattack") as |option key|}}
+                                    {{#each (getAttackOptions "brawlattack") as |option key|}}
                                             <option value="{{key}}" title="{{localize (concat key "_DESCRIPTION")}}"
-                                                    {{#if (eq key attackoption)}}selected{{/if}}>
+                                                    {{#if (eq key ../modifiers.attackoption)}}selected{{/if}}>
                                                 {{localize key}}
                                             </option>
                                         {{/each}}
-                                    {{/select}}
                                 </select>
                             </div>
                         {{/if}}
@@ -384,27 +358,23 @@
                             <div class="flexrow flex-group-left calledshot modifier" data-type="calledshot">
                                 <label for="calledshot">{{localize "OD6S.CALLED_SHOT"}}</label>
                                 <select name="calledshot" id="calledshot" style="width: 70px;">
-                                    {{#select modifiers.calledshot}}
-                                        {{#each (getCalledShot) as |calledshot key|}}
+                                    {{#each (getCalledShot) as |calledshot key|}}
                                             <option value="{{key}}" title="{{localize (concat key "_DESCRIPTION")}}"
-                                                    {{#if (eq key calledshot)}}selected{{/if}}>
+                                                    {{#if (eq key ../modifiers.calledshot)}}selected{{/if}}>
                                                 {{localize key}}
                                             </option>
                                         {{/each}}
-                                    {{/select}}
                                 </select>
                             </div>
                             <div class="flexrow flex-group-left cover modifier" data-type="cover">
                                 <label for="cover">{{localize "OD6S.COVER"}}</label>
                                 <select name="cover" id="cover" style="width: 70px;">
-                                    {{#select modifiers.cover}}
-                                        {{#each (getCover "OD6S.COVER") as |cover key|}}
+                                    {{#each (getCover "OD6S.COVER") as |cover key|}}
                                             <option value="{{key}}" title="{{localize (concat key "_DESCRIPTION")}}"
-                                                    {{#if (eq key cover)}}selected{{/if}}>
+                                                    {{#if (eq key ../modifiers.cover)}}selected{{/if}}>
                                                 {{localize key}}
                                             </option>
                                         {{/each}}
-                                    {{/select}}
                                 </select>
                             </div>
                             {{#if (diceForScale)}}
@@ -430,27 +400,23 @@
                             <div class="flexrow flex-group-left coverlight modifier" data-type="coverlight">
                                 <label for="coverlight">{{localize "OD6S.COVER_LIGHT"}}</label>
                                 <select name="coverlight" id="coverlight" style="width: 70px;">
-                                    {{#select modifiers.coverlight}}
-                                        {{#each (getCover "OD6S.COVER_LIGHT") as |coverlight key|}}
+                                    {{#each (getCover "OD6S.COVER_LIGHT") as |coverlight key|}}
                                             <option value="{{key}}" title="{{localize (concat key "_DESCRIPTION")}}"
-                                                    {{#if (eq key coverlight)}}selected{{/if}}>
+                                                    {{#if (eq key ../modifiers.coverlight)}}selected{{/if}}>
                                                 {{localize key}}
                                             </option>
                                         {{/each}}
-                                    {{/select}}
                                 </select>
                             </div>
                             <div class="flexrow flex-group-left coversmoke modifier" data-type="coversmoke">
                                 <label for="coversmoke">{{localize "OD6S.COVER_SMOKE"}}</label>
                                 <select name="coversmoke" id="coversmoke" style="width: 70px;">
-                                    {{#select modifiers.coversmoke}}
-                                        {{#each (getCover "OD6S.COVER_SMOKE") as |coversmoke key|}}
+                                    {{#each (getCover "OD6S.COVER_SMOKE") as |coversmoke key|}}
                                             <option value="{{key}}" title="{{localize (concat key "_DESCRIPTION")}}"
-                                                    {{#if (eq key coversmoke)}}selected{{/if}}>
+                                                    {{#if (eq key ../modifiers.coversmoke)}}selected{{/if}}>
                                                 {{localize key}}
                                             </option>
                                         {{/each}}
-                                    {{/select}}
                                 </select>
                             </div>
                             <div class="flexrow flex-group-left miscmod modifier"
