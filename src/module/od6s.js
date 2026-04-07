@@ -23,14 +23,51 @@ import OD6SSocketHandler from "./system/socket.js";
 import OD6S from "./config/config-od6s.js";
 import od6sSettings from "./config/settings-od6s.js";
 import od6sHandlebars from "./system/handlebars.js"
-import {OD6SInitiative} from "./system/initative.js";
+import {OD6SInitiative} from "./system/initiative.js";
 import {OD6SCombat} from "./overrides/combat.js";
 import {od6sroll} from "./apps/od6sroll.js";
+
+// DataModel imports — Actors
+import {CharacterData} from "./data/actor/character.js";
+import {NpcData} from "./data/actor/npc.js";
+import {CreatureData} from "./data/actor/creature.js";
+import {VehicleData} from "./data/actor/vehicle.js";
+import {StarshipData} from "./data/actor/starship.js";
+import {ContainerData} from "./data/actor/container.js";
+
+// DataModel imports — Items
+import {SkillData} from "./data/item/skill.js";
+import {SpecializationData} from "./data/item/specialization.js";
+import {AdvantageData} from "./data/item/advantage.js";
+import {DisadvantageData} from "./data/item/disadvantage.js";
+import {SpecialAbilityData} from "./data/item/special-ability.js";
+import {ArmorData} from "./data/item/armor.js";
+import {WeaponData} from "./data/item/weapon.js";
+import {GearData} from "./data/item/gear.js";
+import {CyberneticData} from "./data/item/cybernetic.js";
+import {ManifestationData} from "./data/item/manifestation.js";
+import {CharacterTemplateData} from "./data/item/character-template.js";
+import {ActionData} from "./data/item/action.js";
+import {VehicleItemData} from "./data/item/vehicle-item.js";
+import {VehicleWeaponData} from "./data/item/vehicle-weapon.js";
+import {VehicleGearData} from "./data/item/vehicle-gear.js";
+import {StarshipWeaponData} from "./data/item/starship-weapon.js";
+import {StarshipGearData} from "./data/item/starship-gear.js";
+import {SpeciesTemplateData} from "./data/item/species-template.js";
+import {ItemGroupData} from "./data/item/item-group.js";
 
 od6sSettings();
 od6sHandlebars();
 
 Hooks.once('init', async function () {
+
+    // Catch otherwise-silent errors that can trigger a reload or broken UI
+    window.addEventListener("error", (event) => {
+        try { console.error("OD6S window.error:", event?.error ?? event?.message ?? event); } catch (_) {}
+    });
+    window.addEventListener("unhandledrejection", (event) => {
+        try { console.error("OD6S unhandledrejection:", event?.reason ?? event); } catch (_) {}
+    });
 
     game.od6s = {
         OD6SActor,
@@ -76,6 +113,35 @@ Hooks.once('init', async function () {
     CONFIG.Dice.terms["w"] = WildDie;
     CONFIG.Dice.terms["b"] = CharacterPointDie;
     CONFIG.Token.objectClass = OD6SToken;
+
+    // Register TypeDataModel classes for actor types (replaces template.json schema)
+    CONFIG.Actor.dataModels.character = CharacterData;
+    CONFIG.Actor.dataModels.npc = NpcData;
+    CONFIG.Actor.dataModels.creature = CreatureData;
+    CONFIG.Actor.dataModels.vehicle = VehicleData;
+    CONFIG.Actor.dataModels.starship = StarshipData;
+    CONFIG.Actor.dataModels.container = ContainerData;
+
+    // Register TypeDataModel classes for item types
+    CONFIG.Item.dataModels.skill = SkillData;
+    CONFIG.Item.dataModels.specialization = SpecializationData;
+    CONFIG.Item.dataModels.advantage = AdvantageData;
+    CONFIG.Item.dataModels.disadvantage = DisadvantageData;
+    CONFIG.Item.dataModels.specialability = SpecialAbilityData;
+    CONFIG.Item.dataModels.armor = ArmorData;
+    CONFIG.Item.dataModels.weapon = WeaponData;
+    CONFIG.Item.dataModels.gear = GearData;
+    CONFIG.Item.dataModels.cybernetic = CyberneticData;
+    CONFIG.Item.dataModels.manifestation = ManifestationData;
+    CONFIG.Item.dataModels["character-template"] = CharacterTemplateData;
+    CONFIG.Item.dataModels.action = ActionData;
+    CONFIG.Item.dataModels.vehicle = VehicleItemData;
+    CONFIG.Item.dataModels["vehicle-weapon"] = VehicleWeaponData;
+    CONFIG.Item.dataModels["vehicle-gear"] = VehicleGearData;
+    CONFIG.Item.dataModels["starship-weapon"] = StarshipWeaponData;
+    CONFIG.Item.dataModels["starship-gear"] = StarshipGearData;
+    CONFIG.Item.dataModels["species-template"] = SpeciesTemplateData;
+    CONFIG.Item.dataModels["item-group"] = ItemGroupData;
 
     CONFIG.ChatMessage.template = "systems/od6s/templates/chat/chat.html";
 
