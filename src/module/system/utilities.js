@@ -105,17 +105,12 @@ export class od6sutilities {
             flags.range = newRanges;
             flags.origRange = range;
             const label = game.i18n.localize('OD6S.RANGE_ROLL') + ": " + item.name;
-            let rollMode = CONST.DICE_ROLL_MODES.PUBLIC;
-            if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
-            await roll.toMessage({
-                speaker: ChatMessage.getSpeaker(),
-                flavor: label,
-                flags: {
-                    od6s: flags
-                },
-                rollMode: rollMode,
-                create: true
-            })
+            let messageMode = "public";
+            if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) messageMode = "gm";
+            await roll.toMessage(
+                { speaker: ChatMessage.getSpeaker(), flavor: label, flags: { od6s: flags } },
+                { messageMode, create: true }
+            )
         }
         return newRanges;
     }
@@ -296,15 +291,15 @@ export class od6sutilities {
                 if(typeof(origMessage) !== 'undefined') {
                     const cloneMessage = origMessage.clone(data);
                     await origMessage.unsetFlag('od6s', 'isExplosive');
-                    let rollMode = CONST.DICE_ROLL_MODES.PUBLIC;
+                    let messageMode = "public";
                     if(origMessage.whisper.length > 0) {
-                        rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
+                        messageMode = "gm";
                     } else if (origMessage.blind) {
-                        rollMode = CONST.DICE_ROLL_MODES.BLIND;
+                        messageMode = "blind";
                     }
                     await ChatMessage.deleteDocuments([origMessage.id]);
                     cloneMessage.flags.od6s.canUseCp = false;
-                    const _newMessage = cloneMessage.rolls[0].toMessage(cloneMessage, {rollMode: rollMode});
+                    const _newMessage = cloneMessage.rolls[0].toMessage(cloneMessage, {messageMode});
                 }
             }
         }
@@ -368,9 +363,9 @@ export class od6sutilities {
         msgData.speaker.token = actor.isToken ? actor.token.id : '';
         msgData.speaker.scene = game.scenes.active.id;
 
-        let _rollMode = CONST.DICE_ROLL_MODES.PUBLIC;
+        let _messageMode = "public";
         let rollString = "";
-        if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) _rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
+        if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) _messageMode = "gm";
 
         if(game.settings.get('od6s','explosive_zones')) {
             // Separate rolls for each zone; damage score represents whole dice

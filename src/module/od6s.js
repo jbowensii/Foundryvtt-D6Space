@@ -238,11 +238,11 @@ Hooks.on('deleteRegion', async (template) => {
 
 // Chat hooks
 // Chat listeners
-Hooks.on('renderChatMessageHTML', (msg, html, data) => {
-    if (game.settings.get('od6s', 'hide-gm-rolls') && data.whisperTo !== '') {
-        if (game.user.isGM === false &&
-            game.userId !== data.author.id &&
-            data.message.whisper.indexOf(game.user.id) === -1) {
+Hooks.on('renderChatMessageHTML', (msg, html, context) => {
+    if (game.settings.get('od6s', 'hide-gm-rolls') && msg.whisper?.length > 0) {
+        if (!game.user.isGM &&
+            game.userId !== msg.author?.id &&
+            !msg.whisper.includes(game.user.id)) {
             msg.sound = null;
             html.style.display = 'none';
         }
@@ -546,17 +546,13 @@ Hooks.on('renderChatLog', (log, html, data) => {
             }
         }
 
-        let messageMode = CONST.DICE_ROLL_MODES.PUBLIC;
-        if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) messageMode = CONST.DICE_ROLL_MODES.PRIVATE;
+        let messageMode = "public";
+        if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) messageMode = "gm";
 
-        const rollMessage = await roll.toMessage({
-            speaker: ChatMessage.getSpeaker({actor: game.actors.find(a => a.id === data.actor)}),
-            flavor: label,
-            flags: {
-                od6s: flags
-            },
-            rollMode: messageMode, create: true
-        });
+        const rollMessage = await roll.toMessage(
+            { speaker: ChatMessage.getSpeaker({actor: game.actors.find(a => a.id === data.actor)}), flavor: label, flags: { od6s: flags } },
+            { messageMode, create: true }
+        );
 
         // Wild die penalty (wildDieOneDefault=2): when the wild die rolls 1, find the highest
         // normal die and discard it, reducing the total. This is the "remove highest" penalty
@@ -815,7 +811,7 @@ Hooks.on('diceSoNiceRollStart', (messageId, context) => {
     }
 })
 
-Hooks.on('renderChatMessageHTML', (message, html, data) => {
+Hooks.on('renderChatMessageHTML', (message, html, context) => {
     ui.chat.scrollBottom();
 })
 
@@ -1462,7 +1458,7 @@ async function simpleRoll() {
             callback: async (event2, button, dialog) => {
                     let wild = false;
                     let rollString = "";
-                    let messageMode = CONST.DICE_ROLL_MODES.PUBLIC;
+                    let messageMode = "public";
                     let dice = (button.form ?? dialog.element).querySelector("#dice").value;
                     const pips = (button.form ?? dialog.element).querySelector("#pips").value;
                     const damageRoll = (button.form ?? dialog.element).querySelector('#damageroll').checked;
@@ -1522,15 +1518,11 @@ async function simpleRoll() {
                         }
                     }
 
-                    if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) messageMode = CONST.DICE_ROLL_MODES.PRIVATE;
-                    const rollMessage = await roll.toMessage({
-                        speaker: ChatMessage.getSpeaker(),
-                        flavor: label,
-                        flags: {
-                            od6s: flags
-                        },
-                        rollMode: messageMode, create: true
-                    });
+                    if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) messageMode = "gm";
+                    const rollMessage = await roll.toMessage(
+                        { speaker: ChatMessage.getSpeaker(), flavor: label, flags: { od6s: flags } },
+                        { messageMode, create: true }
+                    );
 
                     // Same "remove highest" wild die penalty as the damage-button handler above
                     if (flags.wild === true && OD6S.wildDieOneDefault === 2 && OD6S.wildDieOneAuto === 0) {

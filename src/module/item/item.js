@@ -150,7 +150,7 @@ export class OD6SItem extends Item {
             if ( pack ) collection = game.packs.get(pack);
             else collection = game.collections.get(documentName);
         }
-        const folders = collection?._formatFolderSelectOptions() ?? [];
+        const folders = collection?.folders?.map(f => ({id: f.id, name: f.name})) ?? [];
         const label = game.i18n.localize(this.metadata.label);
         const title = game.i18n.format("DOCUMENT.Create", {type: label});
 

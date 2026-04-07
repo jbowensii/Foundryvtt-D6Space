@@ -13,7 +13,8 @@ export class OD6SToken extends foundry.canvas.placeables.Token {
         return !this._movement && !blockMove;
     }
 
-    async drawEffects() {
+    /** @override */
+    async _drawEffects() {
         const wasVisible = this.effects.visible;
         this.effects.visible = false;
         this.effects.removeChildren().forEach(c => c.destroy());
@@ -21,8 +22,7 @@ export class OD6SToken extends foundry.canvas.placeables.Token {
         this.effects.bg.visible = false;
         this.effects.overlay = null;
 
-        // Use Actor effects only — TokenDocument#effects and #overlayEffect are deprecated (removed in v14)
-        const actorEffects = this.actor?.temporaryEffects || [];
+        const actorEffects = this.actor?.appliedEffects ?? [];
         let overlay = { src: null, tint: null };
 
         if ( actorEffects.length ) {
@@ -30,12 +30,15 @@ export class OD6SToken extends foundry.canvas.placeables.Token {
 
             // Draw actor effects, hiding wound status icons from non-owners
             for ( const f of actorEffects ) {
-                const status = [...f.statuses][0];
                 if ( !f.img ) continue;
-                if(!this.isOwner && OD6S.hiddenStatusEffects.find(e=> e === status)) continue;
-                const tint = Color.from(f.tint ?? null);
+                // Filter hidden statuses for non-owners
+                if ( !this.isOwner ) {
+                    const status = [...f.statuses][0];
+                    if ( OD6S.hiddenStatusEffects.includes(status) ) continue;
+                }
+                const tint = foundry.utils.Color.from(f.tint ?? null);
                 if ( f.getFlag("core", "overlay") ) {
-                    if ( overlay && overlay.src ) promises.push(this._drawEffect(overlay.src, overlay.tint));
+                    if ( overlay.src ) promises.push(this._drawEffect(overlay.src, overlay.tint));
                     overlay = {src: f.img, tint};
                     continue;
                 }
@@ -49,6 +52,5 @@ export class OD6SToken extends foundry.canvas.placeables.Token {
         this.effects.overlay = await this._drawOverlay(overlay.src, overlay.tint);
         this.effects.bg.visible = true;
         this.effects.visible = wasVisible;
-        this._refreshEffects();
     }
 }

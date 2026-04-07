@@ -2275,14 +2275,13 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
         const label = game.i18n.localize('OD6S.ROLLING') + " " + game.i18n.localize(OD6S.bodyPointsName);
 
-        let rollMode = CONST.DICE_ROLL_MODES.PUBLIC;
-        if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
+        let messageMode = "public";
+        if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) messageMode = "gm";
         const roll = await new Roll(rollString).evaluate();
-        await roll.toMessage({
-            speaker: ChatMessage.getSpeaker(),
-            flavor: label,
-            rollMode: rollMode, create: true
-        });
+        await roll.toMessage(
+            { speaker: ChatMessage.getSpeaker(), flavor: label },
+            { messageMode, create: true }
+        );
 
         const update = {};
         update[`system.wounds.body_points.max`] = roll.total;
