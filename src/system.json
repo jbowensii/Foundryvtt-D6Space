@@ -14,7 +14,8 @@
     }
   ],
   "esmodules": [
-    "module/od6s.js"
+    "module/od6s.js",
+    "module/quench/o6s-quench.js"
   ],
   "styles": [
     "css/od6s.css"

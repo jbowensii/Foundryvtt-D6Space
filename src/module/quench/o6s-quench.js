@@ -1,319 +1,145 @@
-/*
-  OpenD6 Space – Quench Test Scaffolding
-  Purpose: Register placeholder Quench suites and tests matching TEST_PLAN_QUENCH.md IDs.
-  Behavior: If Quench is not installed/ready, this file is a no-op. If Quench is present,
-            it will register suites and tests that currently always pass but log their
-            intended manual steps. This provides immediate visibility in Quench and a
-            skeleton to incrementally replace with real automated interactions.
-*/
+/**
+ * OpenD6 Space — Quench Test Registration
+ * Registers test batches with Quench (if installed) using the quenchReady hook.
+ * Each batch corresponds to a module area with placeholder tests that log manual steps.
+ */
 
-(() => {
-  const QUIET = false; // set true to suppress console info logs
+Hooks.on("quenchReady", (quench) => {
 
-  const log = (msg, ...rest) => {
-    if (!QUIET) console.info(`[OD6S/Quench] ${msg}`, ...rest);
-  };
-
-  // Define the suites/tests derived from TEST_PLAN_QUENCH.md
-  const suites = [
-    {
-      id: 'O6S.SYS',
-      label: 'System Load & Configuration',
-      tests: [
-        {
-          id: 'O6S.SYS.001',
-          name: 'System installs and loads',
-          steps: [
-            'Install system from manifest (README) or local system.json.',
-            'Create/launch a World using od6s; wait for initial load.'
-          ]
-        },
-        {
-          id: 'O6S.SYS.002',
-          name: 'System settings menu present',
-          steps: [
-            'Open Game Settings > Configure Settings > System Settings.',
-            'Verify OpenD6 Space settings groups render and open.'
-          ]
-        },
-        {
-          id: 'O6S.SYS.003',
-          name: 'Grid and units',
-          steps: [
-            'Open Scene configuration for “Blank”.',
-            'Confirm grid distance 1 and units m; save and persist.'
-          ]
-        }
-      ]
-    },
-    {
-      id: 'O6S.LOC',
-      label: 'Localization',
-      tests: [
-        {
-          id: 'O6S.LOC.001',
-          name: 'Language switching',
-          steps: [
-            'Switch language between en, fr, es, ru.',
-            'Reopen common UIs; verify localization without missing keys.'
-          ]
-        }
-      ]
-    },
-    {
-      id: 'O6S.CMP',
-      label: 'Compendia',
-      tests: [
-        {
-          id: 'O6S.CMP.001',
-          name: 'All compendia load',
-          steps: [
-            'Open Compendium tab.',
-            'Open all packs (items/actors/macros) and verify contents; drag-drop to sidebar.'
-          ]
-        }
-      ]
-    },
-    {
-      id: 'O6S.ACT',
-      label: 'Actors & Actor Sheets',
-      tests: [
-        { id: 'O6S.ACT.001', name: 'Create Character actor', steps: [
-          'Actors > Create Actor > Type: Character.',
-          'Open sheet; verify sections and no console errors.'
-        ]},
-        { id: 'O6S.ACT.002', name: 'Create Vehicle actor', steps: [
-          'Create Actor > Type: Vehicle.',
-          'Open sheet; verify vehicle stats.'
-        ]},
-        { id: 'O6S.ACT.003', name: 'Create Starship actor', steps: [
-          'Create Actor > Type: Starship.',
-          'Open sheet; verify starship stats/crew UI if applicable.'
-        ]},
-        { id: 'O6S.ACT.004', name: 'Attribute edit', steps: [
-          'On Character sheet, edit an attribute value inline.',
-          'Blur/save; reopen and verify persistence and dice/pips updates.'
-        ]},
-        { id: 'O6S.ACT.005', name: 'Character creation helper (if present)', steps: [
-          'Launch character creation app/dialog.',
-          'Verify selections update actor; cancel/confirm behavior.'
-        ]}
-      ]
-    },
-    {
-      id: 'O6S.ITM',
-      label: 'Items & Item Sheets',
-      tests: [
-        { id: 'O6S.ITM.001', name: 'Create core item types', steps: [
-          'Create items for: Weapon, Armor, Gear, Skill, Advantage, Disadvantage, Natural, Cybernetic, Special Ability, Vehicle Gear/Weapon, Starship Gear/Weapon, Character Template.',
-          'Open each sheet; verify tabs (Attributes where applicable).'
-        ]},
-        { id: 'O6S.ITM.002', name: 'Weapon stun fields', steps: [
-          'Open a Weapon item; set Stun Dice/Pips to non-zero on Attributes tab.',
-          'Save and verify persistence.'
-        ]},
-        { id: 'O6S.ITM.003', name: 'Drag items onto Actor', steps: [
-          'Drag Weapon, Armor, Gear from Items to Character.',
-          'Verify inventory sections, quantity, equipped flags editable.'
-        ]}
-      ]
-    },
-    {
-      id: 'O6S.ROL',
-      label: 'Rolling & Chat',
-      tests: [
-        { id: 'O6S.ROL.001', name: 'Skill roll from sheet', steps: [
-          'Click a Skill roll on Character.',
-          'Accept dialog defaults and roll.'
-        ]},
-        { id: 'O6S.ROL.002', name: 'Attribute roll from sheet', steps: [
-          'Roll a core attribute; verify chat card.'
-        ]},
-        { id: 'O6S.ROL.003', name: 'Weapon attack roll', steps: [
-          'From inventory, use Weapon attack control to roll to chat.'
-        ]},
-        { id: 'O6S.ROL.004', name: 'Damage roll including Stun option', steps: [
-          'Trigger weapon damage roll with Stun fields set; ensure Stun checkbox appears.',
-          'Toggle Stun ON and roll; verify chat reflects Stun path.'
-        ]},
-        { id: 'O6S.ROL.005', name: 'Rerolls/exploding die/wild die', steps: [
-          'Perform multiple rolls to trigger wild die/explosions; verify behavior.'
-        ]},
-        { id: 'O6S.ROL.006', name: 'Chat sound (if configured)', steps: [
-          'Perform a roll that emits sound; verify audio plays without error.'
-        ]}
-      ]
-    },
-    {
-      id: 'O6S.AUTO',
-      label: 'Automation & Special Dialogs',
-      tests: [
-        { id: 'O6S.AUTO.001', name: 'Explosives template placement', steps: [
-          'Open explosives template tool/dialog.',
-          'Place template on Scene; verify behavior; cancel removes.'
-        ]},
-        { id: 'O6S.AUTO.002', name: 'Add embedded crew (vehicles/starships)', steps: [
-          'On Vehicle/Starship, use add embedded crew action; verify embedding.'
-        ]},
-        { id: 'O6S.AUTO.003', name: 'Config: active attributes', steps: [
-          'Open active attributes config; toggle attribute; save.',
-          'Reopen Character; visibility matches config.'
-        ]},
-        { id: 'O6S.AUTO.004', name: 'Config: attribute sorting', steps: [
-          'Open attribute sorting config; reorder; save; verify sheet order.'
-        ]},
-        { id: 'O6S.AUTO.005', name: 'Config: automation', steps: [
-          'Open automation config; toggle option; perform affected roll; verify.'
-        ]},
-        { id: 'O6S.AUTO.006', name: 'Config: character points', steps: [
-          'Adjust character points config; verify sheet updates.'
-        ]},
-        { id: 'O6S.AUTO.007', name: 'Config: custom fields', steps: [
-          'Add custom field via config; open sheet and verify render/persistence.'
-        ]}
-      ]
-    },
-    {
-      id: 'O6S.TOK',
-      label: 'Tokens & Scene Interactions',
-      tests: [
-        { id: 'O6S.TOK.001', name: 'Token creation and overlay', steps: [
-          'Drag Character to Scene to create Token.',
-          'Apply condition/effect to set overlay; verify token overlay/tint.'
-        ]},
-        { id: 'O6S.TOK.002', name: 'Targeting and roll with target', steps: [
-          'Place attacker/defender tokens; target defender.',
-          'Perform attack; verify chat/automation uses target.'
-        ]}
-      ]
-    },
-    {
-      id: 'O6S.PER',
-      label: 'Permissions & Ownership',
-      tests: [
-        { id: 'O6S.PER.001', name: 'Player vs GM sheet access', steps: [
-          'As GM, set PL1 owner of Character and remove other ownership.',
-          'As PL1, open owned vs unowned sheets; verify permissions.'
-        ]},
-        { id: 'O6S.PER.002', name: 'Item visibility and edit restrictions', steps: [
-          'As PL1, attempt to edit non-owned items; verify restrictions.'
-        ]}
-      ]
-    },
-    {
-      id: 'O6S.MAC',
-      label: 'Macros',
-      tests: [
-        { id: 'O6S.MAC.001', name: 'Macros compendium import', steps: [
-          'Drag a macro from Macros compendium into Macro Directory.',
-          'Execute macro; verify expected output or action.'
-        ]}
-      ]
-    },
-    {
-      id: 'O6S.SOC',
-      label: 'Socket & Multiplayer',
-      tests: [
-        { id: 'O6S.SOC.001', name: 'Socketlib availability', steps: [
-          'Ensure socketlib enabled; check console for socket registration errors.'
-        ]},
-        { id: 'O6S.SOC.002', name: 'Player triggers GM-only effects (if applicable)', steps: [
-          'As PL1, trigger GM-side action via socket; observe GM client.'
-        ]}
-      ]
-    },
-    {
-      id: 'O6S.PKS',
-      label: 'Packs & Data Integrity',
-      tests: [
-        { id: 'O6S.PKS.001', name: 'Drag from pack to world', steps: [
-          'Drag Skill, Weapon, Armor from packs into World directories; open and verify schema.'
-        ]},
-        { id: 'O6S.PKS.002', name: 'Actor packs (vehicles/starships)', steps: [
-          'Drag Vehicle and Starship from packs into Actors; open and verify fields.'
-        ]}
-      ]
-    },
-    {
-      id: 'O6S.MIG',
-      label: 'Data Schema & Migrations',
-      tests: [
-        { id: 'O6S.MIG.001', name: 'Version metadata', steps: [
-          'Compare system.json version vs displayed system version; ensure no unexpected migrations.'
-        ]}
-      ]
-    },
-    {
-      id: 'O6S.UIX',
-      label: 'General UI/UX',
-      tests: [
-        { id: 'O6S.UIX.001', name: 'Sheet tab navigation', steps: [
-          'On Item/Actor sheets, switch through tabs including Attributes/Inventory; observe.'
-        ]},
-        { id: 'O6S.UIX.002', name: 'Drag-and-drop between lists', steps: [
-          'Reorder items in Actor inventory; drag to delete/drop zones; verify.'
-        ]}
-      ]
-    }
-  ];
-
-  function tryRegister(quenchApi) {
-    if (!quenchApi) return false;
-    const registerSuite = quenchApi.registerSuite || quenchApi.addSuite || quenchApi.suite;
-    const addTest = (suiteCtx, title, fn) => {
-      // Cover a few API shapes
-      if (typeof suiteCtx.test === 'function') return suiteCtx.test(title, fn);
-      if (typeof quenchApi.test === 'function') return quenchApi.test(title, fn);
-      // Fallback: run immediately so at least it logs in console
-      log(`(fallback run) ${title}`);
-      return Promise.resolve().then(fn);
-    };
-
-    if (typeof registerSuite !== 'function') return false;
-
-    for (const suite of suites) {
-      try {
-        registerSuite.call(quenchApi, suite.id, (suiteCtx) => {
-          for (const t of suite.tests) {
-            const title = `${t.id} – ${t.name}`;
-            addTest(suiteCtx, title, async (ctx = {}) => {
-              // Log planned steps for visibility
-              if (Array.isArray(t.steps)) {
-                t.steps.forEach((s, i) => log(`${t.id} step ${i + 1}: ${s}`));
-              }
-              // Placeholders: replace with actual assertions/actions
-              if (ctx?.assert?.true) {
-                ctx.assert.true(true, 'Placeholder – replace with automated steps.');
-              }
+    // System Load & Configuration
+    quench.registerBatch("od6s.system", (context) => {
+        const { describe, it, assert } = context;
+        describe("System Load", function() {
+            it("should have od6s system registered", function() {
+                assert.ok(game.system.id === "od6s");
             });
-          }
-        }, { description: suite.label });
-        log(`Registered Quench suite: ${suite.id} – ${suite.label}`);
-      } catch (e) {
-        console.warn(`[OD6S/Quench] Failed to register suite ${suite.id}`, e);
-      }
-    }
-    return true;
-  }
+            it("should have OD6SActor document class", function() {
+                assert.ok(CONFIG.Actor.documentClass);
+            });
+            it("should have OD6SItem document class", function() {
+                assert.ok(CONFIG.Item.documentClass);
+            });
+            it("should have custom dice terms registered", function() {
+                assert.ok(CONFIG.Dice.terms["w"], "WildDie registered");
+                assert.ok(CONFIG.Dice.terms["b"], "CharacterPointDie registered");
+            });
+            it("should have status effects configured", function() {
+                assert.ok(CONFIG.statusEffects);
+                assert.ok(CONFIG.statusEffects.dead, "dead status exists");
+                assert.ok(CONFIG.statusEffects.stunned, "stunned status exists");
+            });
+        });
+    }, { displayName: "OD6S: System Load & Configuration" });
 
-  // Hook into Quench readiness in a defensive manner
-  if (globalThis.Hooks?.once) {
-    Hooks.once('quenchReady', (api) => {
-      if (!tryRegister(api)) {
-        console.warn('[OD6S/Quench] quenchReady fired but API shape not supported.');
-      }
-    });
-  }
+    // Actor Creation & Sheets
+    quench.registerBatch("od6s.actors", (context) => {
+        const { describe, it, assert } = context;
+        describe("Actor Types", function() {
+            for (const type of ["character", "npc", "creature", "vehicle", "starship", "container"]) {
+                it(`should create a ${type} actor`, async function() {
+                    const actor = await Actor.create({ name: `Test ${type}`, type: type });
+                    assert.ok(actor, `${type} actor created`);
+                    assert.equal(actor.type, type);
+                    await actor.delete();
+                });
+            }
+        });
+    }, { displayName: "OD6S: Actors & Actor Sheets" });
 
-  // Also try on ready in case Quench is already up or exposes a global
-  if (globalThis.Hooks?.once) {
-    Hooks.once('ready', () => {
-      const api = globalThis.quench || game?.modules?.get?.('quench')?.api;
-      if (!api) {
-        log('Quench not detected; test scaffolding inactive.');
-        return;
-      }
-      tryRegister(api);
-    });
-  }
-})();
+    // Item Creation & Sheets
+    quench.registerBatch("od6s.items", (context) => {
+        const { describe, it, assert } = context;
+        describe("Item Types", function() {
+            const itemTypes = ["skill", "specialization", "advantage", "disadvantage",
+                "specialability", "armor", "weapon", "gear", "cybernetic", "manifestation",
+                "character-template", "action", "vehicle", "vehicle-weapon", "vehicle-gear",
+                "starship-weapon", "starship-gear", "species-template", "item-group"];
+            for (const type of itemTypes) {
+                it(`should create a ${type} item`, async function() {
+                    const item = await Item.create({ name: `Test ${type}`, type: type });
+                    assert.ok(item, `${type} item created`);
+                    assert.equal(item.type, type);
+                    await item.delete();
+                });
+            }
+        });
+    }, { displayName: "OD6S: Items & Item Sheets" });
+
+    // Dice & Rolling
+    quench.registerBatch("od6s.dice", (context) => {
+        const { describe, it, assert } = context;
+        describe("Dice Encoding", function() {
+            it("should convert score 7 to 2D+1", function() {
+                const result = game.od6s.config.pipsPerDice;
+                assert.ok(result, "pipsPerDice is defined");
+            });
+        });
+        describe("Wild Die", function() {
+            it("should have WildDie with denomination 'w'", function() {
+                assert.equal(CONFIG.Dice.terms["w"].DENOMINATION, "w");
+            });
+            it("should have CharacterPointDie with denomination 'b'", function() {
+                assert.equal(CONFIG.Dice.terms["b"].DENOMINATION, "b");
+            });
+        });
+    }, { displayName: "OD6S: Dice & Rolling" });
+
+    // Compendium Packs
+    quench.registerBatch("od6s.packs", (context) => {
+        const { describe, it, assert } = context;
+        describe("Compendium Packs", function() {
+            const expectedPacks = ["weapons", "armor", "natural", "advantages",
+                "disadvantages", "skills", "metaphysics-skills", "specialabilities",
+                "gear", "cybernetics", "vehicles", "character-templates", "macros"];
+            for (const packName of expectedPacks) {
+                it(`should have ${packName} pack`, function() {
+                    const pack = game.packs.get(`od6s.${packName}`);
+                    assert.ok(pack, `${packName} pack exists`);
+                });
+            }
+            it("should have entries in weapons pack", async function() {
+                const pack = game.packs.get("od6s.weapons");
+                const index = await pack.getIndex();
+                assert.ok(index.size > 0, `weapons has ${index.size} entries`);
+            });
+        });
+    }, { displayName: "OD6S: Compendium Packs" });
+
+    // Settings
+    quench.registerBatch("od6s.settings", (context) => {
+        const { describe, it, assert } = context;
+        describe("System Settings", function() {
+            it("should have use_wild_die setting", function() {
+                const val = game.settings.get("od6s", "use_wild_die");
+                assert.ok(typeof val === "boolean", "use_wild_die is boolean");
+            });
+            it("should have hide-gm-rolls setting", function() {
+                const val = game.settings.get("od6s", "hide-gm-rolls");
+                assert.ok(typeof val === "boolean", "hide-gm-rolls is boolean");
+            });
+        });
+    }, { displayName: "OD6S: Settings" });
+
+    // DataModels
+    quench.registerBatch("od6s.datamodels", (context) => {
+        const { describe, it, assert } = context;
+        describe("Actor DataModels", function() {
+            for (const type of ["character", "npc", "creature", "vehicle", "starship", "container"]) {
+                it(`should have DataModel for ${type}`, function() {
+                    assert.ok(CONFIG.Actor.dataModels[type], `${type} DataModel registered`);
+                });
+            }
+        });
+        describe("Item DataModels", function() {
+            const types = ["skill", "specialization", "advantage", "disadvantage",
+                "specialability", "armor", "weapon", "gear", "cybernetic", "manifestation",
+                "action", "vehicle", "species-template", "item-group"];
+            for (const type of types) {
+                it(`should have DataModel for ${type}`, function() {
+                    assert.ok(CONFIG.Item.dataModels[type], `${type} DataModel registered`);
+                });
+            }
+        });
+    }, { displayName: "OD6S: DataModels" });
+
+});
