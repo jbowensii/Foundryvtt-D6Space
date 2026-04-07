@@ -1622,14 +1622,14 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                     sourceActor = game.actors.get(data.actorId);
                 }
                 if (game.user.isGM || sourceActor.isOwner) {
-                    if (await this._onDropItemCreate(itemData)) {
+                    if (await this.actor.createEmbeddedDocuments("Item", Array.isArray(itemData) ? itemData : [itemData])) {
                         await sourceActor.deleteEmbeddedDocuments('Item', [system._id]);
                     }
                 } else {
                     ui.notifications.warn('OD6S.WARN_NOT_DELETING_ITEM_OWNER');
                 }
             } else {
-                await this._onDropItemCreate(itemData);
+                await this.actor.createEmbeddedDocuments("Item", Array.isArray(itemData) ? itemData : [itemData]);
             }
         }
         this.render();

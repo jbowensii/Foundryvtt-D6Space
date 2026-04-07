@@ -43,8 +43,10 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
     /** @override — render correct template for this item type, bypassing cached PARTS */
     async _renderHTML(context, options) {
         const template = `systems/od6s/templates/item/item-${this.document.type}-sheet.html`;
-        const partContext = await this._preparePartContext("form", { ...context });
-        const htmlString = await foundry.applications.handlebars.renderTemplate(template, partContext);
+        // Pass the full context directly — no need for _preparePartContext spread
+        console.log(`OD6SItemSheet._renderHTML: template=${template}, contextKeys=${Object.keys(context)}, item.system.damage=`, context.item?.system?.damage);
+        const htmlString = await foundry.applications.handlebars.renderTemplate(template, context);
+        console.log(`OD6SItemSheet._renderHTML: htmlString length=${htmlString.length}, first200=${htmlString.substring(0, 200)}`);
         const parser = new DOMParser();
         const doc = parser.parseFromString(htmlString, "text/html");
         const element = doc.body.firstElementChild;
