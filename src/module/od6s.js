@@ -546,8 +546,8 @@ Hooks.on('renderChatLog', (log, html, data) => {
             }
         }
 
-        let rollMode = 'roll';
-        if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
+        let messageMode = "public";
+        if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) messageMode = "private";
 
         const rollMessage = await roll.toMessage({
             speaker: ChatMessage.getSpeaker({actor: game.actors.find(a => a.id === data.actor)}),
@@ -555,7 +555,7 @@ Hooks.on('renderChatLog', (log, html, data) => {
             flags: {
                 od6s: flags
             },
-            rollMode: rollMode, create: true
+            messageMode: messageMode, create: true
         });
 
         // Wild die penalty (wildDieOneDefault=2): when the wild die rolls 1, find the highest
@@ -1462,7 +1462,7 @@ async function simpleRoll() {
             callback: async (event2, button, dialog) => {
                     let wild = false;
                     let rollString = "";
-                    let rollMode = 0;
+                    let messageMode = "public";
                     let dice = (button.form ?? dialog.element).querySelector("#dice").value;
                     const pips = (button.form ?? dialog.element).querySelector("#pips").value;
                     const damageRoll = (button.form ?? dialog.element).querySelector('#damageroll').checked;
@@ -1522,14 +1522,14 @@ async function simpleRoll() {
                         }
                     }
 
-                    if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
+                    if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) messageMode = "private";
                     const rollMessage = await roll.toMessage({
                         speaker: ChatMessage.getSpeaker(),
                         flavor: label,
                         flags: {
                             od6s: flags
                         },
-                        rollMode: rollMode, create: true
+                        messageMode: messageMode, create: true
                     });
 
                     // Same "remove highest" wild die penalty as the damage-button handler above

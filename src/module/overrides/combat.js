@@ -28,7 +28,7 @@ export class OD6SCombat extends Combat {
         // For NPCs and batch rolls, apply GM roll hiding and use default behavior
         if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) {
             options.messageOptions ??= {};
-            options.messageOptions.rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
+            options.messageOptions.messageMode = "private";
         }
         return super.rollInitiative(ids, options);
     }

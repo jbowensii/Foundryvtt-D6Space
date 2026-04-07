@@ -106,14 +106,14 @@ export class od6sutilities {
             flags.origRange = range;
             const label = game.i18n.localize('OD6S.RANGE_ROLL') + ": " + item.name;
             let rollMode = 'roll';
-            if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
+            if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) rollMode = "private";
             await roll.toMessage({
                 speaker: ChatMessage.getSpeaker(),
                 flavor: label,
                 flags: {
                     od6s: flags
                 },
-                rollMode: rollMode,
+                messageMode: rollMode,
                 create: true
             })
         }
@@ -296,16 +296,16 @@ export class od6sutilities {
                 if(typeof(origMessage) !== 'undefined') {
                     const cloneMessage = origMessage.clone(data);
                     await origMessage.unsetFlag('od6s', 'isExplosive');
-                    let rollMode = CONST.DICE_ROLL_MODES.PUBLIC;
+                    let rollMode = "public";
                     if(origMessage.whisper.length > 0) {
-                        rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
+                        rollMode = "private";
                     } else if (origMessage.blind) {
-                        rollMode = CONST.DICE_ROLL_MODES.BLIND;
+                        rollMode = "blind";
                     } else {
                     }
                     await ChatMessage.deleteDocuments([origMessage.id]);
                     cloneMessage.flags.od6s.canUseCp = false;
-                    const _newMessage = cloneMessage.rolls[0].toMessage(cloneMessage, {rollMode: rollMode});
+                    const _newMessage = cloneMessage.rolls[0].toMessage(cloneMessage, {messageMode: rollMode});
                 }
             }
         }
@@ -371,7 +371,7 @@ export class od6sutilities {
 
         let _rollMode = 'roll';
         let rollString = "";
-        if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) _rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
+        if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) _rollMode = "private";
 
         if(game.settings.get('od6s','explosive_zones')) {
             // Separate rolls for each zone; damage score represents whole dice
