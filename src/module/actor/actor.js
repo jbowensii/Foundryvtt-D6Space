@@ -1241,7 +1241,7 @@ export class OD6SActor extends Actor {
                 default: true,
                 callback: (event, button, dialog) => {
                     const form = (button.form ?? dialog.element).querySelector("form");
-                    const fd = new FormDataExtended(form);
+                    const fd = new foundry.applications.ux.FormDataExtended(form);
                     foundry.utils.mergeObject(data, fd.object);
                     if (!data.folder) delete data["folder"];
                     if (types.length === 1) data.type = types[0];

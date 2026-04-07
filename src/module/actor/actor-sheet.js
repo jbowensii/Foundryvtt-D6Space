@@ -79,7 +79,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
             items: this.actor.items.map(i => {
                 const itemObj = i.toObject();
                 itemObj.id = i.id;
-                itemObj.img = itemObj.img || CONST.DEFAULT_TOKEN;
+                itemObj.img = itemObj.img || "icons/svg/mystery-man.svg";
                 return itemObj;
             }),
             effects: this.actor.effects,
@@ -204,7 +204,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
         // Iterate through items, allocating to containers
         for (const i of sheetData.items) {
-            i.img = i.img || CONST.DEFAULT_TOKEN;
+            i.img = i.img || "icons/svg/mystery-man.svg";
             // Append to gear.
             if (i.type === 'gear') {
                 gear.push(i);
@@ -305,7 +305,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         // Iterate through items, allocating to containers
         // let totalWeight = 0;
         for (const i of sheetData.items) {
-            i.img = i.img || CONST.DEFAULT_TOKEN;
+            i.img = i.img || "icons/svg/mystery-man.svg";
             // Append to vehicle weapons
             if (i.type === 'skill') {
                 if (!OD6S.flatSkills &&
@@ -352,7 +352,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         // Iterate through items, allocating to containers
         // let totalWeight = 0;
         for (const i of sheetData.items) {
-            i.img = i.img || CONST.DEFAULT_TOKEN;
+            i.img = i.img || "icons/svg/mystery-man.svg";
             // Append to starship weapons
             if (i.type === 'skill') {
                 if (!OD6S.flatSkills &&
@@ -395,7 +395,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         const container = [];
 
         for (const i of sheetData.items) {
-            i.img = i.img || CONST.DEFAULT_TOKEN;
+            i.img = i.img || "icons/svg/mystery-man.svg";
             container.push(i);
         }
 
@@ -1080,11 +1080,11 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 const itemName = ev.currentTarget.dataset.itemName;
                 item = await od6sutilities._getItemFromWorld(itemName);
                 if (typeof (item) !== 'undefined') {
-                    new OD6SItemInfo(item.data).render({force: true});
+                    new OD6SItemInfo(item).render({force: true});
                 } else {
                     item = await od6sutilities._getItemFromCompendium(itemName);
                     if (typeof (item) !== 'undefined') {
-                        new OD6SItemInfo(item.data).render({force: true});
+                        new OD6SItemInfo(item).render({force: true});
                     }
                 }
             }
@@ -1569,7 +1569,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
             case "Actor":
                 return this._onDropActor(event, data);
             case "Item":
-                const item = await Item.fromDropData(data);
+                const item = await Item.implementation.fromDropData(data);
                 switch (item.type) {
                     case "character-template":
                         return this._onDropCharacterTemplate(event, item, data);

@@ -1358,7 +1358,7 @@ export async function createOD6SMacro(data, slot) {
 
     if (data.type !== "Item" || data.type !== 'availableaction') return;
     if (!data.uuid.includes('Actor.') && !data.uuid.includes('Token.'))return ui.notifications.warn(game.i18n.localize('OD6S.WARN_NOT_OWNED'));
-    const item = await Item.fromDropData(data);
+    const item = await Item.implementation.fromDropData(data);
 
     // Filter out certain item types
     if (item.type === '' ||
@@ -1378,7 +1378,7 @@ export async function createOD6SMacro(data, slot) {
     const command = `game.od6s.rollItemMacro("${item._id}");`;
     let macro = game.macros.find(m => (m.name === item.name) && (m.command === command));
     if (!macro) {
-        macro = await Macro.create({
+        macro = await Macro.implementation.create({
             name: item.name,
             type: "script",
             img: item.img,

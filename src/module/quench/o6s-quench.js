@@ -45,7 +45,7 @@ Hooks.on("quenchReady", (quench) => {
         describe("Actor Types", function() {
             for (const type of ["character", "npc", "creature", "vehicle", "starship", "container"]) {
                 it(`should create a ${type} actor`, async function() {
-                    const actor = await Actor.create({ name: `Test ${type}`, type: type });
+                    const actor = await Actor.implementation.create({ name: `Test ${type}`, type: type });
                     assert.ok(actor, `${type} actor created`);
                     assert.equal(actor.type, type);
                     await actor.delete();
@@ -64,7 +64,7 @@ Hooks.on("quenchReady", (quench) => {
                 "starship-weapon", "starship-gear", "species-template", "item-group"];
             for (const type of itemTypes) {
                 it(`should create a ${type} item`, async function() {
-                    const item = await Item.create({ name: `Test ${type}`, type: type });
+                    const item = await Item.implementation.create({ name: `Test ${type}`, type: type });
                     assert.ok(item, `${type} item created`);
                     assert.equal(item.type, type);
                     await item.delete();
@@ -188,7 +188,7 @@ Hooks.on("quenchReady", (quench) => {
         let testActor;
 
         before(async function() {
-            testActor = await Actor.create({ name: "DD Test Character", type: "character" });
+            testActor = await Actor.implementation.create({ name: "DD Test Character", type: "character" });
         });
 
         after(async function() {
@@ -241,7 +241,7 @@ Hooks.on("quenchReady", (quench) => {
         let testActor;
 
         before(async function() {
-            testActor = await Actor.create({ name: "AE Test Character", type: "character" });
+            testActor = await Actor.implementation.create({ name: "AE Test Character", type: "character" });
         });
 
         after(async function() {
@@ -294,8 +294,8 @@ Hooks.on("quenchReady", (quench) => {
         let testVehicle, testCharacter;
 
         before(async function() {
-            testVehicle = await Actor.create({ name: "Test Vehicle", type: "vehicle" });
-            testCharacter = await Actor.create({ name: "Test Pilot", type: "character" });
+            testVehicle = await Actor.implementation.create({ name: "Test Vehicle", type: "vehicle" });
+            testCharacter = await Actor.implementation.create({ name: "Test Pilot", type: "character" });
         });
 
         after(async function() {
@@ -342,7 +342,7 @@ Hooks.on("quenchReady", (quench) => {
         let testActor;
 
         before(async function() {
-            testActor = await Actor.create({ name: "Data Test Character", type: "character" });
+            testActor = await Actor.implementation.create({ name: "Data Test Character", type: "character" });
         });
 
         after(async function() {

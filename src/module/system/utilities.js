@@ -1178,7 +1178,7 @@ export class od6sutilities {
             "isCollision": collision,
             "passengerDamage": passengerDamage
         }
-        await ChatMessage.create(data);
+        await ChatMessage.implementation.create(data);
     }
 
     static
@@ -1337,7 +1337,7 @@ export class od6sutilities {
                 newValue = newValue.replace(match, value);
             }
         }
-        if (typeof(newValue) === 'undefined' || newValue.includes('undefined') && game.user.isGM()) {
+        if (typeof(newValue) === 'undefined' || newValue.includes('undefined') && game.user.isGM) {
             ui.notifications.warn(game.i18n.localize('OD6S.WARN_EFFECT_PARSE') + ' ' + change.value);
             return 0;
         }
