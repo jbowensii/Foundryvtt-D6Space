@@ -1,3 +1,26 @@
+@use "colors" as c;
+
 $padding-sm: 5px;
 $padding-md: 10px;
 $padding-lg: 20px;
+
+// CSS Variable injection for Light/Dark themes
+:root, .theme-light, [data-theme="light"] {
+  --od6s-text: #{c.$text-primary-light};
+  --od6s-muted: #{c.$text-muted-light};
+  --od6s-surface: #{c.$surface-light};
+  --od6s-surface-2: #{c.$surface-2-light};
+  --od6s-surface-3: #{c.$surface-3-light};
+  --od6s-border: #{c.$border-light};
+  --od6s-focus: #{c.$focus-light};
+}
+
+:root.theme-dark, .theme-dark, [data-theme="dark"] {
+  --od6s-text: #{c.$text-primary-dark};
+  --od6s-muted: #{c.$text-muted-dark};
+  --od6s-surface: #{c.$surface-dark};
+  --od6s-surface-2: #{c.$surface-2-dark};
+  --od6s-surface-3: #{c.$surface-3-dark};
+  --od6s-border: #{c.$border-dark};
+  --od6s-focus: #{c.$focus-dark};
+}

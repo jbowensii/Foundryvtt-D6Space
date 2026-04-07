@@ -1,3 +1,8 @@
+%flex-left-base {
+  display: flex;
+  justify-content: space-between;
+}
+
 .flex-center {
   align-items: center;
   justify-content: center;
@@ -9,12 +14,10 @@
 }
 
 .flex-left {
-  display: flex;
-  justify-content: space-between;
+  @extend %flex-left-base;
   align-items: center;
 }
 
 .flex-left-plain {
-  display: flex;
-  justify-content: space-between;
+  @extend %flex-left-base;
 }

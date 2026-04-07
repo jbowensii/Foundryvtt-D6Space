@@ -1,0 +1,57 @@
+.od6s.create-character {
+  background: var(--od6s-surface);
+  color: var(--od6s-text);
+  padding: 8px;
+  border-radius: 5px;
+
+  .creation-form {
+    padding: 10px;
+
+    .select-template {
+      min-height: 680px;
+    }
+
+    .template-dropdown {
+      margin-bottom: 10px;
+    }
+
+    .create-character-skills {
+      margin-bottom: 10px;
+    }
+
+    .create-character-dice {
+      margin-bottom: 15px;
+    }
+
+    .character-create-button {
+      margin-top: 20px;
+    }
+  }
+
+  .template-holder,
+  .skills-holder {
+    .template-header {
+      border-radius: 10px;
+      background: var(--od6s-surface-2);
+      color: var(--od6s-text);
+      border: 1px solid var(--od6s-border);
+      padding: 10px;
+      width: 95%;
+      min-height: 80px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+
+    .content-box {
+      border-radius: 10px;
+      background: var(--od6s-surface-3);
+      color: var(--od6s-text);
+      border: 1px solid var(--od6s-border);
+      padding: 10px;
+      width: 95%;
+      height: auto;
+      min-height: 100px;
+      margin-bottom: 10px;
+    }
+  }
+}

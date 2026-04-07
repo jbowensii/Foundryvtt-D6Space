@@ -1,20 +1,553 @@
 // Import utilities.
-@import 'utils/typography';
-@import 'utils/colors';
-@import 'utils/mixins';
-@import 'utils/variables';
+@use "sass:meta";
+@use 'utils/typography';
+@use 'utils/colors';
+@use 'utils/mixins';
+@use 'utils/variables';
 
 /* Global styles */
-@import 'global/window';
-@import 'global/grid';
-@import 'global/flex';
-@import 'global/column';
+@use 'global/window';
+@use 'global/grid';
+@use 'global/flex';
+@use 'global/column';
+
+/* Web fonts */
+@import url('https://fonts.googleapis.com/css2?family=Martel:wght@400;800&family=Roboto:wght@300;400;500&display=swap');
 
 /* Styles limited to od6s sheets */
 .od6s {
-  @import 'components/forms';
-  @import 'components/resource';
-  @import 'components/tabs';
-  @import 'components/items';
-  @import 'components/attributes';
+  @include meta.load-css('components/forms');
+  @include meta.load-css('components/resource');
+  @include meta.load-css('components/tabs');
+  @include meta.load-css('components/items');
+  @include meta.load-css('components/attributes');
+  @include meta.load-css('components/character-creation');
+
+  color: var(--od6s-text);
+
+  .sheet-header {
+    margin: 0;
+    padding: 0;
+    border: none;
+    overflow: visible;
+    position: relative;
+
+    // Profile image sizing to match runtime CSS
+    .profile-img {
+      flex: 0 0 200px;
+      height: 200px;
+      margin-right: 10px;
+    }
+
+    // Compact inline row for small fields like Type/Species
+    .header-inline {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin: 2px 0 6px;
+
+      // Neutralize the default header-fields floats for compact layout
+      label,
+      input,
+      button { float: none; }
+
+      .field {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+
+        // prevent overly wide inputs on this compact row
+        input {
+          width: auto;
+          max-width: 220px;
+        }
+      }
+    }
+
+    .charname {
+      height: 30px;
+      padding: 0;
+      margin: 5px 0;
+      border-bottom: 0;
+      input {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        font-size: 18px; // prevent clipping
+        line-height: 28px; // align with container height
+        background: transparent;
+        border: none;
+        color: inherit;
+      }
+    }
+  }
+
+  .sheet-body,
+  .sheet-body .tab {
+    height: 100%;
+  }
+
+  // Item sheet-specific header/layout overrides to mirror runtime CSS
+  &.sheet.item {
+    .sheet-header {
+      // Keep image on the left in a single non-wrapping row
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: flex-start;
+      overflow: visible;
+
+      .header-fields {
+        // Allow shrinking beside fixed image column
+        min-width: 0;
+        overflow: hidden;
+        flex: 1 1 auto;
+
+        // Neutralize legacy floats that break flex layout
+        label,
+        input { float: none; }
+      }
+
+      // Smaller fixed image column to prevent wrapping at narrow widths
+      .profile-img {
+        width: 128px;
+        max-width: 128px;
+        height: 128px;
+        object-fit: cover;
+        flex: 0 0 128px;
+        margin-right: 10px;
+        align-self: flex-start;
+      }
+    }
+
+    // Ensure the sheet body scrolls independently as a fallback
+    .sheet-body {
+      overflow-y: auto;
+    }
+  }
+
+  // Hide tabs by default; show only the active tab
+  .sheet-body {
+    // Rich text editor sizing inside sheets
+    .editor {
+      height: 8em;
+      min-height: 300px;
+      overflow: hidden;
+    }
+    .tab {
+      display: none;
+      &.active { display: block; }
+    }
+  }
+
+  // Tabs strip border emphasis
+  .sheet-tabs {
+    flex: 0;
+    border-width: thick;
+    border-style: double;
+  }
+
+  /* Header Mode row (Character sheet) */
+  .header-mode-row {
+    display: flex;
+    justify-content: flex-end;   // right align
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    width: 100%;                 // span full header width
+    clear: both;                 // force a new row after floated elements
+    // Ensure the row itself has no visible outline/box
+    border: none;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+    position: relative;
+
+    // Prevent children from stretching to fill the row
+    > * { flex: 0 0 auto; }
+
+    // Keep label compact and on one line
+    label { white-space: nowrap; margin-right: 6px; }
+
+    // Size the select to content, not full width
+    .sheetmode-select {
+      width: auto;
+      max-width: none;
+      min-width: 90px;           // reasonable minimum similar to wounds dropdown
+      // Compact control with a subtle border
+      padding: 2px 6px;
+      font-size: 12px;
+      line-height: 1.2;
+      border: 1px solid var(--od6s-border);
+      border-radius: 3px;
+      background: var(--od6s-surface);
+      color: var(--od6s-text);
+      box-shadow: none;
+      outline: none;
+      appearance: none;
+      position: relative;
+
+      // Ensure dropdown options are visible and have correct theme colors
+      option {
+        background-color: var(--od6s-surface);
+        color: var(--od6s-text);
+      }
+
+      // Focus state: reinforce border color instead of using a separate outline
+      &:focus {
+        outline: none;
+        background: var(--od6s-surface);
+        border-color: var(--od6s-focus);
+      }
+    }
+  }
+
+  // TinyMCE tweaks within od6s scope
+  .tox {
+    .tox-editor-container { background: #fff; }
+    .tox-edit-area { padding: 0 8px; }
+  }
+
+  // Attribute and header blocks readability
+  .attribute,
+  .header-solid,
+  .body-points-max {
+    background-color: black;
+    color: white;
+    border: none;
+  }
+
+  // Box around attributes in Attributes tab (Dark mode default)
+  .tab.attributes .attribute-list li.attributes,
+  .tab.main .attribute-list li.attributes,
+  .tab.main .attribute-list li.item.item-list.skills {
+    margin-bottom: 5px;
+    padding: 0;
+
+    .header-solid,
+    &.header-solid {
+      border: 1px solid white;
+      border-radius: 3px;
+    }
+  }
+
+  // Ensure NPC and Creature sheet main tabs also have white-outlined attributes
+  // These often use .attribute directly on the label/div
+  .tab.main .attribute.header-solid,
+  .tab.main .attribute.attributedialog.header-solid {
+    border: 1px solid white;
+    border-radius: 3px;
+  }
+
+  // Form controls
+  input,
+  select,
+  textarea {
+    background: var(--od6s-surface);
+    color: var(--od6s-text);
+    border: 1px solid var(--od6s-border);
+
+    &:focus {
+      outline: 2px solid color-mix(in srgb, var(--od6s-focus) 55%, transparent);
+      outline-offset: 1px;
+      border-color: color-mix(in srgb, var(--od6s-focus) 60%, var(--od6s-border));
+    }
+  }
+
+  // Lists/tables row shading
+  .gear-list,
+  .weapons-list,
+  .armor-list,
+  .manifestations-list,
+  .cybernetics-list,
+  .advantages-list,
+  .specialabilities-list,
+  .disadvantages-list,
+  .vehicles-list,
+  .template-item-list,
+  .cargo-hold-list,
+  .container-inventory-list,
+  .item-data,
+  .assigned-action-list,
+  .crew-list {
+    li {
+      border-radius: 4px;
+      padding: 2px 4px;
+
+      &:nth-child(odd) {
+        background: color-mix(in srgb, var(--od6s-surface-2) 65%, transparent);
+      }
+    }
+  }
+}
+
+// Window content background based on theme
+.window-app.od6s .window-content {
+  background: var(--od6s-surface);
+  color: var(--od6s-text);
+}
+
+
+/* Ensure the Sheet Mode dropdown has a light background in Foundry's Light Theme */
+:root.theme-light .od6s .header-mode-row .sheetmode-select, .theme-light .od6s .header-mode-row .sheetmode-select, [data-theme=light] .od6s .header-mode-row .sheetmode-select {
+  background-color: #fff !important;
+  color: #000 !important;
+  border-color: #bbb !important;
+}
+:root.theme-light .od6s .header-mode-row .sheetmode-select option, .theme-light .od6s .header-mode-row .sheetmode-select option, [data-theme=light] .od6s .header-mode-row .sheetmode-select option {
+  background-color: #fff !important;
+  color: #000 !important;
+}
+
+/* Light theme readability improvements (Character sheets, etc.) */
+:root.theme-light .od6s.application,
+:root.theme-light .od6s.window-app,
+:root.theme-light .od6s.window,
+.theme-light .od6s.application,
+.theme-light .od6s.window-app,
+[data-theme=light] .od6s.application,
+[data-theme=light] .od6s.window-app {
+  --od6s-text: #111827;        /* near-black */
+  --od6s-muted: #4b5563;       /* readable muted text */
+  --od6s-surface: #ffffff;     /* base surface */
+  --od6s-surface-2: #f3f4f6;   /* header/pill surface */
+  --od6s-surface-3: #e5e7eb;   /* subtle separators */
+  --od6s-border: #cbd5e1;      /* soft border */
+  --od6s-focus: #2563eb;       /* accessible focus */
+}
+
+:root.theme-light .od6s.application .window-content,
+:root.theme-light .od6s.window-app .window-content,
+.theme-light .od6s.application .window-content,
+.theme-light .od6s.window-app .window-content,
+[data-theme=light] .od6s.application .window-content,
+[data-theme=light] .od6s.window-app .window-content {
+  background: var(--od6s-surface);
+  color: var(--od6s-text);
+}
+
+/* Make the “black bars” readable in light mode (attribute/header blocks) */
+:root.theme-light .od6s .attribute,
+:root.theme-light .od6s .header-solid,
+:root.theme-light .od6s .body-points-max,
+.theme-light .od6s .attribute,
+.theme-light .od6s .header-solid,
+.theme-light .od6s .body-points-max,
+[data-theme=light] .od6s .attribute,
+[data-theme=light] .od6s .header-solid,
+[data-theme=light] .od6s .body-points-max {
+  background-color: black;
+  color: white;
+  border: none;
+}
+
+/* Remove the attribute box border in light mode */
+:root.theme-light .od6s .tab.attributes .attribute-list li.attributes,
+::root.theme-light .od6s .tab.main .attribute-list li.attributes,
+.theme-light .od6s .tab.attributes .attribute-list li.attributes,
+.theme-light .od6s .tab.main .attribute-list li.attributes,
+[data-theme=light] .od6s .tab.attributes .attribute-list li.attributes,
+[data-theme=light] .od6s .tab.main .attribute-list li.attributes {
+  border: none;
+  padding: 0;
+  margin-bottom: 1px;
+
+  .header-solid {
+    border: none;
+  }
+}
+
+/* Form controls: increase contrast + clearer focus */
+:root.theme-light .od6s.application input,
+:root.theme-light .od6s.application select,
+:root.theme-light .od6s.application textarea,
+:root.theme-light .od6s.window-app input,
+:root.theme-light .od6s.window-app select,
+:root.theme-light .od6s.window-app textarea,
+.theme-light .od6s.application input,
+.theme-light .od6s.application select,
+.theme-light .od6s.application textarea,
+[data-theme=light] .od6s.application input,
+[data-theme=light] .od6s.application select,
+[data-theme=light] .od6s.application textarea {
+  background: #fff;
+  color: var(--od6s-text);
+  border: 1px solid var(--od6s-border);
+}
+
+:root.theme-light .od6s.application input:focus,
+:root.theme-light .od6s.application select:focus,
+:root.theme-light .od6s.application textarea:focus,
+:root.theme-light .od6s.window-app input:focus,
+:root.theme-light .od6s.window-app select:focus,
+:root.theme-light .od6s.window-app textarea:focus,
+.theme-light .od6s.application input:focus,
+.theme-light .od6s.application select:focus,
+.theme-light .od6s.application textarea:focus,
+[data-theme=light] .od6s.application input:focus,
+[data-theme=light] .od6s.application select:focus,
+[data-theme=light] .od6s.application textarea:focus {
+  outline: 2px solid color-mix(in srgb, var(--od6s-focus) 55%, transparent);
+  outline-offset: 1px;
+  border-color: color-mix(in srgb, var(--od6s-focus) 60%, var(--od6s-border));
+}
+
+/* Lists/tables feel: reduce “wall of text” with subtle row shading */
+:root.theme-light .od6s .gear-list li,
+:root.theme-light .od6s .weapons-list li,
+:root.theme-light .od6s .armor-list li,
+:root.theme-light .od6s .manifestations-list li,
+:root.theme-light .od6s .cybernetics-list li,
+:root.theme-light .od6s .advantages-list li,
+:root.theme-light .od6s .specialabilities-list li,
+:root.theme-light .od6s .disadvantages-list li,
+:root.theme-light .od6s .vehicles-list li,
+:root.theme-light .od6s .template-item-list li,
+:root.theme-light .od6s .cargo-hold-list li,
+:root.theme-light .od6s .container-inventory-list li,
+:root.theme-light .od6s .item-data li,
+:root.theme-light .od6s .assigned-action-list li,
+:root.theme-light .od6s .crew-list li,
+.theme-light .od6s .gear-list li,
+.theme-light .od6s .weapons-list li,
+.theme-light .od6s .armor-list li,
+.theme-light .od6s .manifestations-list li,
+.theme-light .od6s .cybernetics-list li,
+.theme-light .od6s .advantages-list li,
+.theme-light .od6s .specialabilities-list li,
+.theme-light .od6s .disadvantages-list li,
+.theme-light .od6s .vehicles-list li,
+.theme-light .od6s .template-item-list li,
+.theme-light .od6s .cargo-hold-list li,
+.theme-light .od6s .container-inventory-list li,
+.theme-light .od6s .item-data li,
+.theme-light .od6s .assigned-action-list li,
+.theme-light .od6s .crew-list li,
+[data-theme=light] .od6s .gear-list li,
+[data-theme=light] .od6s .weapons-list li,
+[data-theme=light] .od6s .armor-list li,
+[data-theme=light] .od6s .manifestations-list li,
+[data-theme=light] .od6s .cybernetics-list li,
+[data-theme=light] .od6s .advantages-list li,
+[data-theme=light] .od6s .specialabilities-list li,
+[data-theme=light] .od6s .disadvantages-list li,
+[data-theme=light] .od6s .vehicles-list li,
+[data-theme=light] .od6s .template-item-list li,
+[data-theme=light] .od6s .cargo-hold-list li,
+[data-theme=light] .od6s .container-inventory-list li,
+[data-theme=light] .od6s .item-data li,
+[data-theme=light] .od6s .assigned-action-list li,
+[data-theme=light] .od6s .crew-list li {
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+
+:root.theme-light .od6s .gear-list li:nth-child(odd),
+:root.theme-light .od6s .weapons-list li:nth-child(odd),
+:root.theme-light .od6s .armor-list li:nth-child(odd),
+:root.theme-light .od6s .vehicles-list li:nth-child(odd),
+:root.theme-light .od6s .template-item-list li:nth-child(odd),
+.theme-light .od6s .gear-list li:nth-child(odd),
+.theme-light .od6s .weapons-list li:nth-child(odd),
+.theme-light .od6s .armor-list li:nth-child(odd),
+.theme-light .od6s .vehicles-list li:nth-child(odd),
+.theme-light .od6s .template-item-list li:nth-child(odd),
+[data-theme=light] .od6s .gear-list li:nth-child(odd),
+[data-theme=light] .od6s .weapons-list li:nth-child(odd),
+[data-theme=light] .od6s .armor-list li:nth-child(odd),
+[data-theme=light] .od6s .vehicles-list li:nth-child(odd),
+[data-theme=light] .od6s .template-item-list li:nth-child(odd) {
+  background: color-mix(in srgb, var(--od6s-surface-2) 65%, transparent);
+}
+
+// Ensure the window application components of the actor sheet and character creation app do not clip dropdowns
+// Supports both Application V1 (.window-app) and Application V2 (.application)
+.application.od6s,
+.window-app.od6s,
+.window.od6s {
+  // Ensure the window itself allows dropdowns to pop out
+  overflow: visible !important;
+
+  // Ensure the header and its controls/dropdowns are always on top of the content
+  .window-header {
+    z-index: 5 !important;
+    overflow: visible !important;
+    position: relative;
+    border-bottom: none !important;
+  }
+
+  .window-content {
+    z-index: 1 !important;
+    position: relative;
+    min-height: 0;
+    padding: 0 !important;
+    // Do NOT use overflow: visible here as it causes the sheet to spill out of the window.
+    // The z-index on the header is enough to keep the dropdowns on top of the content.
+  }
+
+  // Remove the shadow/box in light mode as requested by the user
+  &[data-theme=light],
+  &.theme-light,
+  .theme-light &,
+  :root.theme-light & {
+    box-shadow: none !important;
+    border: none !important;
+
+    &::after, &::before {
+      box-shadow: none !important;
+      display: none !important;
+    }
+  }
+
+  // Application V2 dropdowns and controls
+  .window-controls, .controls-dropdown, .header-control {
+    z-index: 10 !important;
+  }
+}
+
+
+// Settings configuration forms: let Foundry handle scrolling natively via PARTS.scrollable.
+// Only need to ensure the window has bounded height and the layout doesn't prevent overflow.
+.application#custom_labels,
+.application#custom_miscrules,
+.application#custom_attributes_sorting,
+.application#wild_die {
+  .window-content {
+    .settings-wrapper {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+
+      .scrollable {
+        flex: 1 1 auto;
+        min-height: 0;
+      }
+
+      .submit {
+        flex: 0 0 auto;
+        padding: 4px 0;
+      }
+    }
+  }
+}
+
+// Flex column sheet layout with scrollable body (Application V2)
+form.od6s.flexcol {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;  // allow children to size properly in flex containers
+  height: 100%;   // occupy the full window-content height
+  width: 100%;    // ensure it spans the full window-content width
+  margin: 0;      // remove any default margins
+  padding: 0;     // remove any default padding
+
+  .sheet-body {
+    flex: 1 1 auto;     // take remaining space, shrink if needed
+    min-height: 0;      // required so overflow containers can shrink
+    overflow-y: auto;   // scroll within the body when content is long
+    padding-bottom: 0;  // no footer padding for character sheets (footer removed)
+
+    .tab { height: auto; }
+  }
 }

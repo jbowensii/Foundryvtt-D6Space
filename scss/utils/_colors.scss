@@ -1,2 +1,30 @@
+// Color definitions
 $c-white: #fff;
 $c-black: #000;
+$c-grey: #bbb;
+$c-dark-grey: #555;
+$c-light-grey: #eee;
+$c-yellow-light: #ffffcc;
+$c-yellow: #ffff66;
+$c-red: #f00;
+$c-dark-red: #8b0000;
+$c-crimson: crimson;
+$c-dark-green: darkgreen;
+$c-light-blue: lightblue;
+
+// Theme-aware tokens (will be assigned to CSS variables in :root or .od6s)
+$text-primary-light: #111827;
+$text-muted-light: #4b5563;
+$surface-light: #ffffff;
+$surface-2-light: #f3f4f6;
+$surface-3-light: #e5e7eb;
+$border-light: #cbd5e1;
+$focus-light: #2563eb;
+
+$text-primary-dark: #eeeeee;
+$text-muted-dark: #9ca3af;
+$surface-dark: #1f2937;
+$surface-2-dark: #111827;
+$surface-3-dark: #374151;
+$border-dark: #4b5563;
+$focus-dark: #60a5fa;

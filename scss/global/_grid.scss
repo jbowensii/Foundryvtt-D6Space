@@ -71,16 +71,12 @@
 
 .grid-2col-type {
   @extend .grid-2col;
-  display: grid;
-  grid-column: span 2 / span 2;
   grid-template-columns: auto;
   align-items: center;
 }
 
 .grid-2col-species {
   @extend .grid-2col;
-  display: grid;
-  grid-column: span 2 / span 2;
   grid-template-columns: auto;
   align-items: center;
 }
@@ -160,16 +156,12 @@
 
 .grid-3col-type {
   @extend .grid-3col;
-  display: grid;
-  grid-column: span 3 / span 3;
   grid-template-columns: auto;
   align-items: center;
 }
 
 .grid-3col-species {
   @extend .grid-3col;
-  display: grid;
-  grid-column: span 3 / span 3;
   grid-template-columns: auto;
   align-items: center;
 }
