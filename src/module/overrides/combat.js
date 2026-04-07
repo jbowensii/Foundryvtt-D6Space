@@ -52,7 +52,7 @@ export class OD6SCombat extends Combat {
         }
         let advanceTime = Math.max(this.turns.length - this.turn, 0) * CONFIG.time.turnTime;
         advanceTime += CONFIG.time.roundTime;
-        let nextRound = this.round + 1;
+        const nextRound = this.round + 1;
 
         // Update the document, passing data through a hook first
         const updateData = {round: nextRound, turn};

@@ -87,7 +87,7 @@ export class od6sspecialize {
             event.currentTarget.dataset.itemId, true);
         const derivedScore = (+skill.system.score) + (+this.actor.system.attributes[skill.system.attribute.toLowerCase()].score) + 1
         const cpCost = Math.floor(Math.floor(derivedScore/OD6S.pipsPerDice)/2);
-        let newItemData = {
+        const newItemData = {
             specname: "",
             type: "specialization",
             skill: skill.name,

@@ -201,7 +201,7 @@ export class AdvanceDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         /* Do not allow advances above attribute maximum */
         if ( (this.advanceData.type === "attribute")) {
             let attr = "";
-            for (let attribute in OD6S.attributes) {
+            for (const attribute in OD6S.attributes) {
                 if(OD6S.attributes[attribute].name === this.advanceData.label) {
                     attr = attribute;
                     break;
@@ -209,7 +209,7 @@ export class AdvanceDialog extends HandlebarsApplicationMixin(ApplicationV2) {
             }
             if (attr === "") {
                 // For some reason this happens on The Forge
-                for (let attribute in OD6S.attributes) {
+                for (const attribute in OD6S.attributes) {
                     if(OD6S.attributes[attribute].name === this.advanceData.label) {
                         attr = attribute;
                         break;
@@ -273,15 +273,15 @@ export class od6sadvance {
         const element = event.currentTarget;
         const dataset = element.dataset;
         let originalScore = 0;
-        let cpcost = 0;
-        let dice = dataset.dice;
-        let pips = dataset.pips;
-        let base = dataset.base;
-        let freeAdvance = Boolean(false);
+        const cpcost = 0;
+        const dice = dataset.dice;
+        const pips = dataset.pips;
+        const base = dataset.base;
+        const freeAdvance = Boolean(false);
         let itemid = 0;
         let used = false;
         let metaPhysicsSkill = false;
-        let metaphysicsteacher = false;
+        const metaphysicsteacher = false;
         const actorData = this.actor.system;
 
         /* Determine the type of thing we're trying to advance so we can set the correct data fields */
@@ -319,7 +319,7 @@ export class od6sadvance {
         }
 
         /* Structure to pass to dialog */
-        let advanceData = {
+        const advanceData = {
             label: dataset.label,
             score: originalScore,
             base: base,
@@ -374,7 +374,7 @@ export class od6sadvance {
     static async advanceAction(actor, advanceData, event, dice, pips) {
 
         const actorData = actor.system;
-        let update = '';
+        const update = '';
         const actorUpdate = {};
         const updates = [];
         actorUpdate.system = {};

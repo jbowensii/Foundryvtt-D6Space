@@ -2,7 +2,7 @@
   "id": "od6s",
   "title": "OpenD6 Space",
   "description": "OpenD6 Space System for FoundryVTT",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "templateVersion": 2,
   "compatibility": {
     "minimum": "13",

@@ -39,7 +39,7 @@ export default class od6sMiscRulesConfiguration extends HandlebarsApplicationMix
     }
 
     static async #onSubmit(event, form, formData) {
-        for (let setting in formData.object) {
+        for (const setting in formData.object) {
             await game.settings.set("od6s", setting, formData.object[setting]);
             const s = game.settings.settings.get('od6s.' + setting);
             this.requiresWorldReload ||= s?.requiresReload;

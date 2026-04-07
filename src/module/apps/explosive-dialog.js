@@ -108,7 +108,7 @@ export  default class ExplosiveDialog extends HandlebarsApplicationMixin(Applica
 
         if (this.data.stage === 1 && this.data.type === 'OD6S.EXPLOSIVE_THROWN') {
             // Calculate Range
-            let range = "";
+            const range = "";
             const distance = Math.floor(canvas.grid.measureDistance({x: this.token.center.x, y: this.token.center.y},
                 {x: template[0].x, y: template[0].y}, {gridSpaces: false}))
 

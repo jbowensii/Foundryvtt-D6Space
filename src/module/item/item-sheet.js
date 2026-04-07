@@ -44,9 +44,7 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
     async _renderHTML(context, options) {
         const template = `systems/od6s/templates/item/item-${this.document.type}-sheet.html`;
         // Pass the full context directly — no need for _preparePartContext spread
-        console.log(`OD6SItemSheet._renderHTML: template=${template}, contextKeys=${Object.keys(context)}, item.system.damage=`, context.item?.system?.damage);
         const htmlString = await foundry.applications.handlebars.renderTemplate(template, context);
-        console.log(`OD6SItemSheet._renderHTML: htmlString length=${htmlString.length}, first200=${htmlString.substring(0, 200)}`);
         const parser = new DOMParser();
         const doc = parser.parseFromString(htmlString, "text/html");
         const element = doc.body.firstElementChild;
@@ -81,14 +79,6 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
         };
         // backward compat — templates may reference {{data.xxx}}
         context.data = context;
-        // Debug: log context to verify data is available
-        console.log(`OD6SItemSheet._prepareContext for ${item.type} "${item.name}":`, {
-            hasSystem: !!item.system,
-            systemKeys: item.system ? Object.keys(item.system) : [],
-            name: item.name,
-            type: item.type,
-            img: item.img
-        });
         return context;
     }
 
@@ -214,8 +204,8 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
         update.system.actor_types = this.item.system.actor_types.filter(i => i !== type);
         // Remove all items that are no longer allowed
         update.system.items = [];
-        for (let i of this.item.system.items) {
-            for (let t of update.system.actor_types) {
+        for (const i of this.item.system.items) {
+            for (const t of update.system.actor_types) {
                 if (OD6S.allowedItemTypes[t].includes(i.type)) {
                     update.system.items.push(i);
                     break;
@@ -310,7 +300,7 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
         }
         if (this.actor != null) {
             const skills = this.actor.items.filter(i => i.type === "skill");
-            let update = skills.map(() => {
+            const update = skills.map(() => {
                 return {
                     id: itemId,
                     _id: itemId,
@@ -345,7 +335,7 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
         }
         if (this.actor != null) {
             const skills = this.actor.items.filter(i => i.type === "specialization");
-            let update = skills.map(() => {
+            const update = skills.map(() => {
                 return {
                     id: itemId,
                     _id: itemId,
@@ -381,7 +371,7 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
         if (this.actor != null) {
             const updates = [];
 
-            let update = {
+            const update = {
                 _id: itemId
             }
             update.system = {};
@@ -424,7 +414,7 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
         if (this.actor != null) {
             const updates = [];
 
-            let update = {
+            const update = {
                 _id: itemId
             }
             update.system = {};
@@ -466,7 +456,7 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 
         if (this.actor != null) {
             const weapons = this.actor.items.filter(i => i.type === "vehicle-weapon" || i.type === 'starship-weapon');
-            let update = weapons.map(() => {
+            const update = weapons.map(() => {
                 return {
                     id: itemId,
                     _id: itemId,
@@ -484,9 +474,9 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
     }
 
     async _getGameItemsByType(type) {
-        let compendia = await od6sutilities.getItemsFromCompendiumByType(type);
-        let world = await od6sutilities.getItemsFromWorldByType(type);
-        let data = compendia.concat(world);
+        const compendia = await od6sutilities.getItemsFromCompendiumByType(type);
+        const world = await od6sutilities.getItemsFromWorldByType(type);
+        const data = compendia.concat(world);
         return data.sort(function (a, b) {
             return a.name.localeCompare(b.name);
         })
@@ -501,7 +491,7 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
         }
 
         const addTemplate = "systems/od6s/templates/item/item-template-add.html";
-        let html = await renderTemplate(addTemplate, newItem);
+        const html = await renderTemplate(addTemplate, newItem);
         const label = game.i18n.localize(game.system.template.Item[event.currentTarget.dataset.type].label);
 
         new Dialog({
@@ -525,7 +515,7 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
             let allowed = false;
             for (const [key, items] of Object.entries(OD6S.allowedItemTypes)) {
                 if (this.item.system.actor_types.includes(key)) {
-                    for (let i of items) {
+                    for (const i of items) {
                         if (OD6S.templateItemTypes['item-group'].includes(i)) {
                             allowed = true;
                             break;
@@ -628,7 +618,7 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
     async _editTemplateAttribute(event) {
         const score = event.currentTarget.dataset.score;
         /* Structure to pass to dialog */
-        let editData = {
+        const editData = {
             score: score
         }
 
@@ -677,7 +667,7 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
         // Prepare item update
         const itemId = event.currentTarget.dataset.itemId;
         let newScore;
-        let update = {};
+        const update = {};
         update.id = itemId;
         update._id = itemId;
         update.system = {};

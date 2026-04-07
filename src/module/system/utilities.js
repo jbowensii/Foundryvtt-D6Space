@@ -75,7 +75,7 @@ export class od6sutilities {
         const dice = this.getDiceFromScore(baseDice);
 
         if (game.settings.get('od6s', 'static_str_range')) {
-            for (let r in range) {
+            for (const r in range) {
                 const e = range[r].match(/([+|\-][0-9])$/);
                 if (e) {
                     newRanges[r] = (dice.dice * 4) + dice.pips + (+e[0]);
@@ -89,7 +89,7 @@ export class od6sutilities {
             if (dice.pips > 0) rollString = rollString + "+" + dice.pips;
             const roll = await new Roll(rollString).evaluate();
 
-            for (let r in range) {
+            for (const r in range) {
                 const e = range[r].match(/([+|\-][0-9])$/);
                 if (e) {
                     newRanges[r] = roll.total + (+e[0]);
@@ -102,7 +102,7 @@ export class od6sutilities {
             flags.type = "range";
             flags.range = newRanges;
             flags.origRange = range;
-            let label = game.i18n.localize('OD6S.RANGE_ROLL') + ": " + item.name;
+            const label = game.i18n.localize('OD6S.RANGE_ROLL') + ": " + item.name;
             let rollMode = 'roll';
             if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
             await roll.toMessage({
@@ -199,7 +199,7 @@ export class od6sutilities {
                 break;
         }
 
-        let newAngle = sourceRay.angle + angle;
+        const newAngle = sourceRay.angle + angle;
 
         const destRay = Ray.fromAngle(template.x, template.y, newAngle, distance);
 
@@ -248,7 +248,7 @@ export class od6sutilities {
 
         // Calculate range to each
         const targets = [];
-        for (let target of hitTokens) {
+        for (const target of hitTokens) {
             const thisTarget = {};
             thisTarget.id = target.id;
             thisTarget.range = canvas.grid.measureDistance(template.center, target.center);
@@ -288,7 +288,7 @@ export class od6sutilities {
             if(template.getFlag('od6s','message')) {
                 const origMessage = game.messages.get(template.getFlag('od6s','message'));
                 if(typeof(origMessage) !== 'undefined') {
-                    let cloneMessage = origMessage.clone(data);
+                    const cloneMessage = origMessage.clone(data);
                     await origMessage.unsetFlag('od6s', 'isExplosive');
                     let rollMode = CONST.DICE_ROLL_MODES.PUBLIC;
                     if(origMessage.whisper.length > 0) {
@@ -425,7 +425,7 @@ export class od6sutilities {
         } else {
             msgData.flags.od6s.targets = targets;
             // One roll, with a fraction for zones > 1
-            let dice = (this.boolCheck(data.stun)) ? od6sutilities.getDiceFromScore(item.system.stun.score)
+            const dice = (this.boolCheck(data.stun)) ? od6sutilities.getDiceFromScore(item.system.stun.score)
                 : od6sutilities.getDiceFromScore(item.system.damage.score);
             if (this.boolCheck(data.stun)) {
                 if (item.system.stun.score === 0 || item.system.stun.score === '') {
@@ -449,7 +449,7 @@ export class od6sutilities {
             } else {
                 rollString = dice.dice + "d6" + game.i18n.localize('OD6S.BASE_DIE_FLAVOR');
             }
-            let roll = await new Roll(rollString).evaluate();
+            const roll = await new Roll(rollString).evaluate();
             // Iterate over targets
             for (const i in targets) {
                 const target = targets[i];
@@ -494,7 +494,7 @@ export class od6sutilities {
      */
     static getBlastRadius(item, range) {
         let zone = 1;
-        let maxZone = game.settings.get('od6s', 'explosive_zones') ? 4 : 3;
+        const maxZone = game.settings.get('od6s', 'explosive_zones') ? 4 : 3;
 
         for (let i=1; i < maxZone + 1; i++) {
             if (range > item.system.blast_radius[i].range) {
@@ -550,7 +550,7 @@ export class od6sutilities {
                     difficulty = roll.total;
                 } else {
                     let min = 0;
-                    let max = OD6S.difficulty[level].max;
+                    const max = OD6S.difficulty[level].max;
                     switch (level) {
                         case "OD6S.DIFFICULTY_VERY_EASY":
                             min = 1;
@@ -584,7 +584,7 @@ export class od6sutilities {
                             // Shouldn't be here
                             min = 1;
                     }
-                    difficulty = Math.floor(twist.random() * (max - min + 1) + min);
+                    difficulty = Math.floor(Math.random() * (max - min + 1) + min);
                 }
             }
         } else {
@@ -661,7 +661,7 @@ export class od6sutilities {
 
     static getActiveAttributes() {
         const attr = [];
-        for (let attribute in OD6S.attributes) {
+        for (const attribute in OD6S.attributes) {
             if (OD6S.attributes[attribute].active) {
                 attr.push(attribute);
             }
@@ -682,7 +682,7 @@ export class od6sutilities {
     }
 
     static async getSkillsFromTemplate(items) {
-        let foundSkills = [];
+        const foundSkills = [];
         for (let i = 0; i < items.length; i++) {
             if (items[i].type === 'skill') {
                 foundSkills.push(await this.getItemByName(items[i].name));
@@ -707,9 +707,9 @@ export class od6sutilities {
         } else {
             packs = await game.packs;
         }
-        for (let p of packs) {
+        for (const p of packs) {
             await p.getIndex().then(index => itemList = index);
-            let searchResult = itemList.find(t => t._id === id);
+            const searchResult = itemList.find(t => t._id === id);
             if (searchResult) {
                 return await p.getDocument(searchResult._id);
             }
@@ -733,9 +733,9 @@ export class od6sutilities {
         } else {
             packs = await game.packs;
         }
-        for (let p of packs) {
+        for (const p of packs) {
             await p.getIndex().then(index => itemList = index);
-            let searchResult = itemList.find(t => t.name === itemName);
+            const searchResult = itemList.find(t => t.name === itemName);
             if (searchResult) {
                 return await p.getDocument(searchResult._id);
             }
@@ -783,7 +783,7 @@ export class od6sutilities {
             packs = game.packs.filter(p => p.documentName === 'Item');
         }
 
-        for (let p of packs) {
+        for (const p of packs) {
             const items = p.index.filter(i => i.type === itemType);
             searchResult = searchResult.concat(items);
         }
@@ -798,10 +798,10 @@ export class od6sutilities {
      * @returns {Promise<[]>}
      */
     static getItemsFromWorldByType(itemType) {
-        let searchResult = [];
+        const searchResult = [];
         for (let i = 0; i < game.items.contents.length; i++) {
             if (game.items.contents[i].type === itemType) {
-                let item = {
+                const item = {
                     _id: game.items.contents[i]._id,
                     name: game.items.contents[i].name,
                     type: game.items.contents[i].type,
@@ -819,9 +819,9 @@ export class od6sutilities {
      * @returns {*}
      */
     static getAllItemsByType(itemType) {
-        let cItems = this.getItemsFromCompendiumByType(itemType);
-        let wItems = this.getItemsFromWorldByType(itemType);
-        let allItems = cItems.map((x) => x);
+        const cItems = this.getItemsFromCompendiumByType(itemType);
+        const wItems = this.getItemsFromWorldByType(itemType);
+        const allItems = cItems.map((x) => x);
         // Prefer world items over compendium items
         this.mergeByProperty(allItems, wItems, 'name');
         allItems.sort((a, b) => a.name.localeCompare(b.name));
@@ -837,7 +837,7 @@ export class od6sutilities {
     static
     mergeByProperty = (target, source, prop) => {
         source.forEach(sourceElement => {
-            let targetElement = target.find(targetElement => {
+            const targetElement = target.find(targetElement => {
                 return sourceElement[prop] === targetElement[prop];
             })
             targetElement ? Object.assign(targetElement, sourceElement) : target.push(sourceElement);
@@ -971,7 +971,7 @@ export class od6sutilities {
         let result = '';
         let damageFlavor = '';
         let stunned = false;
-        let data = {};
+        const data = {};
         data.flags = {};
         let collision = false;
         let passengerDamage = '';
@@ -1008,12 +1008,12 @@ export class od6sutilities {
 
         if (message1.getFlag('od6s', 'vehicle')) {
             message1.actorType = "vehicle";
-            let vehicleActor = await od6sutilities.getActorFromUuid(message1.getFlag('od6s', 'vehicle'));
+            const vehicleActor = await od6sutilities.getActorFromUuid(message1.getFlag('od6s', 'vehicle'));
             message1.flavorName = vehicleActor.name;
         }
         if (message2.getFlag('od6s', 'vehicle')) {
             message2.actorType = "vehicle";
-            let vehicleActor = await od6sutilities.getActorFromUuid(message2.getFlag('od6s', 'vehicle'));
+            const vehicleActor = await od6sutilities.getActorFromUuid(message2.getFlag('od6s', 'vehicle'));
             message2.flavorName = vehicleActor.name;
         }
 
@@ -1031,7 +1031,7 @@ export class od6sutilities {
                 }
                 diff = damage - resistance
             } else {
-                const targetId =  message1.speaker.token !== null ? message1.speaker.token : message.speaker.actor;
+                const targetId =  message1.speaker.token !== null ? message1.speaker.token : message1.speaker.actor;
                 const damage = message2.getFlag('od6s', 'targets').find(t=>t.id === targetId).damage;
                 const resistance = message1.rolls[0].total;
                 if (damage > resistance) {
@@ -1128,7 +1128,7 @@ export class od6sutilities {
 
         let loserId = loser.speaker.token;
         if (loser.actorType === "vehicle" || loser.actorType === "starship") {
-            let token = await this.getTokenFromUuid(loser.getFlag('od6s','vehicle'));
+            const token = await this.getTokenFromUuid(loser.getFlag('od6s','vehicle'));
             //let token = await this.getActorFromUuid(loser.getFlag('od6s', 'vehicle'));
             //let token = await game.scenes.active.tokens.get(loser.getFlag('od6s','vehicle'));
             if (typeof (token) !== 'undefined') {
@@ -1213,7 +1213,7 @@ export class od6sutilities {
     static getInjury(damage, actorType) {
         let resultMessage = '';
         if (actorType === "vehicle" || actorType === "starship") {
-            for (let result in OD6S.vehicle_damage) {
+            for (const result in OD6S.vehicle_damage) {
                 if (damage >= OD6S.vehicle_damage[result].damage) {
                     resultMessage = result;
                 } else {
@@ -1221,7 +1221,7 @@ export class od6sutilities {
                 }
             }
         } else {
-            for (let result in OD6S.damage) {
+            for (const result in OD6S.damage) {
                 if (damage >= OD6S.damage[result]) {
                     resultMessage = result;
                 } else {

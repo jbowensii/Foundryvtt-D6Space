@@ -34,7 +34,7 @@ export class OD6SToken extends foundry.canvas.placeables.Token {
 
 
             // Draw actor effects first
-            for ( let f of actorEffects ) {
+            for ( const f of actorEffects ) {
                 const status = [...f.statuses][0];
                 if ( !f.icon ) continue;
                 if(!this.isOwner && OD6S.hiddenStatusEffects.find(e=> e === status)) continue;
@@ -48,7 +48,7 @@ export class OD6SToken extends foundry.canvas.placeables.Token {
             }
 
             // Next draw token effects
-            for ( let f of tokenEffects ) {
+            for ( const f of tokenEffects ) {
                 const status = [...f.statuses][0];
                 if(!this.isOwner && OD6S.hiddenStatusEffects.find(e=> e === status)) continue;
                 promises.push(this._drawEffect(f, null));

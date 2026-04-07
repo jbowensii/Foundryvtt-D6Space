@@ -193,7 +193,7 @@ Hooks.on("preDeleteChatMessage", async (message, data, diff, id) => {
 
 Hooks.on("updateChatMessage", async (message, data, diff, id) => {
     if (data.blind === false) {
-        let messageLi = document.querySelector(`.message[data-message-id="${data._id}"]`);
+        const messageLi = document.querySelector(`.message[data-message-id="${data._id}"]`);
         if (messageLi) messageLi.style.display = '';
     }
 
@@ -264,7 +264,7 @@ Hooks.on('renderChatLog', (log, html, data) => {
     })
 
     _delegate("click", ".modifiers-button", async (ev, el) => {
-        let content = document.getElementById("modifiers-display-" + el.dataset.messageId);
+        const content = document.getElementById("modifiers-display-" + el.dataset.messageId);
         if (content.style.display === "block") {
             content.style.display = "none";
         } else {
@@ -274,7 +274,7 @@ Hooks.on('renderChatLog', (log, html, data) => {
     })
 
     _delegate("click", ".damage-modifiers-button", async (ev, el) => {
-        let content = document.getElementById("damage-modifiers-display-" + el.dataset.messageId);
+        const content = document.getElementById("damage-modifiers-display-" + el.dataset.messageId);
         if (content.style.display === "block") {
             content.style.display = "none";
         } else {
@@ -285,7 +285,7 @@ Hooks.on('renderChatLog', (log, html, data) => {
 
     _delegate("click", ".apply-damage-button", async (ev, el) => {
         ev.preventDefault();
-        let token = game.scenes.active.tokens.get(el.dataset.tokenId);
+        const token = game.scenes.active.tokens.get(el.dataset.tokenId);
         let actor;
         if(typeof(token) === 'undefined' && token !== null) {
             actor = game.scenes.active.tokens.get(el.dataset.tokenId).actor;
@@ -403,7 +403,7 @@ Hooks.on('renderChatLog', (log, html, data) => {
             if (data.damagescalebonus < 0) rollString += "-" + Math.abs(data.damagescalebonus);
         }
 
-        let roll = await new Roll(rollString).evaluate();
+        const roll = await new Roll(rollString).evaluate();
 
         let label = game.i18n.localize('OD6S.DAMAGE') + " (" +
             game.i18n.localize(OD6S.damageTypes[data.damagetype]) + ")";
@@ -456,7 +456,7 @@ Hooks.on('renderChatLog', (log, html, data) => {
         let rollMode = 'roll';
         if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
 
-        let rollMessage = await roll.toMessage({
+        const rollMessage = await roll.toMessage({
             speaker: ChatMessage.getSpeaker({actor: game.actors.find(a => a.id === data.actor)}),
             flavor: label,
             flags: {
@@ -466,7 +466,7 @@ Hooks.on('renderChatLog', (log, html, data) => {
         });
 
         if (flags.wild === true && OD6S.wildDieOneDefault === 2 && OD6S.wildDieOneAuto === 0) {
-            let replacementRoll = JSON.parse(JSON.stringify(rollMessage.rolls[0].toJSON()));
+            const replacementRoll = JSON.parse(JSON.stringify(rollMessage.rolls[0].toJSON()));
             let highest = 0;
             for (let i = 0; i < replacementRoll.terms[0].results.length; i++) {
                 replacementRoll.terms[0].results[i].result >
@@ -537,7 +537,7 @@ Hooks.on('renderChatLog', (log, html, data) => {
     })
 
     _delegate("click", ".edit-difficulty", async (ev, el) => {
-        let data = {};
+        const data = {};
         data.messageId = el.dataset.messageId;
         const message = game.messages.get(data.messageId);
         data.baseDifficulty = message.getFlag('od6s', 'baseDifficulty');
@@ -547,7 +547,7 @@ Hooks.on('renderChatLog', (log, html, data) => {
 
     _delegate("click", ".edit-damage", async (ev, el) => {
         ev.preventDefault();
-        let data = {};
+        const data = {};
         data.messageId = el.dataset.messageId;
         const message = game.messages.get(data.messageId);
         data.damage = message.getFlag('od6s', 'damageScore');
@@ -565,7 +565,7 @@ Hooks.on('renderChatLog', (log, html, data) => {
         if (game.user.isGM) {
             data.isExplosive = message.getFlag('od6s','isExplosive');
             if (game.combat) {
-                for (let t of game.combat.combatants) {
+                for (const t of game.combat.combatants) {
                     const target = {
                         "id": t.token.id,
                         "name": t.token.name
@@ -696,7 +696,7 @@ Hooks.on('diceSoNiceRollStart', (messageId, context) => {
     }
     const roll = context.roll;
     let die;
-    let len = roll.dice.length;
+    const len = roll.dice.length;
     // Customize colors for Dice So Nice
     for (die = 0; die < len; die++) {
         switch (roll.dice[die].options.flavor) {
@@ -1057,7 +1057,7 @@ Hooks.on("preUpdateCombat", async (Combat, data, options, userId) => {
                 if (typeof (combatant) !== 'undefined') {
                     await clearActionList(combatant.actor);
 
-                    let rounds = combatant.actor.system?.stuns?.rounds;
+                    const rounds = combatant.actor.system?.stuns?.rounds;
                     const update = {};
                     update.id = combatant.id;
                     update.system = {};
@@ -1343,9 +1343,9 @@ async function simpleRoll() {
                     let rollMode = 0;
                     const dlgEl = dlg instanceof HTMLElement ? dlg : dlg[0];
                     let dice = dlgEl.querySelector("#dice").value;
-                    let pips = dlgEl.querySelector("#pips").value;
-                    let damageRoll = dlgEl.querySelector('#damageroll').checked;
-                    let damageType = dlgEl.querySelector('#damagetype').value;
+                    const pips = dlgEl.querySelector("#pips").value;
+                    const damageRoll = dlgEl.querySelector('#damageroll').checked;
+                    const damageType = dlgEl.querySelector('#damagetype').value;
                     if (game.settings.get('od6s', 'use_wild_die')) {
                         wild = dlgEl.querySelector("#wilddie").checked;
                     } else {
@@ -1369,7 +1369,7 @@ async function simpleRoll() {
                         label += " " + game.i18n.localize('OD6S.DAMAGE') + "(" +
                             game.i18n.localize(OD6S.damageTypes[damageType]) + ")";
                     }
-                    let roll = await new Roll(rollString).evaluate();
+                    const roll = await new Roll(rollString).evaluate();
 
                     let flags = {
                         "type": "simple",
@@ -1402,7 +1402,7 @@ async function simpleRoll() {
                     }
 
                     if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
-                    let rollMessage = await roll.toMessage({
+                    const rollMessage = await roll.toMessage({
                         speaker: ChatMessage.getSpeaker(),
                         flavor: label,
                         flags: {
@@ -1412,7 +1412,7 @@ async function simpleRoll() {
                     });
 
                     if (flags.wild === true && OD6S.wildDieOneDefault === 2 && OD6S.wildDieOneAuto === 0) {
-                        let replacementRoll = JSON.parse(JSON.stringify(rollMessage.rolls[0].toJSON()));
+                        const replacementRoll = JSON.parse(JSON.stringify(rollMessage.rolls[0].toJSON()));
                         let highest = 0;
                         for (let i = 0; i < replacementRoll.terms[0].results.length; i++) {
                             replacementRoll.terms[0].results[i].result >
@@ -1535,7 +1535,7 @@ async function checkCrewStatus(actorId) {
  */
 async function sendVehicleData(data) {
     for (const e of data.crewmembers) {
-        let actor = await od6sutilities.getActorFromUuid(e.uuid);
+        const actor = await od6sutilities.getActorFromUuid(e.uuid);
         const update = {};
         update.system = {};
         update.id = actor.id;
@@ -1561,8 +1561,8 @@ async function modifyShields(update) {
  * @returns {Promise<void>}
  */
 async function unlinkCrew(vehicleId, crewId) {
-    const actor = await od6sutilities.getActorFromUuid(crew);
-    await actor.sheet.unlinkCrew(vehicle);
+    const actor = await od6sutilities.getActorFromUuid(crewId);
+    await actor.sheet.unlinkCrew(vehicleId);
 }
 
 /**

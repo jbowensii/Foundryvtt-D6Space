@@ -96,7 +96,7 @@ export class od6sInitRoll {
         const combatantId = combatant.id;
         const actor = combatant.actor;
         const actorData = actor.system;
-        let initScore = actorData.initiative.score + actor.system.roll_mod;
+        const initScore = actorData.initiative.score + actor.system.roll_mod;
         const dice = od6sutilities.getDiceFromScore(initScore).dice;
         const pips = od6sutilities.getDiceFromScore(initScore).pips;
         this.rollData = {
@@ -216,7 +216,7 @@ export class RollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         this.element.querySelectorAll('.cpup').forEach(el => {
             el.addEventListener('click', async () => {
                 let rollType = this.rollData.type;
-                let actor = this.rollData.actor;
+                const actor = this.rollData.actor;
                 if(rollType === 'weapon') {
                     const item = this.rollData.actor.items.find(i=>i.id===this.rollData.itemid);
                     const spec = item.system.specialization;
@@ -584,7 +584,7 @@ export class od6sroll {
     static async _metaphysicsRollDialog(item, actor) {
         const skills = {};
 
-        for (let s in item.system.skills) {
+        for (const s in item.system.skills) {
             let name;
             switch (s) {
                 case 'channel':
@@ -644,13 +644,13 @@ export class od6sroll {
         let damageScore = 0;
         let stunDamageType = '';
         let stunDamageScore = 0;
-        let damageModifiers = [];
-        let targets = [];
+        const damageModifiers = [];
+        const targets = [];
         let difficulty = 0;
         let isAttack = false;
         let isVisible = false;
         let isOpposable = false;
-        let isKnown = false;
+        const isKnown = false;
         let difficultyLevel = game.settings.get('od6s','default_unknown_difficulty') ? 'OD6S.DIFFICULTY_UNKNOWN' : 'OD6S.DIFFICULTY_EASY';
         let bonusmod = 0;
         let bonusdice = {};
@@ -661,8 +661,8 @@ export class od6sroll {
         let canUseCp = true;
         let canUseFp = true;
         let vehicle = '';
-        let vehicleSpeed = 'cruise';
-        let vehicleCollisionType = 't_bone';
+        const vehicleSpeed = 'cruise';
+        const vehicleCollisionType = 't_bone';
         let vehicleTerrainDifficulty = 'OD6S.DIFFICULTY_EASY';
         let damageSource = '';
         let attackerScale = 0;
@@ -670,11 +670,11 @@ export class od6sroll {
         let flatPips = 0;
         let specSkill = '';
         let isExplosive = false;
-        let timer = 0;
-        let contact = false;
+        const timer = 0;
+        const contact = false;
         let canStun = false;
         let onlyStun = false;
-        let actorToken = data.actor.isToken ? data.actor.token : data.actor.getActiveTokens()[0];
+        const actorToken = data.actor.isToken ? data.actor.token : data.actor.getActiveTokens()[0];
 
         if (typeof(data.itemId) !== 'undefined' && data.itemId !== '') {
             let item = data.actor.items.get(data.itemId);
@@ -1129,7 +1129,7 @@ export class od6sroll {
             data.subtype === 'vehiclerangedweaponattack') {
             range = "OD6S.RANGE_SHORT_SHORT";
 
-            let rangeDifficulty = game.settings.get('od6s', 'map_range_to_difficulty');
+            const rangeDifficulty = game.settings.get('od6s', 'map_range_to_difficulty');
             if (targets.length === 1 || (isExplosive && game.settings.get('od6s','auto_explosive'))) {
                 if (data.itemId) {
                     const item = data.actor.items.get(data.itemId);
@@ -1402,7 +1402,7 @@ export class od6sroll {
         let baseDamage;
         let strModDice;
         let doUpdate = false;
-        let update = {};
+        const update = {};
 
         rollData.score = parseInt(rollData.score);
 
@@ -1605,7 +1605,7 @@ export class od6sroll {
             }
         }
 
-        let flags = {
+        const flags = {
             "actorId": rollData.actor.id,
             "targetName": targetName,
             "targetId": targetId,
@@ -1733,7 +1733,7 @@ export class od6sroll {
             return;
         }
 
-        let roll = await new Roll(rollString).evaluate();
+        const roll = await new Roll(rollString).evaluate();
 
         let label = ''
         if (OD6S.showSkillSpecialization && rollData.specSkill !== '') {
@@ -1837,7 +1837,7 @@ export class od6sroll {
         if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) {
             rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
         }
-        let rollMessage = await roll.toMessage({
+        const rollMessage = await roll.toMessage({
                 speaker: ChatMessage.getSpeaker({actor: actor}),
                 flavor: label,
                 flags: {od6s: flags}
@@ -1848,7 +1848,7 @@ export class od6sroll {
         if (flags.wild === true && parseInt(OD6S.wildDieOneDefault) === 2 && parseInt(OD6S.wildDieOneAuto) === 0) {
             await new Promise((resolve) => setTimeout(resolve, 100));
 
-            let replacementRoll = JSON.parse(JSON.stringify(rollMessage.rolls[0].toJSON()));
+            const replacementRoll = JSON.parse(JSON.stringify(rollMessage.rolls[0].toJSON()));
             let highest = 0;
             for (let i = 0; i < replacementRoll.terms[0].results.length; i++) {
                 replacementRoll.terms[0].results[i].result >
@@ -1965,7 +1965,7 @@ export class od6sroll {
         }
 
         if (doUpdate) {
-            let update = {};
+            const update = {};
             update.system = {};
             update.system.fatepoints = actor.system.fatepoints;
             update.system.characterpoints = actor.system.characterpoints;
@@ -2062,7 +2062,7 @@ export class od6sroll {
                             if (OD6S.meleeDifficulty) {
                                 return await od6sutilities.getDifficultyFromLevel(rollData.difficultylevel);
                             } else {
-                                return baseMeleeAttackDifficulty;
+                                return OD6S.baseMeleeAttackDifficulty;
                             }
                         } else {
                             return targetData.parry.score;
@@ -2168,8 +2168,8 @@ export class od6sroll {
      */
     static applyDifficultyEffects(rollData) {
         const mods = rollData.modifiers;
-        let difficultyModifiers = [];
-        let modifiers = [];
+        const difficultyModifiers = [];
+        const modifiers = [];
 
         // First, handle modifiers passed to the roll
         if (rollData.subtype === 'rangedattack' ||
@@ -2307,7 +2307,7 @@ export class od6sroll {
 
     static applyDamageEffects(rollData) {
         const mods = rollData.modifiers;
-        let modifiers = [];
+        const modifiers = [];
 
         if (rollData.subtype === 'rangedattack' ||
             rollData.subtype === 'vehiclerangedattack' ||

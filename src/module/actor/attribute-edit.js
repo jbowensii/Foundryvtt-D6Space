@@ -13,7 +13,7 @@ export class od6sattributeedit {
         const score = this.actor.system.attributes[attribute].base;
 
         /* Structure to pass to dialog */
-        let editData = {
+        const editData = {
             score: score
         }
 
@@ -45,7 +45,7 @@ export class od6sattributeedit {
         const newScore = od6sutilities.getScoreFromDice(dice, pips);
         const attribute = event.currentTarget.dataset.attrname;
 
-        let update = {};
+        const update = {};
         update.id = actor.id;
         update.system = {};
         update.system.attributes = {};

@@ -42,10 +42,10 @@ export default class od6sActiveAttributesConfiguration extends HandlebarsApplica
     }
 
     static async #onSubmit(event, form, formData) {
-        for (let setting in formData.object) {
+        for (const setting in formData.object) {
             if (setting.includes("actor_types")) {
                 let value = formData.object[setting][0];
-                for (let type in OD6S.actorMasks) {
+                for (const type in OD6S.actorMasks) {
                     value = formData.object[setting].includes(type) ?
                         od6sActiveAttributesConfiguration.#updateActorTypes(value, type, true) :
                         od6sActiveAttributesConfiguration.#updateActorTypes(value, type, false);

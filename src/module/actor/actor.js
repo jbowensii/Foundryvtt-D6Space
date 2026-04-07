@@ -181,7 +181,7 @@ export class OD6SActor extends Actor {
     }
 
     async prepareDerivedData() {
-        let actorData = this.system;
+        const actorData = this.system;
 
         if(this.type.match(/^(character|npc|creature)/)) {
             if (OD6S.woundConfig === 1) {
@@ -262,9 +262,9 @@ export class OD6SActor extends Actor {
     }
 
     applyMods() {
-        let actorData = this.system;
+        const actorData = this.system;
 
-        for (let a in actorData.attributes) {
+        for (const a in actorData.attributes) {
             actorData.attributes[a].score = actorData.attributes[a].base + actorData.attributes[a].mod;
             if(this.type.match(/^(character|npc|creature)/)) {
                 actorData.strengthdamage.score = this.setStrengthDamageBonus();
@@ -332,9 +332,9 @@ export class OD6SActor extends Actor {
         // Base init is the character's perception score.  Special abilities and optional rules may add to it.
         // Using perception can be overridden in system config options
         // 0.7.3 add an option to change the base attribute
-        let score = this.system.attributes[OD6S.initiative.attribute].score + this.system.initiative.mod;
-        let dice = od6sutilities.getDiceFromScore(score);
-        let tiebreaker = (+(this.system.attributes.per.score / 100 + this.system.attributes.agi.score / 100).toPrecision(2));
+        const score = this.system.attributes[OD6S.initiative.attribute].score + this.system.initiative.mod;
+        const dice = od6sutilities.getDiceFromScore(score);
+        const tiebreaker = (+(this.system.attributes.per.score / 100 + this.system.attributes.agi.score / 100).toPrecision(2));
         dice.dice--;
         formula = dice.dice + "d6[Base]" + "+" + dice.pips + "+1d6x6[Wild]+" + tiebreaker;
         this.system.initiative.formula = formula;
@@ -354,7 +354,7 @@ export class OD6SActor extends Actor {
     }
 
     async rollAction(actionId,msg) {
-        let actor = this;
+        const actor = this;
         const vehicle = (actor.type === 'starship' || actor.type === 'starship') ? actor.system : actor.system?.vehicle
         let itemId = '';
         let name = '';
@@ -399,7 +399,7 @@ export class OD6SActor extends Actor {
             case "parry":
             case "block":
                 type = actionId;
-                for (let k in OD6S.actions) {
+                for (const k in OD6S.actions) {
                     if (OD6S.actions[k].rollable && OD6S.actions[k].type === type) {
                         name = game.i18n.localize(OD6S.actions[k].name);
                         if (OD6S.actions[k].skill) {
@@ -426,7 +426,7 @@ export class OD6SActor extends Actor {
             case 'vehicledodge':
             case 'vehiclemaneuver':
                 type = actionId;
-                for (let k in OD6S.vehicle_actions) {
+                for (const k in OD6S.vehicle_actions) {
                     if (OD6S.vehicle_actions[k].rollable && OD6S.vehicle_actions[k].type === type) {
                         type = actionId;
                         name = game.i18n.localize(OD6S.vehicle_actions[k].name);
@@ -577,7 +577,7 @@ export class OD6SActor extends Actor {
         const newValue = this.calculateNewWoundLevel(wound);
         update.id = this.id;
         update._id = this.id;
-        let armorUpdates = [];
+        const armorUpdates = [];
         if(wound === 'OD6S.WOUNDS_STUNNED') {
             update[`system.stuns.current`] = 1;
             update[`system.stuns.rounds`] = 1;
@@ -588,7 +588,7 @@ export class OD6SActor extends Actor {
             if (this.itemTypes.armor.length) {
                 this.itemTypes.armor.forEach((value, index, array) => {
                     let armorDamage = 0;
-                    let damaged =  typeof(value.system.damaged === "undefined") ? 0 : value.system.damaged;
+                    const damaged =  typeof(value.system.damaged === "undefined") ? 0 : value.system.damaged;
 
                     if (value.system.equipped.value) {
                         switch (wound) {
@@ -920,7 +920,7 @@ export class OD6SActor extends Actor {
     }
 
     async forceRemoveCrewmember(crewID) {
-        let crewMembers = this.system.crewmembers.filter(e => e.uuid !== crewID);
+        const crewMembers = this.system.crewmembers.filter(e => e.uuid !== crewID);
         const update = {};
         update.system = {};
         update.system.crewmembers = crewMembers;
@@ -944,7 +944,7 @@ export class OD6SActor extends Actor {
             return;
         }
         const rollString = "1d6x6[CP]";
-        let roll = await new Roll(rollString).evaluate();
+        const roll = await new Roll(rollString).evaluate();
         if (game.modules.get('dice-so-nice') && game.modules.get('dice-so-nice').active) {
             game.dice3d.showForRoll(roll, game.user, true, false, false);
         }
@@ -975,7 +975,7 @@ export class OD6SActor extends Actor {
         await this.update(update);
 
         // Update original message and re-display
-        let replacementRoll = JSON.parse(JSON.stringify(message.rolls[0]));
+        const replacementRoll = JSON.parse(JSON.stringify(message.rolls[0]));
         replacementRoll.dice.push(roll.dice[0]);
         replacementRoll.total += roll.total;
 
@@ -1056,7 +1056,7 @@ export class OD6SActor extends Actor {
         data.vehicle_weapons = [];
         for (let i = 0; i < data.items.size; i++) {
             if (this.items.contents[i].type === "vehicle-weapon" || this.items.contents[i].type === "starship-weapon") {
-                let newItem = this.items.contents[i].toObject()
+                const newItem = this.items.contents[i].toObject()
                 newItem.id = this.items.contents[i].id;
                 data.vehicle_weapons.push(newItem);
             }
@@ -1071,7 +1071,7 @@ export class OD6SActor extends Actor {
             }
 
             for (const e of crew) {
-                let actor = await od6sutilities.getActorFromUuid(e.uuid);
+                const actor = await od6sutilities.getActorFromUuid(e.uuid);
                 if (actor) {
                     const update = {};
                     update.id = actor.id;
@@ -1124,8 +1124,8 @@ export class OD6SActor extends Actor {
                             rollString = dice.dice + "d6" + +game.i18n.localize('OD6S.BASE_DIE_FLAVOR');
                         }
                         dice.pips ? rollString += "+" + dice.pips : null;
-                        let roll = await new Roll(rollString).evaluate();
-                        let label = game.i18n.localize('OD6S.DAMAGE') + " (" +
+                        const roll = await new Roll(rollString).evaluate();
+                        const label = game.i18n.localize('OD6S.DAMAGE') + " (" +
                             game.i18n.localize(OD6S.damageTypes['p']) + ") "
                             + game.i18n.localize("OD6S.FROM") + " " + game.i18n.localize("OD6S.COLLISION");
 
@@ -1158,7 +1158,7 @@ export class OD6SActor extends Actor {
                         let rollMode = 'roll';
                         if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
 
-                        let rollMessage = await roll.toMessage({
+                        const rollMessage = await roll.toMessage({
                             speaker: ChatMessage.getSpeaker({actor: game.actors.find(a => a.id === this.id)}),
                             flavor: label,
                             flags: {
@@ -1168,7 +1168,7 @@ export class OD6SActor extends Actor {
                         });
 
                         if (flags.wild === true && OD6S.wildDieOneDefault === 2 && OD6S.wildDieOneAuto === 0) {
-                            let replacementRoll = JSON.parse(JSON.stringify(rollMessage.rolls[0].toJSON()));
+                            const replacementRoll = JSON.parse(JSON.stringify(rollMessage.rolls[0].toJSON()));
                             let highest = 0;
                             for (let i = 0; i < replacementRoll.terms[0].results.length; i++) {
                                 replacementRoll.terms[0].results[i].result >
@@ -1180,7 +1180,7 @@ export class OD6SActor extends Actor {
                             replacementRoll.total -= (+replacementRoll.terms[0].results[highest].result) + 1;
                             flags.total = replacementRoll.total;
                             const rollMessageUpdate = {};
-                            rollMessageupdate.system = {};
+                            rollMessageUpdate.system = {};
                             rollMessageUpdate.content = replacementRoll.total;
                             rollMessageUpdate.id = rollMessage.id;
                             rollMessageUpdate._id = rollMessage._id;
@@ -1198,7 +1198,7 @@ export class OD6SActor extends Actor {
                     }
                 }
             },
-            default: roll
+            default: "roll"
         }).render(true);
     }
 
@@ -1213,7 +1213,7 @@ export class OD6SActor extends Actor {
         const documentName = 'Item';
         let types, folders, label, title, template;
         types = game.documentTypes[documentName].filter(t => t !== CONST.BASE_DOCUMENT_TYPE);
-        let data = {};
+        const data = {};
         const foldersCollection = game.folders.filter(f => (f.type === documentName) && f.displayed);
         folders = foldersCollection.map(f => ({id: f.id, name: f.name}));
         label = game.i18n.localize('OD6S.ITEM');

@@ -368,7 +368,7 @@ export class OD6SItem extends Item {
                                 rollData.score = (+actorData.attributes[skill.system.attribute.toLowerCase()].score);
                             } else {
                                 // Cannot find, use defaults for the type
-                                for (let a in OD6S.actions) {
+                                for (const a in OD6S.actions) {
                                     if (OD6S.actions[a].type === itemData.subtype) {
                                         rollData.score = (+this.actor.system.attributes[OD6S.actions[a].base].score);
                                         break;

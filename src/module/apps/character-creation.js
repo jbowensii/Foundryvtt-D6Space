@@ -61,7 +61,7 @@ export default class OD6SCreateCharacter extends HandlebarsApplicationMixin(Appl
         this.custom.move = OD6S.initialMove;
         this.custom.attributeDice = OD6S.initialAttributes;
         this.custom.attributes = {};
-        for (let a in OD6S.attributes) {
+        for (const a in OD6S.attributes) {
             this.custom.attributes[a] = 0;
         }
         this.custom.me = false;
@@ -312,7 +312,7 @@ export default class OD6SCreateCharacter extends HandlebarsApplicationMixin(Appl
         } else if (action === "cancel") {
             return this.close();
         } else if (action === "finish") {
-            let update = {};
+            const update = {};
             if ((this.actor.img === '' || this.actor.img === "icons/svg/mystery-man.svg")
                 && typeof (this.templateData.img) !== 'undefined' && this.templateData.img !== '') {
                 update.img = this.templateData.img;

@@ -105,7 +105,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         data.system = this.actor.system;
 
         if (this.actor.type !== 'container') {
-            let attributes = [];
+            const attributes = [];
             for (const i in OD6S.attributes) {
                 const entry = this.actor.system.attributes[i];
                 entry.id = i;
@@ -183,7 +183,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         const actions = [];
 
         // Iterate through items, allocating to containers
-        for (let i of sheetData.items) {
+        for (const i of sheetData.items) {
             i.img = i.img || CONST.DEFAULT_TOKEN;
             // Append to gear.
             if (i.type === 'gear') {
@@ -283,7 +283,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
         // Iterate through items, allocating to containers
         // let totalWeight = 0;
-        for (let i of sheetData.items) {
+        for (const i of sheetData.items) {
             i.img = i.img || CONST.DEFAULT_TOKEN;
             // Append to vehicle weapons
             if (i.type === 'skill') {
@@ -330,7 +330,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
         // Iterate through items, allocating to containers
         // let totalWeight = 0;
-        for (let i of sheetData.items) {
+        for (const i of sheetData.items) {
             i.img = i.img || CONST.DEFAULT_TOKEN;
             // Append to starship weapons
             if (i.type === 'skill') {
@@ -373,7 +373,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         // Initialize container.
         const container = [];
 
-        for (let i of sheetData.items) {
+        for (const i of sheetData.items) {
             i.img = i.img || CONST.DEFAULT_TOKEN;
             container.push(i);
         }
@@ -440,7 +440,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 //zero out attributes
                 const update = {};
                 update.system = {};
-                for (let a in this.actor.system.attributes) {
+                for (const a in this.actor.system.attributes) {
                     update[`system.attributes.${a}.base`] = 0;
                     update[`system.embedded_pilot.actor`] = "";
                 }
@@ -452,7 +452,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         // Character Creation
         this.element.querySelectorAll('.create-character').forEach(el =>
             el.addEventListener('click', async ev => {
-                let newChar = new OD6SCreateCharacter({
+                const newChar = new OD6SCreateCharacter({
                     actor: this.actor,
                     templates: od6sutilities.getAllItemsByType('character-template')
                 });
@@ -600,7 +600,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 const actorEffectsList = this.actor.getEmbeddedCollection('ActiveEffect');
 
                 if (actorEffectsList.size > 0) {
-                    let actorUpdate = [];
+                    const actorUpdate = [];
                     actorEffectsList.forEach(e => {
                         let [parentType, parentId, documentType, documentId] = e.origin?.split(".") ?? [];
                         if (parentType === "Scene") {
@@ -647,7 +647,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 const actorEffectsList = this.actor.getEmbeddedCollection('ActiveEffect');
 
                 if (actorEffectsList.size > 0) {
-                    let actorUpdate = [];
+                    const actorUpdate = [];
                     actorEffectsList.forEach(e => {
                         let [parentType, parentId, documentType, documentId] = e.origin?.split(".") ?? [];
                         if (parentType === "Scene") {
@@ -686,8 +686,8 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 const actorEffectsList = this.actor.getEmbeddedCollection('ActiveEffect');
 
                 if (actorEffectsList.size > 0) {
-                    let actorUpdate = [];
-                    let itemUpdates = [];
+                    const actorUpdate = [];
+                    const itemUpdates = [];
                     actorEffectsList.forEach(e => {
                         let [parentType, parentId, documentType, documentId] = e.origin?.split(".") ?? [];
                         if (parentType === "Scene") {
@@ -780,7 +780,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
             }));
 
         // Rollable abilities.
-        let rollDialog = new (od6sroll);
+        const rollDialog = new (od6sroll);
         this.element.querySelectorAll('.rolldialog').forEach(el =>
             el.addEventListener('click', rollDialog._onRollEvent.bind(this)));
         this.element.querySelectorAll('.initrolldialog').forEach(el =>
@@ -789,7 +789,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
             el.addEventListener('click', rollDialog._onRollItem.bind(this)));
 
         // Attribute/skill advances
-        let advanceDialog = new (od6sadvance);
+        const advanceDialog = new (od6sadvance);
         this.element.querySelectorAll('.advancedialog').forEach(el =>
             el.addEventListener('click', advanceDialog._onAdvance.bind(this)));
 
@@ -804,7 +804,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
             }));
 
         // Skill specialization
-        let specializeDialog = new (od6sspecialize);
+        const specializeDialog = new (od6sspecialize);
         this.element.querySelectorAll('.specializedialog').forEach(el =>
             el.addEventListener('click', specializeDialog._onSpecialize.bind(this)));
 
@@ -881,7 +881,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 tokens = tokens.filter(t => t.disposition === CONST.TOKEN_DISPOSITIONS.FRIENDLY);
 
                 // Filter out already-crewed tokens
-                let crewed = [];
+                const crewed = [];
                 for (let i = 0; i < tokens.length; i++) {
                     if (await OD6S.socket.executeAsGM("checkCrewStatus", tokens[i].actor.uuid)) {
                         crewed.push(tokens[i]);
@@ -1147,7 +1147,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
         // Drag events
         if (this.actor.isOwner) {
-            let handler = ev => this._onDragStart(ev);
+            const handler = ev => this._onDragStart(ev);
 
             if (this.actor.type === 'container' && !game.user.isGM) return;
 
@@ -1179,7 +1179,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     async deleteItem(ev) {
         // If this is a skill, deny if there are existing specializations.
         if (ev.currentTarget.dataset.type === "skill") {
-            for (let i in this.actor.items) {
+            for (const i in this.actor.items) {
                 if (this.actor.items[i].type === "specialization") {
                     if (this.actor.items[i].skill === ev.currentTarget.dataset.itemId) {
                         ui.notifications.error(game.i18n.localize("OD6S.ERR_SKILL_HAS_SPEC"));
@@ -1413,7 +1413,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
     async _addCharacterTemplate(item) {
         const itemData = item.system;
-        let update = {};
+        const update = {};
         update.system = {};
 
         // Set the actor's data to be equal to the data found in the template
@@ -1451,8 +1451,8 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     async _templateItems(itemList)
     {// Loop through template items and add to actor from world, then compendia.
         // Filter out items if config is set to do so.
-        let templateItems = [];
-        for (let i of itemList) {
+        const templateItems = [];
+        for (const i of itemList) {
             let templateItem = await od6sutilities._getItemFromWorld(i.name);
             if (typeof (templateItem) === 'undefined' || templateItem === null) {
                 // Check compendia
@@ -1623,7 +1623,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 }
                 if (game.user.isGM || sourceActor.isOwner) {
                     if (await this.actor.createEmbeddedDocuments("Item", Array.isArray(itemData) ? itemData : [itemData])) {
-                        await sourceActor.deleteEmbeddedDocuments('Item', [system._id]);
+                        await sourceActor.deleteEmbeddedDocuments('Item', [itemData._id]);
                     }
                 } else {
                     ui.notifications.warn('OD6S.WARN_NOT_DELETING_ITEM_OWNER');
@@ -1649,7 +1649,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
         // Identify sibling items based on adjacent HTML elements
         const siblings = [];
-        for ( let el of dropTarget.parentElement.children ) {
+        for ( const el of dropTarget.parentElement.children ) {
             const siblingId = el.dataset.itemId;
             if ( siblingId && (siblingId !== source.id) ) siblings.push(items.get(el.dataset.itemId));
         }
@@ -1676,7 +1676,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
         // Identify sibling items based on adjacent HTML elements
         const siblings = [];
-        for ( let el of dropTarget.parentElement.children ) {
+        for ( const el of dropTarget.parentElement.children ) {
             const siblingId = el.dataset.crewUuid;
             if ( siblingId && (siblingId !== source.uuid) ) siblings.push(crewMembers.filter(c=>c.uuid===el.dataset.crewUuid)[0]);
         }
@@ -1788,7 +1788,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
     async _onClearSpeciesTemplate() {
         // Find the template
-        let update = {};
+        const update = {};
         update.system = {};
 
         const item = this.actor.items.find(E => E.type === 'species-template');
@@ -1814,8 +1814,8 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
             // Remove items
             if (itemData.items !== null && typeof(itemData.items !== 'undefined')) {
-                for (let templateItem of itemData.items) {
-                    let actorItem = this.actor.items.find(I => I.name === templateItem.name);
+                for (const templateItem of itemData.items) {
+                    const actorItem = this.actor.items.find(I => I.name === templateItem.name);
                     if (typeof (actorItem) !== 'undefined') {
                         await this.actor.deleteEmbeddedDocuments('Item', [actorItem.id]);
                     }
@@ -1864,8 +1864,8 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
             await this.actor.update(update, {diff: true});
 
             if (itemData.items !== null && typeof(itemData.items !== 'undefined')) {
-                for (let templateItem of itemData.items) {
-                    let actorItem = this.actor.items.find(I => I.name === templateItem.name);
+                for (const templateItem of itemData.items) {
+                    const actorItem = this.actor.items.find(I => I.name === templateItem.name);
                     if (typeof (actorItem) !== 'undefined') {
                         await this.actor.deleteEmbeddedDocuments('Item', [actorItem.id]);
                     }
@@ -1940,7 +1940,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
      * @private
      */
     async _rollAvailableVehicleAction(ev) {
-        let rollData = {};
+        const rollData = {};
         rollData.score = 0;
         rollData.scale = 0;
         const data = ev.currentTarget.dataset;
@@ -1987,7 +1987,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
      * @private
      */
     async _rollAvailableAction(ev) {
-        let rollData = {};
+        const rollData = {};
         const data = ev.currentTarget.dataset;
         let name = game.i18n.localize(data.name);
         let flatPips = 0;
@@ -2044,7 +2044,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                         rollData.score = (+this.actor.system.attributes[skill.system.attribute.toLowerCase()].score);
                     } else {
                         // Cannot find, use defaults for the type
-                        for (let a in OD6S.actions) {
+                        for (const a in OD6S.actions) {
                             if (OD6S.actions[a].type === ev.currentTarget.dataset.type) {
                                 rollData.score = (+this.actor.system.attributes[OD6S.actions[a].base].score);
                                 break;
@@ -2144,7 +2144,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
      * @returns {Promise<void>}
      */
     async unlinkCrew(crewID) {
-        let crewMembers = this.actor.system.crewmembers.filter(e => e.uuid !== crewID);
+        const crewMembers = this.actor.system.crewmembers.filter(e => e.uuid !== crewID);
 
         if (await fromUuid(crewID)) {
             if (game.user.isGM) {
@@ -2220,7 +2220,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
         let rollMode = 0;
         if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
-        let roll = await new Roll(rollString).evaluate();
+        const roll = await new Roll(rollString).evaluate();
         await roll.toMessage({
             speaker: ChatMessage.getSpeaker(),
             flavor: label,

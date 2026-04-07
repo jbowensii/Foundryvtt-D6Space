@@ -76,7 +76,7 @@ export default function od6sHandlebars() {
 
         Handlebars.registerHelper('concat', function () {
             let outStr = '';
-            for (let arg in arguments) {
+            for (const arg in arguments) {
                 if (typeof arguments[arg] != 'object') {
                     outStr += arguments[arg];
                 }
@@ -148,7 +148,7 @@ export default function od6sHandlebars() {
 
         Handlebars.registerHelper('compareSubtype', function (subType, compare) {
             const testString = subType.toUpperCase();
-            let compareString = compare.toUpperCase();
+            const compareString = compare.toUpperCase();
             if (game.i18n.localize(compare) === subType) {
                 return true;
             } else {
@@ -267,7 +267,10 @@ export default function od6sHandlebars() {
         })
 
         Handlebars.registerHelper('getActorNameFromUuid', function (uuid) {
-            return getActorNameFromUuid(uuid);
+            const doc = fromUuidSync(uuid);
+            if (!doc) return '';
+            const actor = doc.documentName === 'Token' ? doc.actor : doc;
+            return actor ? actor.name : '';
         })
 
         Handlebars.registerHelper('showWildDie', function () {
@@ -289,7 +292,7 @@ export default function od6sHandlebars() {
                             label = "OD6S.CARD_BRAWL_ATTACK";
                             break
                         default:
-                            create - attribute - column
+                            break;
                     }
                     break;
                 case "action":
@@ -327,8 +330,8 @@ export default function od6sHandlebars() {
 
         Handlebars.registerHelper('getTemplateMetaphysicsSkills', function (data) {
             const templateSkills = od6sutilities.getSkillsFromTemplate(data.system.items);
-            let metaSkills = [];
-            for (let skill in templateSkills) {
+            const metaSkills = [];
+            for (const skill in templateSkills) {
                 const foundSkill = od6sutilities.getItemByName(skill.name);
                 if (typeof (foundSkill) !== "undefined") {
                     if (foundSkill.system.attribute === "met") {
@@ -342,7 +345,7 @@ export default function od6sHandlebars() {
             if (typeof (type) === 'undefined') type = '';
             if (typeof (subtype) === 'undefined') subtype = '';
 
-            let test = (type === 'funds' || type === "skill" || subtype === "skill" ||
+            const test = (type === 'funds' || type === "skill" || subtype === "skill" ||
                 type === "specialization" || subtype === "specialization" ||
                 type === "attribute" || subtype === "attribute" || subtype === 'vehiclemaneuver');
 
@@ -364,7 +367,7 @@ export default function od6sHandlebars() {
                     // Actually a failure
                     return 'OD6S.FAILURE';
                 }
-                for (let result in OD6S.result) {
+                for (const result in OD6S.result) {
                     if (difference >= OD6S.result[result].difference) {
                         resultMessage = result;
                     } else {
@@ -441,14 +444,14 @@ export default function od6sHandlebars() {
         })
 
         Handlebars.registerHelper('templateItemTypes', function (type, actorTypes) {
-            let itemTypes = {};
+            const itemTypes = {};
             let templateItems = [];
 
             // Item group, filter by actor types
             if (type === "item-group") {
                 for (const [key, items] of Object.entries(OD6S.allowedItemTypes)) {
                     if (actorTypes.includes(key)) {
-                        for (let i of items) {
+                        for (const i of items) {
                             if (OD6S.templateItemTypes['item-group'].includes(i)) {
                                 templateItems.push(i);
                             }
@@ -463,7 +466,7 @@ export default function od6sHandlebars() {
                 templateItems = templateItems.filter(t => t !== 'advantage' || t !== 'disadvantage');
             }
 
-            for (let e of templateItems) {
+            for (const e of templateItems) {
                 itemTypes[e] = game.system.template.Item[e];
                 if (e === 'manifestation') {
                     itemTypes[e].label = OD6S.manifestationsName;
@@ -541,7 +544,7 @@ export default function od6sHandlebars() {
             // Return a list of available vehicle actions
             if (actor.type === 'character' || actor.type === 'npc') {
                 if (typeof (actor.system.vehicle.name) != 'undefined') {
-                    let actions = {...OD6S.vehicle_actions};
+                    const actions = {...OD6S.vehicle_actions};
                     if (actor.system.vehicle.shields.value === 0) {
                         delete actions['shields'];
                     }
@@ -558,16 +561,16 @@ export default function od6sHandlebars() {
         })
 
         Handlebars.registerHelper('getArmorDamageLevels', function () {
-            let levels = {};
-            for (let level in OD6S.armorDamage) {
+            const levels = {};
+            for (const level in OD6S.armorDamage) {
                 levels[level] = OD6S.armorDamage[level].label;
             }
             return levels;
         })
 
         Handlebars.registerHelper('getWeaponDamageLevels', function () {
-            let levels = {};
-            for (let level in OD6S.weaponDamage) {
+            const levels = {};
+            for (const level in OD6S.weaponDamage) {
                 levels[level] = OD6S.weaponDamage[level].label;
             }
             return levels;
@@ -814,7 +817,7 @@ export default function od6sHandlebars() {
         })
 
         Handlebars.registerHelper('rangeToItem', function (range) {
-            return Object.keys(OD6S.ranges).find(key => object[key].name === range).item;
+            return Object.keys(OD6S.ranges).find(key => OD6S.ranges[key].name === range).item;
         })
 
         Handlebars.registerHelper('getStrRange', function (messageId, range, type) {
@@ -1008,14 +1011,14 @@ export default function od6sHandlebars() {
 
         Handlebars.registerHelper('sumManeuverability', function (actor, m, type) {
             if (typeof (m) === 'undefined' || Object.keys(m).length === 0) return;
-            let data = {};
+            const data = {};
             const skillTypes = ["specialization", "skill", 'attribute']
             data.score = 0;
             data.skillScore = 0;
             data.skill = ''
 
             // Look for a spec, then a skill, then finally attribute
-            for (let s of skillTypes) {
+            for (const s of skillTypes) {
                 if (s === 'specialization' && typeof (m.specialization.value) !== "undefined" && m.specialization.value !== '') {
                     const spec = actor.items.find(spec => spec.name === m.specialization.value && spec.type === 'specialization');
                     if (spec) {
@@ -1125,7 +1128,7 @@ export default function od6sHandlebars() {
 
         Handlebars.registerHelper('getContainerItemCategories', function () {
             const categories = {};
-            for (let i of OD6S.allowedItemTypes['container']) {
+            for (const i of OD6S.allowedItemTypes['container']) {
                 categories[i] = OD6S.itemLabels[i]
             }
             return categories;
