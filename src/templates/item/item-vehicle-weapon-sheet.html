@@ -1,5 +1,5 @@
-<div class="od6s sheet item flexcol">
-<header class="sheet-header">
+<form class="{{cssClass}}" autocomplete="off">
+    <header class="sheet-header">
         <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}"
              alt="{{localize 'OD6S.ALT_ITEM_IMAGE'}}"/>
         <div class="header-fields">
@@ -15,11 +15,13 @@
                         <div class="resource">
                             <label class="resource-label" for="item.system.price">{{localize 'OD6S.PRICE'}}</label>
                             <select name="system.price" id="item.system.price">
+                                {{#select item.system.price}}
                                     {{#each (getPrices) as |price key|}}
-                                        <option value="{{ key }}" {{#if (eq key ../item.system.price)}}selected{{/if}}>
+                                        <option value="{{ key }}">
                                             {{key}}: {{localize price}}
                                         </option>
                                     {{/each}}
+                                {{/select}}
                             </select>
                         </div>
                     {{else}}
@@ -33,11 +35,13 @@
                         <div class="resource">
                             <label class="resource-label" for="item.system.damaged">{{localize 'OD6S.DAMAGE'}}</label>
                             <select name="system.damaged" id="item.system.damaged">
+                                {{#select item.system.damaged}}
                                     {{#each (getWeaponDamageLevels) as |level key|}}
-                                        <option value="{{ key }}" {{#if (eq key ../item.system.damaged)}}selected{{/if}}>
+                                        <option value="{{ key }}">
                                             {{localize level}}
                                         </option>
                                     {{/each}}
+                                {{/select}}
                             </select>
                         </div>
                     {{/if}}
@@ -58,10 +62,8 @@
     <section class="sheet-body">
         {{!-- Description Tab --}}
         <div class="tab" data-group="primary" data-tab="description">
-            {{#if editable}}
-              <prose-mirror name="system.description" value="{{item.system.description}}" toggled="true"></prose-mirror>
-            {{else}}
-              <div class="editor-content">{{{item.system.description}}}</div>
+            {{#if editable }}
+            <prose-mirror name="system.description" button="true" editable={{editable}} value="{{ system.description }}" toggled="false">{{{ descriptionHTML }}}</prose-mirror>
             {{/if}}
         </div>
 
@@ -103,11 +105,13 @@
                         <div class="flexrow flex-group-left" title="{{localize 'OD6S.DAMAGE_TYPE'}}">
                             <label for="item.system.damage.type"></label>
                             <select name="system.damage.type" id="item.system.damage.type">
+                                {{#select item.system.damage.type }}
                                     {{#each (getDamageTypes) as |damagetype key|}}
-                                        <option value="{{ key }}" {{#if (eq key ../item.system.damage.type)}}selected{{/if}}>
+                                        <option value="{{ key }}">
                                             {{localize damagetype}}
                                         </option>
                                     {{/each}}
+                                {{/select}}
                             </select>
                         </div>
                     </div>
@@ -201,4 +205,4 @@
         {{!--Labels Tab --}}
         {{> systems/od6s/templates/item/item-labels-tags.html }}
     </section>
-</div>
+</form>

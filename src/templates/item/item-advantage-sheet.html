@@ -1,5 +1,5 @@
-<div class="od6s sheet item flexcol">
-<header class="sheet-header">
+<form class="{{cssClass}}" autocomplete="off">
+    <header class="sheet-header">
         <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}"
              alt="{{localize 'OD6S.ALT_ITEM_IMAGE'}}"/>
         <div class="header-fields">
@@ -20,10 +20,8 @@
 
         {{!-- Description Tab --}}
         <div class="tab" data-group="primary" data-tab="description">
-            {{#if editable}}
-              <prose-mirror name="system.description" value="{{item.system.description}}" toggled="true"></prose-mirror>
-            {{else}}
-              <div class="editor">{{{item.system.description}}}</div>
+            {{#if editable }}
+            <prose-mirror name="system.description" button="true" editable={{editable}} value="{{ system.description }}" toggled="false">{{{ descriptionHTML }}}</prose-mirror>
             {{/if}}
         </div>
 
@@ -40,4 +38,4 @@
         {{> systems/od6s/templates/item/item-labels-tags.html }}
 
     </section>
-</div>
+</form>

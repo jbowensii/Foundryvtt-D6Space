@@ -1,4 +1,5 @@
-<div>
+<form>
+    <div>
         {{#if (eq (showWildDie) true)}}
             <div class="flexrow flex-group-left showWildDie" data-wilddie="{{wilddie}}">
                 <label for="wilddie">{{localize 'OD6S.USE_WILD_DIE'}}</label>
@@ -24,11 +25,8 @@
         <div class="flexrow flex-group-left">
             <label for="damagetype">{{localize 'OD6S.DAMAGE_TYPE'}}:</label>
             <select name="damagetype" id="damagetype">
-                    {{#each (getDamageTypes) as |damage_type key|}}
-                        <option value="{{ key }}" {{#if (eq key ../damagetype)}}selected{{/if}}>
-                            {{localize damage_type}}
-                        </option>
-                    {{/each}}
+                {{selectOptions (getDamageTypes) selected=damagetype localize=true}}
             </select>
         </div>
     </div>
+</form>

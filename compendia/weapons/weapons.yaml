@@ -1,5 +1,8 @@
 ---
 name: Light Semi-automatic Pistol
+img: systems/od6s/assets/icons/weapons/light-semi-automatic-pistol.png
+effects:
+flags:
 type: weapon
 system:
   damage: 
@@ -26,6 +29,7 @@ system:
 ---
 name: Medium Semi-automatic Pistol
 type: weapon
+img: systems/od6s/assets/icons/weapons/medium-semi-automatic-pistol.png
 system:
   damage: 
     type: p
@@ -51,6 +55,7 @@ system:
 ---
 name: Heavy Semi-automatic Pistol
 type: weapon
+img: systems/od6s/assets/icons/weapons/heavy-semi-automatic-pistol.png
 system:
   damage: 
     type: p
@@ -76,6 +81,7 @@ system:
 ---
 name: Rifle (Short Range)
 type: weapon
+img: systems/od6s/assets/icons/weapons/rifle.png
 system:
   damage: 
     type: p
@@ -101,6 +107,7 @@ system:
 ---
 name: Rifle (Standard)
 type: weapon
+img: systems/od6s/assets/icons/weapons/rifle.png
 system:
   damage: 
     type: p
@@ -126,6 +133,7 @@ system:
 ---
 name: Rifle (Semi-Automatic)
 type: weapon
+img: systems/od6s/assets/icons/weapons/semi-automatic-rifle.png
 system:
   damage: 
     type: p
@@ -151,6 +159,7 @@ system:
 ---
 name: Single Shot Shotgun(12 gauge)
 type: weapon
+img: systems/od6s/assets/icons/weapons/shotgun.png
 system:
   damage: 
     type: p
@@ -176,6 +185,7 @@ system:
 ---
 name: Semi-Automatic Shotgun (12 gauge)
 type: weapon
+img: systems/od6s/assets/icons/weapons/shotgun.png
 system:
   damage: 
     type: p
@@ -201,6 +211,7 @@ system:
 ---
 name: Sawed-off Double-Barrel Shotfun (12 gauge)
 type: weapon
+img: systems/od6s/assets/icons/weapons/shotgun.png
 system:
   damage: 
     type: p
@@ -226,6 +237,7 @@ system:
 ---
 name: Assault Rifle
 type: weapon
+img: systems/od6s/assets/icons/weapons/assault-rifle.png
 system:
   damage: 
     type: p
@@ -251,6 +263,7 @@ system:
 ---
 name: Light Submachine Gun
 type: weapon
+img: systems/od6s/assets/icons/weapons/light-submachine-gun.png
 system:
   damage: 
     type: p
@@ -276,6 +289,7 @@ system:
 ---
 name: Medium Submachine Gun
 type: weapon
+img: systems/od6s/assets/icons/weapons/medium-submachine-gun.png
 system:
   damage: 
     type: p
@@ -301,6 +315,7 @@ system:
 ---
 name: Heavy Submachine Gun
 type: weapon
+img: systems/od6s/assets/icons/weapons/heavy-submachine-gun.png
 system:
   damage: 
     type: p
@@ -326,6 +341,7 @@ system:
 ---
 name: Machine Pistol
 type: weapon
+img: systems/od6s/assets/icons/weapons/machine-pistol.png
 system:
   damage: 
     type: p
@@ -351,6 +367,7 @@ system:
 ---
 name: Light Machine Gun
 type: weapon
+img: systems/od6s/assets/icons/weapons/machine-gun.png
 system:
   damage: 
     type: p
@@ -376,6 +393,7 @@ system:
 ---
 name: Medium Machine Gun
 type: weapon
+img: systems/od6s/assets/icons/weapons/machine-gun.png
 system:
   damage: 
     type: p
@@ -401,6 +419,7 @@ system:
 ---
 name: Personal Blaster
 type: weapon
+img: systems/od6s/assets/icons/weapons/ray-gun.png
 system:
   damage: 
     type: e
@@ -427,6 +446,7 @@ system:
 ---
 name: Blaster Pistol
 type: weapon
+img: systems/od6s/assets/icons/weapons/ray-gun.png
 system:
   damage: 
     type: e
@@ -453,6 +473,7 @@ system:
 ---
 name: Blaster Rifle
 type: weapon
+img: systems/od6s/assets/icons/weapons/ray-gun.png
 system:
   damage: 
     type: e
@@ -479,6 +500,7 @@ system:
 ---
 name: Stun Pistol
 type: weapon
+img: systems/od6s/assets/icons/weapons/ray-gun.png
 system:
   damage: 
     type: e
@@ -505,6 +527,7 @@ system:
 ---
 name: Laser Pistol
 type: weapon
+img: systems/od6s/assets/icons/weapons/ray-gun.png
 system:
   damage: 
     type: e
@@ -531,6 +554,7 @@ system:
 ---
 name: Laser Rifle
 type: weapon
+img: systems/od6s/assets/icons/weapons/ray-gun.png
 system:
   damage: 
     type: e
@@ -557,6 +581,7 @@ system:
 ---
 name: Plasma Pistol
 type: weapon
+img: systems/od6s/assets/icons/weapons/ray-gun.png
 system:
   damage: 
     type: e
@@ -583,6 +608,7 @@ system:
 ---
 name: Plasma Rifle
 type: weapon
+img: systems/od6s/assets/icons/weapons/ray-gun.png
 system:
   damage: 
     type: e
@@ -609,6 +635,7 @@ system:
 ---
 name: Gyrojet Pistol
 type: weapon
+img: systems/od6s/assets/icons/weapons/gyrojet.png
 system:
   damage: 
     type: p
@@ -635,6 +662,7 @@ system:
 ---
 name: Gyrojet Rifle
 type: weapon
+img: systems/od6s/assets/icons/weapons/gyrojet.png
 system:
   damage: 
     type: p
@@ -661,6 +689,7 @@ system:
 ---
 name: Needler pistol
 type: weapon
+img: systems/od6s/assets/icons/weapons/gyrojet.png
 system:
   damage: 
     type: p
@@ -686,6 +715,7 @@ system:
 ---
 name: Needler rifle
 type: weapon
+img: systems/od6s/assets/icons/weapons/gyrojet.png
 system:
   damage: 
     type: p
@@ -711,6 +741,7 @@ system:
 ---
 name: Blowgun
 type: weapon
+img: systems/od6s/assets/icons/weapons/dart.png
 system:
   damage: 
     type: p
@@ -736,6 +767,7 @@ system:
 ---
 name: Bow (Composite)
 type: weapon
+img: systems/od6s/assets/icons/weapons/bow-arrow.png
 system:
   damage: 
     type: p
@@ -760,6 +792,7 @@ system:
   description:
 ---
 name: Wrist Crossbow
+img: systems/od6s/assets/icons/weapons/crossbow.png
 type: weapon
 system:
   damage: 
@@ -786,6 +819,7 @@ system:
 ---
 name: Crossbow
 type: weapon
+img: systems/od6s/assets/icons/weapons/crossbow.png
 system:
   damage: 
     type: p
@@ -811,6 +845,7 @@ system:
 ---
 name: Dart
 type: weapon
+img: systems/od6s/assets/icons/weapons/dart.png
 system:
   damage: 
     type: p
@@ -836,6 +871,7 @@ system:
 ---
 name: Throwing Dagger
 type: weapon
+img: systems/od6s/assets/icons/weapons/thrown-daggers.png
 system:
   damage: 
     type: p
@@ -861,6 +897,7 @@ system:
 ---
 name: Shuriken
 type: weapon
+img: systems/od6s/assets/icons/weapons/shuriken.png
 system:
   damage: 
     type: p
@@ -886,6 +923,7 @@ system:
 ---
 name: Arrow
 type: weapon
+img: systems/od6s/assets/icons/weapons/arrow.png
 system:
   damage: 
     type: p
@@ -910,6 +948,7 @@ system:
 ---
 name: Crossbow Bolt
 type: weapon
+img: systems/od6s/assets/icons/weapons/crossbow.png
 system:
   damage: 
     type: p
@@ -934,6 +973,7 @@ system:
 ---
 name: Axe (large)
 type: weapon
+img: systems/od6s/assets/icons/weapons/battle-axe.png
 system:
   damage: 
     type: p
@@ -958,6 +998,7 @@ system:
 ---
 name: Baton
 type: weapon
+img: systems/od6s/assets/icons/weapons/baton.png
 system:
   damage: 
     type: p
@@ -982,6 +1023,7 @@ system:
 ---
 name: Blackjack
 type: weapon
+img: systems/od6s/assets/icons/weapons/baton.png
 system:
   damage: 
     type: p
@@ -1006,6 +1048,7 @@ system:
 ---
 name: Brass Knuckles
 type: weapon
+img: systems/od6s/assets/icons/weapons/brass-knuckles.png
 system:
   damage: 
     type: p
@@ -1030,6 +1073,7 @@ system:
 ---
 name: Bullwhip
 type: weapon
+img: systems/od6s/assets/icons/weapons/whip.png
 system:
   damage: 
     type: p
@@ -1054,6 +1098,7 @@ system:
 ---
 name: Club
 type: weapon
+img: systems/od6s/assets/icons/weapons/wood-club.png
 system:
   damage: 
     type: p
@@ -1078,6 +1123,7 @@ system:
 ---
 name: Dagger
 type: weapon
+img: systems/od6s/assets/icons/weapons/plain-dagger.png
 system:
   damage: 
     type: p
@@ -1102,6 +1148,7 @@ system:
 ---
 name: Hatchet
 type: weapon
+img: systems/od6s/assets/icons/weapons/hatchet.png
 system:
   damage: 
     type: p
@@ -1126,6 +1173,7 @@ system:
 ---
 name: Improvised Weapon
 type: weapon
+img: systems/od6s/assets/icons/weapons/broken-bottle.png
 system:
   damage: 
     type: p
@@ -1155,6 +1203,7 @@ system:
 ---
 name: Katana
 type: weapon
+img: systems/od6s/assets/icons/weapons/katana.png
 system:
   damage: 
     type: p
@@ -1179,6 +1228,7 @@ system:
 ---
 name: Knife (survival)
 type: weapon
+img: systems/od6s/assets/icons/weapons/survival-knife.png
 system:
   damage: 
     type: p
@@ -1203,6 +1253,7 @@ system:
 ---
 name: Machete
 type: weapon
+img: systems/od6s/assets/icons/weapons/machete.png
 system:
   damage: 
     type: p
@@ -1227,6 +1278,7 @@ system:
 ---
 name: Manrikigusari
 type: weapon
+img: systems/od6s/assets/icons/weapons/crossed-chains.png
 system:
   damage: 
     type: p
@@ -1251,6 +1303,7 @@ system:
 ---
 name: Nunchaku
 type: weapon
+img: systems/od6s/assets/icons/weapons/nunchaku.png
 system:
   damage: 
     type: p
@@ -1273,8 +1326,9 @@ system:
   subtype: Melee
   description:
 ---
-name: QuarterstaffT
+name: Quarterstaff
 type: weapon
+img: systems/od6s/assets/icons/weapons/staff.png
 system:
   damage: 
     type: p
@@ -1299,6 +1353,7 @@ system:
 ---
 name: Rapier
 type: weapon
+img: systems/od6s/assets/icons/weapons/fencer.png
 system:
   damage: 
     type: p
@@ -1323,6 +1378,7 @@ system:
 ---
 name: Sai
 type: weapon
+img: systems/od6s/assets/icons/weapons/sai.png
 system:
   damage: 
     type: p
@@ -1347,6 +1403,7 @@ system:
 ---
 name: Sword (Broad)
 type: weapon
+img: systems/od6s/assets/icons/weapons/broadsword.png
 system:
   damage: 
     type: p
@@ -1371,6 +1428,7 @@ system:
 ---
 name: Sword (Energized Broad)
 type: weapon
+img: systems/od6s/assets/icons/weapons/broadsword.png
 system:
   damage: 
     type: e
@@ -1395,6 +1453,7 @@ system:
 ---
 name: Sword (Short)
 type: weapon
+img: systems/od6s/assets/icons/weapons/gladius.png
 system:
   damage: 
     type: p
@@ -1419,6 +1478,7 @@ system:
 ---
 name: Sword (Two-Handed)
 type: weapon
+img: systems/od6s/assets/icons/weapons/two-handed-sword.png
 system:
   damage: 
     type: p
@@ -1443,6 +1503,7 @@ system:
 ---
 name: Tonfa
 type: weapon
+img: systems/od6s/assets/icons/weapons/baton.png
 system:
   damage: 
     type: p
@@ -1466,6 +1527,7 @@ system:
 ---
 name: Fragmentation Grenade
 type: weapon
+img: systems/od6s/assets/icons/weapons/grenade.png
 system:
   damage:
     type: p
@@ -1499,6 +1561,7 @@ system:
 ---
 name: Concussion Grenade
 type: weapon
+img: systems/od6s/assets/icons/weapons/stun-grenade.png
 system:
   damage:
     type: p

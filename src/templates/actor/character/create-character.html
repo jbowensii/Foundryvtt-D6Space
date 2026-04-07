@@ -4,20 +4,14 @@
             <div>
                 <b>{{localize 'OD6S.CREATE_CHARACTER_1'}}</b>
             </div>
-            <div class="select-template" style="min-height:680px;">
-                <p>&nbsp
+            <div class="select-template">
+                <p>&nbsp;
                     {{localize 'OD6S.CREATE_CHARACTER_1A'}}
                 </p>
                 <div class="template-dropdown">
                     <label for="select-template">{{localize 'OD6S.TEMPLATES'}}:</label>
-                    <select name="select-template" id="select-template" style="min-width: 100px;">
-                            {{#if (eq selectedTemplate '') }}
-                                <option value="" selected disabled hidden></option>
-                            {{/if}}
-                            <!--   <option value="custom">{{!--localize 'OD6S.CUSTOM'--}}</option> -->
-                            {{#each characterTemplates as |itemTemplate|}}
-                                <option value="{{itemTemplate._id}}" {{#if (eq itemTemplate._id ../selectedTemplate)}}selected{{/if}}>{{itemTemplate.name}}</option>
-                            {{/each}}
+                    <select name="select-template" id="select-template">
+                        {{selectOptions templateChoices selected=selectedTemplate blank=(localize 'OD6S.CREATE_CHARACTER_TEMPLATE_NONE') valueAttr="uuid" labelAttr="name"}}
                     </select>
                 </div>
                 {{> systems/od6s/templates/actor/character/create-character-template.html}}
@@ -56,16 +50,6 @@
                                    id="specPips" data-dtype="Boolean"
                                    min="0" max="{{maxPips}}"
                                    value="{{pipsFromScore specScore}}" disabled>
-                            {{#unless (specializationDice)}}
-                                <div class="flexrow flex-group-center">
-                                    <div class="add-spec-dice"
-                                         title="{{localize "OD6S.ADD_DICE"}}">
-                                        <a><i class="fas fa-plus-square"></i></a></div>
-                                    <div class="remove-spec-dice"
-                                         title="{{localize "OD6S.REMOVE_DICE"}}">
-                                        <a><i class="fas fa-minus-square"></i></a></div>
-                                </div>
-                            {{/unless}}
                         </div>
                     </div>
                 </div>

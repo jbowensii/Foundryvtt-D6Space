@@ -1,4 +1,5 @@
-<section class="standard-form">
+<div class="settings-wrapper">
+    <section class="scrollable">
     {{#each settings as |setting s|}}
         {{#if (eq setting.key 'use_wild_die')}}
             <div class="form-group">
@@ -7,7 +8,7 @@
                     <input type="{{setting.inputType}}" name="{{setting.key}}" data-dtype="{{setting.type.name}}"
                            value="{{setting.value}}" {{checked ../show}}>
                 </div>
-                <p class="hint">{{{localize setting.hint}}}</p>
+                <p class="notes">{{{localize setting.hint}}}</p>
             </div>
         {{else}}
             {{#if ../show}}
@@ -16,11 +17,7 @@
                     <div class="form-fields">
                         {{#if setting.choice}}
                             <select name="{{setting.key}}" id="{{setting.key}}">
-                                    {{#each setting.choices as |choice key|}}
-                                        <option value="{{key}}" {{#if (eq key ../setting.value)}}selected{{/if}}>
-                                            {{localize choice}}
-                                        </option>
-                                    {{/each}}
+                                {{selectOptions setting.choices selected=setting.value localize=true}}
                             </select>
                         {{else}}
                             {{#if (eq setting.filePicker "image")}}
@@ -35,9 +32,13 @@
                             {{/if}}
                         {{/if}}
                     </div>
-                    <p class="hint">{{{localize setting.hint}}}</p>
+                    <p class="notes">{{{localize setting.hint}}}</p>
                 </div>
             {{/if}}
         {{/if}}
     {{/each}}
-</section>
+    </section>
+    <div class="submit">
+        <button type="button" data-action="submit">{{localize "Submit"}}</button>
+    </div>
+</div>

@@ -1,5 +1,5 @@
-<div class="od6s sheet item flexcol">
-<header class="sheet-header">
+<form class="{{cssClass}}" autocomplete="off">
+    <header class="sheet-header">
         <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}"
              alt="{{localize 'OD6S.ALT_ITEM_IMAGE'}}"/>
         <div class="header-fields">
@@ -21,10 +21,8 @@
 
         {{!-- Description Tab --}}
         <div class="tab" data-group="primary" data-tab="description">
-            {{#if editable}}
-              <prose-mirror name="system.description" value="{{item.system.description}}" toggled="true"></prose-mirror>
-            {{else}}
-              <div class="editor-content">{{{item.system.description}}}</div>
+            {{#if editable }}
+            <prose-mirror name="system.description" button="true" editable={{editable}} value="{{ system.description }}" toggled="false">{{{ descriptionHTML }}}</prose-mirror>
             {{/if}}
         </div>
 
@@ -35,13 +33,15 @@
                 <div class="flexrow data-attribute="{{item.system.attribute}}">
                 <label for="item.system.attribute">{{localize 'OD6S.ATTRIBUTE'}}:</label>
                 <select name="system.attribute" id="item.system.attribute" style="width: 70px;">
+                    {{#select item.system.attribute}}
                         {{#each (getAttributes) as |attribute key|}}
                             {{#if attribute.active }}
-                            <option value="{{ key }}" {{#if (eq key ../item.system.attribute)}}selected{{/if}}>
+                            <option value="{{ key }}">
                                 {{localize attribute.name}}
                             </option>
                             {{/if}}
                         {{/each}}
+                    {{/select}}
                 </select>
             </div>
             <div class="flexrow flex-group-left">
@@ -88,4 +88,4 @@
         {{!--Labels Tab --}}
         {{> systems/od6s/templates/item/item-labels-tags.html }}
     </section>
-</div>
+</form>

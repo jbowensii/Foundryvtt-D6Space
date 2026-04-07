@@ -93,20 +93,11 @@
                 </div>
             </div>
         {{else}}
-            <div class="template-header" style="border-radius: 10px;
-                                        background: #ffffcc;padding: 10px;
-                                        width: 95%;
-                                        min-height: 80%;
-                                        overflow-y: auto;">
+            <div class="template-header">
                 {{{ templateData.system.description }}}
                 <br>
             </div>
-            <div style="border-radius: 10px;
-                                        background: #ffff66;padding: 10px;
-                                        width: 95%;
-                                        height: auto;
-                                        min-height: 80%;
-                                        ">
+            <div class="content-box">
                 <div class="row">
                     <div class="column">
                         {{#each attrs as |attr|}}
@@ -166,12 +157,7 @@
                     </div>
                 </div>
             </div>
-            <div style="border-radius: 10px;
-                                        background: #ffff66;padding: 10px;
-                                        width: 95%;
-                                        height: auto;
-                                        min-height: 80%;
-                                        ">
+            <div class="content-box">
                 <span>{{localize 'OD6S.MOVE'}}:&nbsp{{templateData.system.move}}</span>
                 <span>{{getFatePointsShortName}}:&nbsp{{templateData.system.fp}}</span>
                 <span>{{localize 'OD6S.CHARACTER_POINTS'}}:&nbsp{{templateData.system.cp}}</span>

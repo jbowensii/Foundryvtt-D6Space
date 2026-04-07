@@ -1,5 +1,5 @@
-<div class="od6s sheet item flexcol">
-<header class="sheet-header">
+<form class="{{cssClass}}" autocomplete="off">
+    <header class="sheet-header">
         <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}"
              alt="{{localize 'OD6S.ALT_ITEM_IMAGE'}}"/>
         <div class="header-fields">
@@ -19,10 +19,8 @@
 
         {{!-- Description Tab --}}
         <div class="tab" data-group="primary" data-tab="description">
-            {{#if editable}}
-              <prose-mirror name="system.description" value="{{item.system.description}}" toggled="true"></prose-mirror>
-            {{else}}
-              <div class="editor-content">{{{item.system.description}}}</div>
+            {{#if editable }}
+            <prose-mirror name="system.description" button="true" editable={{editable}} value="{{ system.description }}" toggled="false">{{{ descriptionHTML }}}</prose-mirror>
             {{/if}}
         </div>
 
@@ -70,7 +68,7 @@
                                              data-label="{{key}}">
                                             <b>{{diceFromScore score}}</b>D+<b>{{pipsFromScore score}}</b>
                                         </div>
-                                        <div class="edittemplateattribute flexrow flex-group-center" data-action="editTemplateAttribute"
+                                        <div class="edittemplateattribute flexrow flex-group-center"
                                              data-type="attribute"
                                              data-score="{{score}}"
                                              data-label="{{key}}"
@@ -92,7 +90,7 @@
                                      data-label="{{key}}">
                                     <b>{{diceFromScore score}}</b>D+<b>{{pipsFromScore score}}</b>
                                 </div>
-                                <div class="edittemplateattribute flexrow flex-group-center" data-action="editTemplateAttribute"
+                                <div class="edittemplateattribute flexrow flex-group-center"
                                      data-type="attribute"
                                      data-score="{{score}}"
                                      data-label="{{key}}"
@@ -115,7 +113,7 @@
                                 <div><b>{{localize itemType.label}}</b></div>
                                 {{#if itemType.label}}
                                     <div class="item-controls">
-                                        <a class="item-control template-item-add" data-action="addTemplateItem"
+                                        <a class="item-control template-item-add"
                                            title="{{localize 'OD6S.ADD'}} {{localize itemType.label}}"
                                            data-type="{{typeKey}}">
                                             <i class="fas fa-plus"></i>
@@ -132,13 +130,13 @@
                                             <div class="template-item-grid">
                                                 <div title="{{templateItem.description}}">{{templateItem.name}}</div>
                                                 <div class="template-item template-item-control flexrow flex-group-center">
-                                                    <a class="template-item-control template-item-edit" data-action="editTemplateItem"
+                                                    <a class="template-item-control template-item-edit"
                                                        data-name="{{templateItem.name}}"
                                                        data-type="{{templateItem.type}}"
                                                        data-desc="{{templateItem.description}}"
                                                        title="{{localize 'OD6S.EDIT_ITEM'}}">
                                                         <i class="fas fa-edit"></i></a>
-                                                    <a class="template-item-control template-item-delete" data-action="deleteTemplateItem"
+                                                    <a class="template-item-control template-item-delete"
                                                        data-name="{{templateItem.name}}"
                                                        data-type="{{templateItem.type}}"
                                                        title="{{localize 'OD6S.DELETE_ITEM'}}">
@@ -160,4 +158,4 @@
         {{> systems/od6s/templates/item/item-labels-tags.html }}
 
     </section>
-</div>
+</form>

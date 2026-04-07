@@ -1,4 +1,5 @@
-<section class="standard-form">
+<div class="settings-wrapper">
+    <section class="scrollable">
     <ul class="attributes-sort">
         {{#each attributes as |attribute|}}
             {{#if attribute.active }}
@@ -10,5 +11,10 @@
             {{/if}}
         {{/each}}
     </ul>
-</section>
+    </section>
+
+    <div class="submit">
+      <button type="button" data-action="submit">{{localize "Submit"}}</button>
+    </div>
+</div>
 

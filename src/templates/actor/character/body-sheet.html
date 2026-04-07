@@ -49,13 +49,3 @@
         {{> systems/od6s/templates/actor/common/tabs/data.html}}
     {{/if}}
 </section>
-<section class="sheet-mode">
-    <div class="flexrow flex-group-left sheetmode">
-        <label for="actor.system.sheetmode.value">{{localize 'OD6S.SHEETMODE'}}:</label>
-        <select name="system.sheetmode.value" style="width: 70px;">
-                <option value="normal" {{#if (eq actor.system.sheetmode.value "normal")}}selected{{/if}}>{{localize 'OD6S.SHEETMODE_NORMAL'}}</option>
-                <option value="advance" {{#if (eq actor.system.sheetmode.value "advance")}}selected{{/if}}>{{localize 'OD6S.SHEETMODE_ADVANCE'}}</option>
-                <option value="freeedit" {{#if (eq actor.system.sheetmode.value "freeedit")}}selected{{/if}}>{{localize 'OD6S.SHEETMODE_FREEDIT'}}</option>
-        </select>
-    </div>
-</section>

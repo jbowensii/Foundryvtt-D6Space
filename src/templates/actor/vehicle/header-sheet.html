@@ -63,11 +63,13 @@
             {{#if (isCustomFieldUsed 1 actor.type)}}
                 <div class="flexrow flex-group-center">
                     <label for="actor.system.custom1.value">{{getCustomField1Short}}:</label>
-                    <input title="{{getCustomField1Short}}" name="system.custom1.value" type="{{getCustomField1Type}}"
-                           value="{{actor.system.custom1.value}}" data-dtype="{{getCustomField1FType}}"
-                        {{#if (eq (getCustomField1Type) "number") }}
-                           min="0" max="9999" placeholder="0"
-                        {{/if}}/>
+                    {{#if (eq (getCustomField1Type) "number")}}
+                        <input title="{{getCustomField1Short}}" name="system.custom1.value" type="{{getCustomField1Type}}"
+                               value="{{actor.system.custom1.value}}" data-dtype="{{getCustomField1FType}}" min="0" max="9999" placeholder="0"/>
+                    {{else}}
+                        <input title="{{getCustomField1Short}}" name="system.custom1.value" type="{{getCustomField1Type}}"
+                               value="{{actor.system.custom1.value}}" data-dtype="{{getCustomField1FType}}"/>
+                    {{/if}}
                 </div>
             {{/if}}
         {{/if}}
@@ -75,11 +77,13 @@
             {{#if (isCustomFieldUsed 2 actor.type)}}
                 <div class="flexrow flex-group-center">
                     <label for="actor.system.custom2.value">{{getCustomField2Short}}:</label>
-                    <input title="{{getCustomField2Short}}" name="system.custom2.value" type="{{getCustomField2Type}}"
-                           value="{{actor.system.custom2.value}}" data-dtype="{{getCustomField2FType}}"
-                        {{#if (eq (getCustomField2Type) "number") }}
-                           min="0" max="9999" placeholder="0"
-                        {{/if}}/>
+                    {{#if (eq (getCustomField2Type) "number")}}
+                        <input title="{{getCustomField2Short}}" name="system.custom2.value" type="{{getCustomField2Type}}"
+                               value="{{actor.system.custom2.value}}" data-dtype="{{getCustomField2FType}}" min="0" max="9999" placeholder="0"/>
+                    {{else}}
+                        <input title="{{getCustomField2Short}}" name="system.custom2.value" type="{{getCustomField2Type}}"
+                               value="{{actor.system.custom2.value}}" data-dtype="{{getCustomField2FType}}"/>
+                    {{/if}}
                 </div>
             {{/if}}
         {{/if}}
@@ -87,11 +91,13 @@
             {{#if (isCustomFieldUsed 3 actor.type)}}
                 <div class="flexrow flex-group-center">
                     <label for="actor.system.custom3.value">{{getCustomField3Short}}:</label>
-                    <input title="{{getCustomField3Short}}" name="system.custom3.value" type="{{getCustomField3Type}}"
-                           value="{{actor.system.custom3.value}}" data-dtype="{{getCustomField3FType}}"
-                        {{#if (eq (getCustomField3Type) "number") }}
-                           min="0" max="9999" placeholder="0"
-                        {{/if}}/>
+                    {{#if (eq (getCustomField3Type) "number")}}
+                        <input title="{{getCustomField3Short}}" name="system.custom3.value" type="{{getCustomField3Type}}"
+                               value="{{actor.system.custom3.value}}" data-dtype="{{getCustomField3FType}}" min="0" max="9999" placeholder="0"/>
+                    {{else}}
+                        <input title="{{getCustomField3Short}}" name="system.custom3.value" type="{{getCustomField3Type}}"
+                               value="{{actor.system.custom3.value}}" data-dtype="{{getCustomField3FType}}"/>
+                    {{/if}}
                 </div>
             {{/if}}
         {{/if}}
@@ -99,33 +105,26 @@
             {{#if (isCustomFieldUsed 4 actor.type)}}
                 <div class="flexrow flex-group-center">
                     <label for="actor.system.custom4.value">{{getCustomField4Short}}:</label>
-                    <input title="{{getCustomField4Short}}" name="system.custom4.value" type="{{getCustomField4Type}}"
-                           value="{{actor.system.custom4.value}}" data-dtype="{{getCustomField4FType}}"
-                        {{#if (eq (getCustomField4Type) "number") }}
-                           min="0" max="9999" placeholder="0"
-                        {{/if}}/>
+                    {{#if (eq (getCustomField4Type) "number")}}
+                        <input title="{{getCustomField4Short}}" name="system.custom4.value" type="{{getCustomField4Type}}"
+                               value="{{actor.system.custom4.value}}" data-dtype="{{getCustomField4FType}}" min="0" max="9999" placeholder="0"/>
+                    {{else}}
+                        <input title="{{getCustomField4Short}}" name="system.custom4.value" type="{{getCustomField4Type}}"
+                               value="{{actor.system.custom4.value}}" data-dtype="{{getCustomField4FType}}"/>
+                    {{/if}}
                 </div>
             {{/if}}
         {{/if}}
         <div class="flexrow flex-group-left">
             <label for="actor.system.cover.value">{{localize "OD6S.COVER"}}</label>
             <select name="system.cover.value" id="actor.system.cover.value" style="width: 70px;">
-                    {{#each (getCover "OD6S.COVER") as |cover key|}}
-                        <option value="{{key}}" title="{{localize (concat key "_DESCRIPTION")}}"
-                                {{#if (eq key ../actor.system.cover.value)}}selected{{/if}}>
-                            {{localize key}}
-                        </option>
-                    {{/each}}
+                {{selectOptions (getCover "OD6S.COVER") selected=actor.system.cover.value localize=true}}
             </select>
         </div>
         <div class="flexrow flex-group-left">
             <label for="actor.system.damage.value">{{localize 'OD6S.DAMAGE'}}:</label>
             <select name="system.damage.value" id="actor.system.damage.value" style="width: 70px;">
-                    {{#each (getVehicleDamageLevels) as |level key|}}
-                        <option value="{{ key }}" {{#if (eq key ../actor.system.damage.value)}}selected{{/if}}>
-                            {{localize key}}
-                        </option>
-                    {{/each}}
+                {{selectOptions (getVehicleDamageLevels) selected=actor.system.damage.value localize=true}}
             </select>
         </div>
     {{#if (isGM)}}
@@ -140,8 +139,7 @@
         <div class="flexrow flex-group-left sheetmode">
             <label for="actor.system.sheetmode.value">{{localize 'OD6S.SHEETMODE'}}:</label>
             <select name="system.sheetmode.value" id="actor.system.sheetmode.value" style="width: 70px;">
-                    <option value="normal" {{#if (eq actor.system.sheetmode.value "normal")}}selected{{/if}}>{{localize 'OD6S.SHEETMODE_NORMAL'}}</option>
-                    <option value="freeedit" {{#if (eq actor.system.sheetmode.value "freeedit")}}selected{{/if}}>{{localize 'OD6S.SHEETMODE_FREEDIT'}}</option>
+                {{selectOptions (getSheetModeChoices) selected=actor.system.sheetmode.value localize=true}}
             </select>
         </div>
     </div>

@@ -3,7 +3,7 @@
         <div class="row">
             <div class="column">
                 <div>
-                    <div class="flex-group-center">
+                    <div class="flex-group-center header-solid">
                         <b>{{localize 'OD6S.CHAR_ADVANTAGES'}}</b>
                     </div>
                     <div>
@@ -36,7 +36,7 @@
             </div>
             <div class="column">
                 <div>
-                    <div class="flex-group-center">
+                    <div class="flex-group-center header-solid">
                         <b>{{localize 'OD6S.CHAR_DISADVANTAGES'}}</b>
                     </div>
                 </div>
@@ -116,7 +116,11 @@
                                 <div class="flexrow flex-group-left edit-effect
                                     {{#if effect.disabled}}disabled{{/if}}"
                                      data-effect-id="{{effect.id}}"
+                                     {{#if effect.name}}
                                         title="{{effect.name}}">{{effect.name}}
+                                     {{ else }}
+                                         title="{{effect.label}}">{{effect.label}}
+                                     {{/if}}
                                 </div>
                             </li>
                         {{/each}}

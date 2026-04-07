@@ -3,7 +3,7 @@
         <div class="flexrow flex-group-center">
             {{localize 'OD6S.EFFECTS'}}
             <div class="align-right">
-                <a class="item-control effect-add" data-action="addEffect"
+                <a class="item-control effect-add"
                    title="{{localize 'OD6S.ADD'}} {{localize 'OD6S.EFFECTS'}}">
                     <i class="fas fa-plus"></i>
                 </a>
@@ -15,12 +15,12 @@
                     <div class="grid item-effect-grid">
                         <div title="{{effect.name}}">{{effect.name}}</div>
                         <div class="item-control flexrow flex-group-center">
-                            <a class="item-control effect-edit" data-action="editEffect"
+                            <a class="item-control effect-edit"
                                data-name="{{effect.name}}"
                                data-effect-id="{{effect._id}}"
                                title="{{localize 'OD6S.EDIT_ITEM'}}">
                                 <i class="fas fa-edit"></i></a>
-                            <a class="template-item-control effect-delete" data-action="deleteEffect"
+                            <a class="template-item-control effect-delete"
                                data-name="{{effect.name}}"
                                data-effect-id="{{effect._id}}"
                                title="{{localize 'OD6S.DELETE_ITEM'}}">

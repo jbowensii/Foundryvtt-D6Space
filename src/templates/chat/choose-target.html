@@ -1,16 +1,20 @@
-<div class="od6s flexcol">
-<label for="choosetarget">{{localize "OD6S.TARGET"}}:</label>
-<div class="flexrow flex-group-left">
-    <select name="choosetarget" id="choosetarget" {{#if object.isExplosive}}multiple{{/if}}>
-            {{#each object.targets as | target |}}
-                <option value="{{target.id}}" {{#if (eq target.id ../target)}}selected{{/if}}>{{target.name}}</option>
-            {{/each}}
-    </select>
-</div>
-<input name="messageId" type="hidden" value="{{object.messageId}}">
-<div class="flexrow flex-group-center"
-     data-message-id="{{object.messageId}}">
-    <button type="submit" name="submit" value="submit">{{localize "OD6S.SUBMIT"}}</button>
-    <button type="submit" name="cancel" value="cancel">{{localize "OD6S.CANCEL"}}</button>
-</div>
-</div>
+<form autocomplete="off" onsubmit="event.preventDefault();">
+    <label for="choosetarget">{{localize "OD6S.TARGET"}}:</label>
+    <div class="flexrow flex-group-left">
+        {{#if object.isExplosive}}
+            <select name="choosetarget" id="choosetarget" multiple>
+                {{selectOptions object.targets selected=target valueAttr="id" labelAttr="name"}}
+            </select>
+        {{else}}
+            <select name="choosetarget" id="choosetarget">
+                {{selectOptions object.targets selected=target valueAttr="id" labelAttr="name"}}
+            </select>
+        {{/if}}
+    </div>
+    <input name="messageId" type="hidden" value="{{object.messageId}}">
+    <div class="flexrow flex-group-center"
+         data-message-id="{{object.messageId}}">
+        <button type="submit" name="submit" value="submit">{{localize "OD6S.SUBMIT"}}</button>
+        <button type="submit" name="cancel" value="cancel">{{localize "OD6S.CANCEL"}}</button>
+    </div>
+</form>

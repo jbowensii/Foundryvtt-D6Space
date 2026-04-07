@@ -1,34 +1,41 @@
-<section class="standard-form">
+<div class="settings-wrapper">
+    <section class="scrollable">
     {{#each settings as |setting s|}}
         <div class="form-group">
             <label for="{{setting.key}}">{{localize setting.name}}</label>
             <div class="form-fields">
                 {{#if setting.choice}}
                     <select name="{{setting.key}}" id="{{setting.key}}">
-                            {{#each setting.choices as |choice key|}}
-                                <option value="{{key}}" {{#if (eq key ../setting.value)}}selected{{/if}}>
-                                    {{localize choice}}
-                                </option>
-                            {{/each}}
+                        {{selectOptions setting.choices selected=setting.value localize=true}}
                     </select>
                 {{else}}
                     {{#if setting.actorType}}
                         <input type="hidden" name="{{setting.key}}" value="{{setting.value}}">
-                        <input type="checkbox" name="{{setting.key}}"
-                            {{checked (getActorTypeConfig setting.value 'character')}}
-                               value="character" title="{{localize 'ACTOR.TypeCharacter'}}">
-                        <input type="checkbox" name="{{setting.key}}"
-                            {{checked (getActorTypeConfig setting.value 'npc')}}
-                               value="npc" title="{{localize 'ACTOR.TypeNpc'}}">
-                        <input type="checkbox" name="{{setting.key}}"
-                            {{checked (getActorTypeConfig setting.value 'creature')}}
-                               value="creature" title="{{localize 'ACTOR.TypeCreature'}}">
-                        <input type="checkbox" name="{{setting.key}}"
-                            {{checked (getActorTypeConfig setting.value 'vehicle')}}
-                               value="vehicle" title="{{localize 'ACTOR.TypeVehicle'}}">
-                        <input type="checkbox" name="{{setting.key}}"
-                            {{checked (getActorTypeConfig setting.value 'starship')}}
-                               value="starship" title="{{localize 'ACTOR.TypeStarship'}}">
+                        {{#if (getActorTypeConfig setting.value 'character')}}
+                            <input type="checkbox" name="{{setting.key}}" value="character" title="{{localize 'ACTOR.TypeCharacter'}}" checked>
+                        {{else}}
+                            <input type="checkbox" name="{{setting.key}}" value="character" title="{{localize 'ACTOR.TypeCharacter'}}">
+                        {{/if}}
+                        {{#if (getActorTypeConfig setting.value 'npc')}}
+                            <input type="checkbox" name="{{setting.key}}" value="npc" title="{{localize 'ACTOR.TypeNpc'}}" checked>
+                        {{else}}
+                            <input type="checkbox" name="{{setting.key}}" value="npc" title="{{localize 'ACTOR.TypeNpc'}}">
+                        {{/if}}
+                        {{#if (getActorTypeConfig setting.value 'creature')}}
+                            <input type="checkbox" name="{{setting.key}}" value="creature" title="{{localize 'ACTOR.TypeCreature'}}" checked>
+                        {{else}}
+                            <input type="checkbox" name="{{setting.key}}" value="creature" title="{{localize 'ACTOR.TypeCreature'}}">
+                        {{/if}}
+                        {{#if (getActorTypeConfig setting.value 'vehicle')}}
+                            <input type="checkbox" name="{{setting.key}}" value="vehicle" title="{{localize 'ACTOR.TypeVehicle'}}" checked>
+                        {{else}}
+                            <input type="checkbox" name="{{setting.key}}" value="vehicle" title="{{localize 'ACTOR.TypeVehicle'}}">
+                        {{/if}}
+                        {{#if (getActorTypeConfig setting.value 'starship')}}
+                            <input type="checkbox" name="{{setting.key}}" value="starship" title="{{localize 'ACTOR.TypeStarship'}}" checked>
+                        {{else}}
+                            <input type="checkbox" name="{{setting.key}}" value="starship" title="{{localize 'ACTOR.TypeStarship'}}">
+                        {{/if}}
                     {{else}}
                         {{#if (eq setting.filePicker "image")}}
                             <input type="{{setting.inputType}}" name="{{setting.key}}"
@@ -43,8 +50,12 @@
                     {{/if}}
                 {{/if}}
             </div>
-            <p class="hint">{{{localize setting.hint}}}</p>
+            <p class="notes">{{{localize setting.hint}}}</p>
         </div>
     {{/each}}
-</section>
+    </section>
+    <div class="submit">
+        <button type="button" data-action="submit">{{localize "Submit"}}</button>
+    </div>
+</div>
 

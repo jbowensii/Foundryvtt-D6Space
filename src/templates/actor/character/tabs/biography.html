@@ -26,21 +26,15 @@
         </div>
     </div>
     <label for="actor.system.personality.content" class="resource-label">{{localize actor.system.personality.label}}:</label>
-    {{#if editable}}
-      <prose-mirror name="system.personality.content" value="{{actor.system.personality.content}}" toggled="true"></prose-mirror>
-    {{else}}
-      <div class="editor-content">{{{actor.system.personality.content}}}</div>
+    {{#if editable }}
+    <prose-mirror name="system.personality.content" button="true" editable={{editable}} value="{{ system.personality.content }}" toggled="false">{{{ personalityHTML }}}</prose-mirror>
     {{/if}}
     <label for="actor.system.description.content" class="resource-label">{{localize actor.system.description.label}}:</label>
-    {{#if editable}}
-      <prose-mirror name="system.description.content" value="{{actor.system.description.content}}" toggled="true"></prose-mirror>
-    {{else}}
-      <div class="editor-content">{{{actor.system.description.content}}}</div>
+    {{#if editable }}
+    <prose-mirror name="system.description.content" button="true" editable={{editable}} value="{{ system.description.content }}" toggled="false">{{{ descriptionHTML }}}</prose-mirror>
     {{/if}}
-    <label for="actor.system.background.content" class="resource-label">{{localize actor.system.background.label}}:</label>
-    {{#if editable}}
-      <prose-mirror name="system.background.content" value="{{actor.system.background.content}}" toggled="true"></prose-mirror>
-    {{else}}
-      <div class="editor-content">{{{actor.system.background.content}}}</div>
+    <label for="system.background.content" class="resource-label">{{localize system.background.label}}:</label>
+    {{#if editable }}
+    <prose-mirror name="system.background.content" button="true" editable={{editable}} value="{{ system.background.content }}" toggled="false">{{{ backgroundHTML }}}</prose-mirror>
     {{/if}}
 </div>
