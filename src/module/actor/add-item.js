@@ -74,7 +74,7 @@ export class OD6SAddItem extends HandlebarsApplicationMixin(ApplicationV2) {
             if (items[fd['add-item']].type === "skill" || items[fd['add-item']].type === "specialization") {
                 items[fd['add-item']].system.base = (od6sutilities.getScoreFromDice(this.dice, this.pips))
             }
-            const result = await actor.createEmbeddedDocuments('Item', [items[fd['add-item']]]);
+            const _result = await actor.createEmbeddedDocuments('Item', [items[fd['add-item']]]);
             await actor.sheet.getData();
             this.itemData.caller.render(false);
         }

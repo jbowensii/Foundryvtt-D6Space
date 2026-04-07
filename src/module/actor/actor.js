@@ -858,9 +858,8 @@ export class OD6SActor extends Actor {
         /* Copy attributes and items to vehicle */
         const update = {};
 
-        const newItems = await this.createEmbeddedDocuments('Item',
+        await this.createEmbeddedDocuments('Item',
             pilotActor.items.filter(s => s.type === 'skill' || s.type === "specialization"));
-        const itemIds = newItems.keys();
         update[`system.attributes`] = pilotActor.system.attributes;
         update[`system.embedded_pilot.actor`] = pilotActor;
         await this.update(update);
@@ -1232,7 +1231,7 @@ export class OD6SActor extends Actor {
         const documentName = 'Item';
         let types, folders, label, title, template;
         types = game.documentTypes[documentName].filter(t => t !== CONST.BASE_DOCUMENT_TYPE);
-        const data = {};
+        let data = {};
         const foldersCollection = game.folders.filter(f => (f.type === documentName) && f.displayed);
         folders = foldersCollection.map(f => ({id: f.id, name: f.name}));
         label = game.i18n.localize('OD6S.ITEM');
@@ -1256,7 +1255,7 @@ export class OD6SActor extends Actor {
         })
 
         // Render the entity creation form
-        const html = await renderTemplate(template, {
+        const html = await foundry.applications.handlebars.renderTemplate(template, {
             name: data.name || game.i18n.format("OD6S.NEW_ITEM", {entity: label}),
             folder: data.folder,
             folders: folders,
@@ -1271,20 +1270,23 @@ export class OD6SActor extends Actor {
         });
 
         // Render the confirmation dialog window
-        return Dialog.prompt({
-            title: title,
+        return new foundry.applications.api.DialogV2({
+            window: { title: title },
             content: html,
-            label: title,
-            callback: html => {
-                const form = html[0].querySelector("form");
-                const fd = new FormDataExtended(form);
-                foundry.utils.mergeObject(data, fd.object);
-                if (!data.folder) delete data["folder"];
-                if (types.length === 1) data.type = types[0];
-                data.name = data.name || game.i18n.localize('OD6S.NEW') + " " + game.i18n.localize(OD6S.itemLabels[data.type]);
-                return this.createEmbeddedDocuments('Item', [data]);
-            },
-            rejectClose: false
-        });
+            buttons: [{
+                action: "submit",
+                label: title,
+                default: true,
+                callback: (event, button, dialog) => {
+                    const form = dialog.querySelector("form");
+                    const fd = new FormDataExtended(form);
+                    foundry.utils.mergeObject(data, fd.object);
+                    if (!data.folder) delete data["folder"];
+                    if (types.length === 1) data.type = types[0];
+                    data.name = data.name || game.i18n.localize('OD6S.NEW') + " " + game.i18n.localize(OD6S.itemLabels[data.type]);
+                    return this.createEmbeddedDocuments('Item', [data]);
+                }
+            }]
+        }).render(true);
     }
 }

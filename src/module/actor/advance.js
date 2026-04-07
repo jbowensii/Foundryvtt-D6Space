@@ -275,8 +275,8 @@ export class od6sadvance {
         const dataset = element.dataset;
         let originalScore = 0;
         const cpcost = 0;
-        const dice = dataset.dice;
-        const pips = dataset.pips;
+        const _dice = dataset.dice;
+        const _pips = dataset.pips;
         const base = dataset.base;
         const freeAdvance = Boolean(false);
         let itemid = 0;
@@ -306,7 +306,7 @@ export class od6sadvance {
             originalScore = actorData.attributes[attrname].base;
         } else if (dataset.type === "specialization") {
             const spec = this.actor.getEmbeddedDocument("Item", dataset.itemId);
-            const skill = this.actor.getEmbeddedDocument("Item", spec.system.skill);
+            const _skill = this.actor.getEmbeddedDocument("Item", spec.system.skill);
             used = spec.system.used.value;
             let attribute;
             for (attribute in this.actor.system.attributes) {
@@ -376,7 +376,7 @@ export class od6sadvance {
     static async advanceAction(actor, advanceData, event, dice, pips) {
 
         const actorData = actor.system;
-        const update = '';
+        const _update = '';
         const actorUpdate = {};
         const updates = [];
         actorUpdate.system = {};
@@ -443,7 +443,7 @@ export class od6sadvance {
         }
 
         if(event.currentTarget.dataset.type === "specialization") {
-            const specs = actor.items.filter(i => i.type === "specialization");
+            const _specs = actor.items.filter(i => i.type === "specialization");
             /* Add/subtract to item score, not displayed/aggregate score */
             let newScore;
             OD6S.flatSkills ? newScore = advanceData.base : newScore = advanceData.score - advanceData.originalscore;

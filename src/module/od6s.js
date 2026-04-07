@@ -63,10 +63,10 @@ Hooks.once('init', async function () {
 
     // Catch otherwise-silent errors that can trigger a reload or broken UI
     window.addEventListener("error", (event) => {
-        try { console.error("OD6S window.error:", event?.error ?? event?.message ?? event); } catch (_) {}
+        try { console.error("OD6S window.error:", event?.error ?? event?.message ?? event); } catch { /* swallow */ }
     });
     window.addEventListener("unhandledrejection", (event) => {
-        try { console.error("OD6S unhandledrejection:", event?.reason ?? event); } catch (_) {}
+        try { console.error("OD6S unhandledrejection:", event?.reason ?? event); } catch { /* swallow */ }
     });
 
     game.od6s = {
@@ -905,8 +905,7 @@ Hooks.on("updateActor", async (document, change, options, userId) => {
                         game.i18n.localize('OD6S.CHAT_UNCONSCIOUS_02');
                     await roll.toMessage({flavor: flavor});
 
-                    let tokens;
-                    tokens ??= document.getActiveTokens(true, false);
+                    const tokens = document.getActiveTokens(true, false);
                     for (const token of tokens) {
                         await token.toggleEffect(CONFIG.statusEffects.find(e => e.id === 'unconscious', {
                             overlay: false,
@@ -925,8 +924,7 @@ Hooks.on("updateActor", async (document, change, options, userId) => {
         if(game.settings.get('od6s','auto_status')) {
             const status = OD6S.woundsId[od6sutilities.getWoundLevel(change.system.wounds.value, document)];
             if ((document.hasPlayerOwner && document.isOwner)) {
-                let tokens;
-                tokens ??= document.getActiveTokens(true, false);
+                const tokens = document.getActiveTokens(true, false);
 
                 // Clear all wound-related status effects first
                 for (const s in OD6S.woundsId) {
@@ -992,8 +990,7 @@ Hooks.on("updateActor", async (document, change, options, userId) => {
 
 
             } else if (!document.hasPlayerOwner && game.user.isGM) {
-                let tokens;
-                tokens ??= document.getActiveTokens(true, false);
+                const tokens = document.getActiveTokens(true, false);
                 for (const s in OD6S.woundsId) {
                     const id = OD6S.woundsId[s]
                     if (id === 'healthy') continue;

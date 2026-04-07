@@ -498,7 +498,7 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 
         const addTemplate = "systems/od6s/templates/item/item-template-add.html";
         const html = await renderTemplate(addTemplate, newItem);
-        const label = game.i18n.localize(game.system.template.Item[event.currentTarget.dataset.type].label);
+        const label = game.i18n.localize(OD6S.itemLabels[event.currentTarget.dataset.type] || event.currentTarget.dataset.type);
 
         new Dialog({
             title: game.i18n.localize("OD6S.ADD") + " " + label + "!",
@@ -566,7 +566,7 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 
         const editTemplate = "systems/od6s/templates/item/item-template-item-edit.html";
         const html = await renderTemplate(editTemplate, itemData);
-        const label = game.i18n.localize(game.system.template.Item[event.currentTarget.dataset.type].label);
+        const label = game.i18n.localize(OD6S.itemLabels[event.currentTarget.dataset.type] || event.currentTarget.dataset.type);
 
         new Dialog({
             title: game.i18n.localize("OD6S.EDIT") + " " + label + "!",
@@ -712,7 +712,7 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
         try {
             //data = JSON.parse(event.dataTransfer.getData('text/plain'));
             data = TextEditor.getDragEventData(event)
-        } catch (err) {
+        } catch {
             return false;
         }
 

@@ -305,7 +305,7 @@ export class od6sutilities {
                     }
                     await ChatMessage.deleteDocuments([origMessage.id]);
                     cloneMessage.flags.od6s.canUseCp = false;
-                    const newMessage = cloneMessage.rolls[0].toMessage(cloneMessage, {rollMode: rollMode});
+                    const _newMessage = cloneMessage.rolls[0].toMessage(cloneMessage, {rollMode: rollMode});
                 }
             }
         }
@@ -369,13 +369,13 @@ export class od6sutilities {
         msgData.speaker.token = actor.isToken ? actor.token.id : '';
         msgData.speaker.scene = game.scenes.active.id;
 
-        let rollMode = 'roll';
+        let _rollMode = 'roll';
         let rollString = "";
-        if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
+        if (game.user.isGM && game.settings.get('od6s', 'hide-gm-rolls')) _rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
 
         if(game.settings.get('od6s','explosive_zones')) {
             // Separate rolls for each zone; damage score represents whole dice
-            const zoneDamage = [];
+            const _zoneDamage = [];
             for (const i in item.system.blast_radius) {
                 const zone = item.system.blast_radius[i];
                 const zoneTargets = targets.filter(target => target.zone === (+i));
@@ -488,7 +488,7 @@ export class od6sutilities {
                     }
                 }
             }
-            const damageMessage = await roll.toMessage(msgData,);
+            const _damageMessage = await roll.toMessage(msgData,);
         }
     }
 
@@ -1184,7 +1184,7 @@ export class od6sutilities {
 
     static
     async generateOpposedRoll(token, msg) {
-        const type = msg.getFlag('od6s', 'damageType');
+        const _type = msg.getFlag('od6s', 'damageType');
         if (!token.actor.hasPlayerOwner) {
             if (msg.getFlag('od6s', 'type') === 'damage' || msg.getFlag('od6s','type') === 'explosive') {
                 const type = msg.getFlag('od6s', 'damageType');
@@ -1208,7 +1208,7 @@ export class od6sutilities {
     }
 
     static getActorOwner(actor) {
-        const permissionObject = getProperty(actor ?? {}, "ownership") ?? {};
+        const permissionObject = foundry.utils.getProperty(actor ?? {}, "ownership") ?? {};
 
         const playerOwners = Object.entries(permissionObject)
             .filter(

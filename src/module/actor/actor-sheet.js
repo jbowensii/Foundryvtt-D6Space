@@ -621,10 +621,10 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                     actorEffectsList.forEach(e => {
                         // Parse effect origin to find the source item ID.
                         // Token-based actors have a longer origin path with Scene/Token segments.
-                        let [parentType, parentId, documentType, documentId] = e.origin?.split(".") ?? [];
+                        let [parentType, _parentId, documentType, documentId] = e.origin?.split(".") ?? [];
                         if (parentType === "Scene") {
-                            let actorType, actorId;
-                            [parentType, parentId, actorType, actorId, documentType, documentId] = e.origin?.split(".") ?? [];
+                            let _actorType, _actorId;
+                            [parentType, _parentId, _actorType, _actorId, documentType, documentId] = e.origin?.split(".") ?? [];
                         }
                         if (documentType === "Item") {
                             const effectItem = this.actor.items.find(i => i.id === documentId);
@@ -666,10 +666,10 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 if (actorEffectsList.size > 0) {
                     const actorUpdate = [];
                     actorEffectsList.forEach(e => {
-                        let [parentType, parentId, documentType, documentId] = e.origin?.split(".") ?? [];
+                        let [parentType, _parentId, documentType, documentId] = e.origin?.split(".") ?? [];
                         if (parentType === "Scene") {
-                            let actorType, actorId;
-                            [parentType, parentId, actorType, actorId, documentType, documentId] = e.origin?.split(".") ?? [];
+                            let _actorType, _actorId;
+                            [parentType, _parentId, _actorType, _actorId, documentType, documentId] = e.origin?.split(".") ?? [];
                         }
                         if (documentType === "Item") {
                             const effectItem = this.actor.items.find(i => i.id === documentId);
@@ -709,10 +709,10 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                     const actorUpdate = [];
                     const itemUpdates = [];
                     actorEffectsList.forEach(e => {
-                        let [parentType, parentId, documentType, documentId] = e.origin?.split(".") ?? [];
+                        let [parentType, _parentId, documentType, documentId] = e.origin?.split(".") ?? [];
                         if (parentType === "Scene") {
-                            let actorType, actorId;
-                            [parentType, parentId, actorType, actorId, documentType, documentId] = e.origin?.split(".") ?? [];
+                            let _actorType, _actorId;
+                            [parentType, _parentId, _actorType, _actorId, documentType, documentId] = e.origin?.split(".") ?? [];
                         }
                         if (documentType === "Item") {
                             const effectItem = this.actor.items.find(i => i.id === documentId);
@@ -1346,7 +1346,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         const type = header.dataset.type;
 
         // Grab any data associated with this control.
-        const data = duplicate(header.dataset);
+        const data = foundry.utils.deepClone(header.dataset);
         // Initialize a default name.
         const name = game.i18n.localize('OD6S.NEW') + ' ' + game.i18n.localize('ITEM.Type' + type.capitalize());
         // Prepare the item object.
@@ -1525,7 +1525,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         let data;
         try {
             data = JSON.parse(event.dataTransfer.getData('text/plain'));
-        } catch (err) {
+        } catch {
             return false;
         }
 

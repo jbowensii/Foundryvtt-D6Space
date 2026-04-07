@@ -1413,7 +1413,7 @@ export class od6sroll {
         let baseDamage;
         let strModDice;
         let doUpdate = false;
-        const update = {};
+        const _update = {};
 
         rollData.score = parseInt(rollData.score);
 

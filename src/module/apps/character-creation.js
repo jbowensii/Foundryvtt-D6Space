@@ -1,7 +1,7 @@
 // OD6S Character creation wizard — multi-step template selection, attribute assignment, and skill allocation.
 import {od6sutilities} from "../system/utilities.js";
 import OD6S from "../config/config-od6s.js";
-import OD6SAddItem from "../actor/add-item.js";
+
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 

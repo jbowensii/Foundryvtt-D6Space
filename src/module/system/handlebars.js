@@ -348,7 +348,7 @@ export default function od6sHandlebars() {
             if (typeof (type) === 'undefined') type = '';
             if (typeof (subtype) === 'undefined') subtype = '';
 
-            const test = (type === 'funds' || type === "skill" || subtype === "skill" ||
+            const _test = (type === 'funds' || type === "skill" || subtype === "skill" ||
                 type === "specialization" || subtype === "specialization" ||
                 type === "attribute" || subtype === "attribute" || subtype === 'vehiclemaneuver');
 
@@ -470,7 +470,8 @@ export default function od6sHandlebars() {
             }
 
             for (const e of templateItems) {
-                itemTypes[e] = game.system.template.Item[e];
+                // Use OD6S.itemLabels instead of deprecated game.system.template
+                itemTypes[e] = { label: OD6S.itemLabels[e] || e };
                 if (e === 'manifestation') {
                     itemTypes[e].label = OD6S.manifestationsName;
                 }
@@ -969,7 +970,7 @@ export default function od6sHandlebars() {
 
         Handlebars.registerHelper('isExplosiveSet', async (actorUuid,weaponId) => {
             const actor = await od6sutilities.getActorFromUuid(actorUuid);
-            const weapon = actor.items.get(weaponId);
+            const _weapon = actor.items.get(weaponId);
         })
 
         Handlebars.registerHelper('getActorTypeLabel', (type) => {
@@ -1154,7 +1155,7 @@ export default function od6sHandlebars() {
         })
 
         Handlebars.registerHelper('getCharacterInventoryForContainer', function () {
-            const items = game.user.character.items.filter(i => OD6S.equippable.includes(i.type));
+            const _items = game.user.character.items.filter(i => OD6S.equippable.includes(i.type));
             return game.user.character.items.filter(i => OD6S.equippable.includes(i.type));
         })
 

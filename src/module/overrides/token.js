@@ -1,4 +1,4 @@
-// OD6S Token rendering — prevents dragging containers and hides wound status icons from non-owners.
+// OD6S Token override — restricts container dragging and filters hidden status effects from non-owners.
 import OD6S from "../config/config-od6s.js";
 
 export class OD6SToken extends foundry.canvas.placeables.Token {
@@ -21,39 +21,27 @@ export class OD6SToken extends foundry.canvas.placeables.Token {
         this.effects.bg.visible = false;
         this.effects.overlay = null;
 
-        // Categorize new effects
-        const tokenEffects = this.document.effects;
+        // Use Actor effects only — TokenDocument#effects and #overlayEffect are deprecated (removed in v14)
         const actorEffects = this.actor?.temporaryEffects || [];
-        let overlay = {
-            src: this.document.overlayEffect,
-            tint: null
-        };
+        let overlay = { src: null, tint: null };
 
-        // Draw status effects
-        if ( tokenEffects.length || actorEffects.length ) {
+        if ( actorEffects.length ) {
             const promises = [];
 
-
-            // Draw actor effects first, skipping wound statuses for non-owners
+            // Draw actor effects, hiding wound status icons from non-owners
             for ( const f of actorEffects ) {
                 const status = [...f.statuses][0];
-                if ( !f.icon ) continue;
+                if ( !f.img ) continue;
                 if(!this.isOwner && OD6S.hiddenStatusEffects.find(e=> e === status)) continue;
                 const tint = Color.from(f.tint ?? null);
                 if ( f.getFlag("core", "overlay") ) {
-                    if ( overlay ) promises.push(this._drawEffect(overlay.src, overlay.tint));
-                    overlay = {src: f.icon, tint};
+                    if ( overlay && overlay.src ) promises.push(this._drawEffect(overlay.src, overlay.tint));
+                    overlay = {src: f.img, tint};
                     continue;
                 }
-                promises.push(this._drawEffect(f.icon, tint));
+                promises.push(this._drawEffect(f.img, tint));
             }
 
-            // Next draw token effects
-            for ( const f of tokenEffects ) {
-                const status = [...f.statuses][0];
-                if(!this.isOwner && OD6S.hiddenStatusEffects.find(e=> e === status)) continue;
-                promises.push(this._drawEffect(f, null));
-            }
             await Promise.all(promises);
         }
 
@@ -64,5 +52,3 @@ export class OD6SToken extends foundry.canvas.placeables.Token {
         this._refreshEffects();
     }
 }
-
-

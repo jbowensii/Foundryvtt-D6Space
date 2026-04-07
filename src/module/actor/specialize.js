@@ -130,7 +130,7 @@ export class od6sspecialize {
         }
 
         // Create new specialization item, derived from original skill
-        let newItemData = duplicate(actorSheet.actor.getEmbeddedDocument("Item",
+        let newItemData = foundry.utils.deepClone(actorSheet.actor.getEmbeddedDocument("Item",
             skillId, true));
         let base = 0;
         if(actorSheet.actor.type === "npc") {

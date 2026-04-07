@@ -4,7 +4,7 @@ export class OD6SInitiative {
     static async _onPreUpdateCombat(combat, data, options, userId) {
         if(game.settings.get('od6s', 'reroll_initiative')) {
 
-            if (!hasProperty(data, "round")) return;
+            if (!foundry.utils.hasProperty(data, "round")) return;
             if (data.round < 2 || data.round < combat.previous.round) return;
             const gmUsers = game.users.contents.filter(u => u.isGM);
             const gmUserId = game.user.isGM ? game.userId : gmUsers.length ? gmUsers[0].id : null;
