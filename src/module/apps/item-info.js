@@ -16,7 +16,12 @@ export default class OD6SItemInfo extends HandlebarsApplicationMixin(Application
         form: { template: "systems/od6s/templates/item/item-info.html" }
     };
 
+    constructor(itemData, options = {}) {
+        super(options);
+        this._itemData = itemData;
+    }
+
     async _prepareContext(options) {
-        return this.options;
+        return { object: this._itemData };
     }
 }

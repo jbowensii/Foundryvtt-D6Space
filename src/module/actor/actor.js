@@ -30,13 +30,14 @@ export class OD6SActor extends Actor {
 
     /** @override */
     prepareData() {
-        // v14 workaround (foundryvtt#11096): Actor class fields (overrides,
-        // statuses, tokenActiveEffectChanges) are undefined during the first
-        // prepareData() call because _initialize() runs in the parent constructor
-        // before class field initializers execute. Initialize them defensively.
-        this.overrides ??= {};
+        // v14 workaround (foundryvtt#11096): Actor class fields are undefined
+        // during the first prepareData() because _initialize() runs in the parent
+        // constructor before class field initializers execute. Force-reset on every
+        // cycle so reset() → _initialize() also clears stale AE phase tracking
+        // stored in tokenActiveEffectChanges (prevents "phase already completed").
+        this.overrides = {};
         this.statuses ??= new Set();
-        this.tokenActiveEffectChanges ??= {};
+        this.tokenActiveEffectChanges = {};
         super.prepareData();
     }
 
