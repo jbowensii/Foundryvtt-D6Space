@@ -26,15 +26,12 @@ Hooks.on("quenchReady", (quench) => {
             });
             it("should have status effects configured", function() {
                 assert.ok(CONFIG.statusEffects, "statusEffects exists");
-                // v13: array with .id property, v14: object keyed by id or different structure
-                const effects = CONFIG.statusEffects;
-                if (Array.isArray(effects)) {
-                    assert.ok(effects.find(e => e.id === "dead"), "dead status exists");
-                } else if (typeof effects === "object") {
-                    // v14 may key by id directly or use a different structure
-                    const keys = Object.keys(effects);
-                    assert.ok(keys.length > 0, `statusEffects has ${keys.length} entries`);
-                }
+                // Foundry v14 may expose a hybrid Array with named properties.
+                // Our runtime code accesses by key (e.g. CONFIG.statusEffects.dead),
+                // so verify named-property access works regardless of underlying type.
+                assert.ok(CONFIG.statusEffects.dead, "dead status accessible by key");
+                assert.ok(CONFIG.statusEffects.stunned, "stunned status accessible by key");
+                assert.ok(CONFIG.statusEffects.unconscious, "unconscious status accessible by key");
             });
             it("should have socketlib registered", function() {
                 assert.ok(game.od6s.config, "od6s config exists");
