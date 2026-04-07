@@ -22,9 +22,10 @@ export class od6sattributeedit {
             ok: {
                 label: game.i18n.localize("OD6S.EDIT_ATTRIBUTE"),
                 callback: (event2, button, dialog) => {
+                    const form = button.form ?? dialog.element;
                     return od6sattributeedit.editAttributeAction(
-                        dialog.querySelector("#dice").value,
-                        dialog.querySelector("#pips").value,
+                        form.querySelector("#dice").value,
+                        form.querySelector("#pips").value,
                         event,
                         this.actor);
                 }

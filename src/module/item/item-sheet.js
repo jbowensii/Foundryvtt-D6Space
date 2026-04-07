@@ -183,7 +183,7 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
             ok: {
                 label: game.i18n.localize("OD6S.ADD"),
                 callback: (event, button, dialog) => this._addActorTypeAction(
-                    dialog.querySelector("#actor-type").value
+                    (button.form ?? dialog.element).querySelector("#actor-type").value
                 )
             }
         });
@@ -229,8 +229,8 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
             ok: {
                 label: game.i18n.localize("OD6S.ADD"),
                 callback: (event, button, dialog) => this._addLabelAction(
-                    dialog.querySelector("#key").value,
-                    dialog.querySelector("#value").value)
+                    (button.form ?? dialog.element).querySelector("#key").value,
+                    (button.form ?? dialog.element).querySelector("#value").value)
             }
         });
     }
@@ -500,7 +500,7 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
             ok: {
                 label: game.i18n.localize("OD6S.ADD"),
                 callback: (event2, button, dialog) => this._addTemplateItemAction(
-                    dialog.querySelector("#itemname").value,
+                    (button.form ?? dialog.element).querySelector("#itemname").value,
                     event.currentTarget.dataset.type,
                     this)
             }
@@ -565,7 +565,7 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
             ok: {
                 label: game.i18n.localize("OD6S.EDIT"),
                 callback: (event2, button, dialog) => this._editTemplateItemAction(
-                    dialog.querySelector("#itemdesc").value,
+                    (button.form ?? dialog.element).querySelector("#itemdesc").value,
                     event,
                     this)
             }
@@ -629,8 +629,8 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
             ok: {
                 label: game.i18n.localize("OD6S.EDIT_ATTRIBUTE"),
                 callback: (event2, button, dialog) => this._editAttributeAction(
-                    dialog.querySelector("#dice").value,
-                    dialog.querySelector("#pips").value,
+                    (button.form ?? dialog.element).querySelector("#dice").value,
+                    (button.form ?? dialog.element).querySelector("#pips").value,
                     event,
                     this)
             }

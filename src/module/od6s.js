@@ -1463,12 +1463,12 @@ async function simpleRoll() {
                     let wild = false;
                     let rollString = "";
                     let rollMode = 0;
-                    let dice = dialog.querySelector("#dice").value;
-                    const pips = dialog.querySelector("#pips").value;
-                    const damageRoll = dialog.querySelector('#damageroll').checked;
-                    const damageType = dialog.querySelector('#damagetype').value;
+                    let dice = (button.form ?? dialog.element).querySelector("#dice").value;
+                    const pips = (button.form ?? dialog.element).querySelector("#pips").value;
+                    const damageRoll = (button.form ?? dialog.element).querySelector('#damageroll').checked;
+                    const damageType = (button.form ?? dialog.element).querySelector('#damagetype').value;
                     if (game.settings.get('od6s', 'use_wild_die')) {
-                        wild = dialog.querySelector("#wilddie").checked;
+                        wild = (button.form ?? dialog.element).querySelector("#wilddie").checked;
                     } else {
                         wild = false;
                     }

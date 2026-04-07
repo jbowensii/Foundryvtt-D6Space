@@ -280,7 +280,7 @@ export default class OD6SCreateCharacter extends HandlebarsApplicationMixin(Appl
             ok: {
                 label: game.i18n.localize("OD6S.CREATE_SPECIALIZATION"),
                 callback: async (event2, button, dialog) => {
-                    await this.addSpec(dialog.querySelector("#specname").value, specData);
+                    await this.addSpec((button.form ?? dialog.element).querySelector("#specname").value, specData);
                 }
             }
         });

@@ -1086,11 +1086,11 @@ export class OD6SActor extends Actor {
             ok: {
                 label: game.i18n.localize('OD6S.ROLL'),
                 callback: async (event2, button, dialog) => {
-                        const speed = dialog.querySelector("#vehiclespeed").value;
+                        const speed = (button.form ?? dialog.element).querySelector("#vehiclespeed").value;
                         const speedValue = OD6S.vehicle_speeds[speed].damage;
-                        const type = dialog.querySelector("#vehiclecollisiontype").value;
+                        const type = (button.form ?? dialog.element).querySelector("#vehiclecollisiontype").value;
                         const typeValue = OD6S.collision_types[type].score;
-                        const mod = dialog.querySelector("#vehiclecollisionmod").value;
+                        const mod = (button.form ?? dialog.element).querySelector("#vehiclecollisionmod").value;
                         const score = (+speedValue) + (+typeValue) + (+mod * OD6S.pipsPerDice);
                         const dice = od6sutilities.getDiceFromScore(score);
                         let rollString;
@@ -1240,7 +1240,7 @@ export class OD6SActor extends Actor {
                 label: title,
                 default: true,
                 callback: (event, button, dialog) => {
-                    const form = dialog.querySelector("form");
+                    const form = (button.form ?? dialog.element).querySelector("form");
                     const fd = new FormDataExtended(form);
                     foundry.utils.mergeObject(data, fd.object);
                     if (!data.folder) delete data["folder"];
