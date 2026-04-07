@@ -485,12 +485,16 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         this.element.querySelectorAll('.rollbodypoints').forEach(el =>
             el.addEventListener('click', async ev => {
                 const confirmText = "<p>" + game.i18n.localize("OD6S.CONFIRM_ROLL_BODYPOINTS") + "</p>";
-                await Dialog.prompt({
-                    title: game.i18n.localize("OD6S.ROLL") + " " + game.i18n.localize(OD6S.bodyPointsName),
+                await foundry.applications.api.DialogV2.confirm({
+                    window: { title: game.i18n.localize("OD6S.ROLL") + " " + game.i18n.localize(OD6S.bodyPointsName) },
                     content: confirmText,
-                    callback: () => {
-                        return this._rollBodyPoints();
-                    }
+                    yes: {
+                        label: game.i18n.localize("OD6S.ROLL"),
+                        callback: () => {
+                            return this._rollBodyPoints();
+                        }
+                    },
+                    no: { label: game.i18n.localize("Cancel") }
                 })
             }));
 
@@ -841,24 +845,32 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         this.element.querySelectorAll('.reset-template').forEach(el =>
             el.addEventListener('click', () => {
                 const confirmText = "<p>" + game.i18n.localize("OD6S.CONFIRM_TEMPLATE_CLEAR") + "</p>";
-                Dialog.prompt({
-                    title: game.i18n.localize("OD6S.CLEAR_TEMPLATE"),
+                foundry.applications.api.DialogV2.confirm({
+                    window: { title: game.i18n.localize("OD6S.CLEAR_TEMPLATE") },
                     content: confirmText,
-                    callback: () => {
-                        return this._onClearCharacterTemplate();
-                    }
+                    yes: {
+                        label: game.i18n.localize("OD6S.CLEAR_TEMPLATE"),
+                        callback: () => {
+                            return this._onClearCharacterTemplate();
+                        }
+                    },
+                    no: { label: game.i18n.localize("Cancel") }
                 })
             }));
 
         this.element.querySelectorAll('.reset-species-template').forEach(el =>
             el.addEventListener('click', () => {
                 const confirmText = "<p>" + game.i18n.localize("OD6S.CONFIRM_SPECIES_TEMPLATE_CLEAR") + "</p>";
-                Dialog.prompt({
-                    title: game.i18n.localize("OD6S.CLEAR_SPECIES_TEMPLATE"),
+                foundry.applications.api.DialogV2.confirm({
+                    window: { title: game.i18n.localize("OD6S.CLEAR_SPECIES_TEMPLATE") },
                     content: confirmText,
-                    callback: () => {
-                        return this._onClearSpeciesTemplate();
-                    }
+                    yes: {
+                        label: game.i18n.localize("OD6S.CLEAR_SPECIES_TEMPLATE"),
+                        callback: () => {
+                            return this._onClearSpeciesTemplate();
+                        }
+                    },
+                    no: { label: game.i18n.localize("Cancel") }
                 })
             }));
 
@@ -1232,13 +1244,17 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 itemId = li.dataset.itemId;
             }
             const confirmText = "<p>" + game.i18n.localize("OD6S.DELETE_CONFIRM") + "</p>";
-            await Dialog.prompt({
-                title: game.i18n.localize("OD6S.DELETE"),
+            await foundry.applications.api.DialogV2.confirm({
+                window: { title: game.i18n.localize("OD6S.DELETE") },
                 content: confirmText,
-                callback: async () => {
-                    await this.actor.deleteEmbeddedDocuments('Item', [itemId]);
-                    this.render();
-                }
+                yes: {
+                    label: game.i18n.localize("OD6S.DELETE"),
+                    callback: async () => {
+                        await this.actor.deleteEmbeddedDocuments('Item', [itemId]);
+                        this.render();
+                    }
+                },
+                no: { label: game.i18n.localize("Cancel") }
             })
         } else {
             await this.actor.deleteEmbeddedDocuments('Item', [ev.currentTarget.dataset.itemId]);

@@ -853,18 +853,15 @@ export class OD6SActor extends Actor {
             const html = await renderTemplate(addTemplate, data);
             const label = game.i18n.localize("OD6S.TRANSFER_VEHICLE");
 
-            new Dialog({
-                title: label,
+            await foundry.applications.api.DialogV2.confirm({
+                window: { title: label },
                 content: html,
-                width: 400,
-                buttons: {
-                    submit: {
-                        label: game.i18n.localize("OD6S.OK"),
-                        callback: dlg => this._verifyAddToCrew(currentVehicle.uuid, vehicleId)
-                    },
+                yes: {
+                    label: game.i18n.localize("OD6S.OK"),
+                    callback: () => this._verifyAddToCrew(currentVehicle.uuid, vehicleId)
                 },
-                default: "submit"
-            }).render(true);
+                no: { label: game.i18n.localize("Cancel") }
+            });
         } else {
             return await this.setFlag('od6s', 'crew', vehicleId);
         }
@@ -1083,19 +1080,17 @@ export class OD6SActor extends Actor {
             return;
         }
         const html = await renderTemplate("systems/od6s/templates/actor/vehicle/collision.html");
-        new Dialog({
-            title: game.i18n.localize('OD6S.ROLL_COLLISION_DAMAGE'),
+        await foundry.applications.api.DialogV2.prompt({
+            window: { title: game.i18n.localize('OD6S.ROLL_COLLISION_DAMAGE') },
             content: html,
-            buttons: {
-                roll: {
-                    label: game.i18n.localize('OD6S.ROLL'),
-                    callback: async (dlg) => {
-                        const dlgEl = dlg instanceof HTMLElement ? dlg : dlg[0];
-                        const speed = dlgEl.querySelector("#vehiclespeed").value;
+            ok: {
+                label: game.i18n.localize('OD6S.ROLL'),
+                callback: async (event2, button, dialog) => {
+                        const speed = dialog.querySelector("#vehiclespeed").value;
                         const speedValue = OD6S.vehicle_speeds[speed].damage;
-                        const type = dlgEl.querySelector("#vehiclecollisiontype").value;
+                        const type = dialog.querySelector("#vehiclecollisiontype").value;
                         const typeValue = OD6S.collision_types[type].score;
-                        const mod = dlgEl.querySelector("#vehiclecollisionmod").value;
+                        const mod = dialog.querySelector("#vehiclecollisionmod").value;
                         const score = (+speedValue) + (+typeValue) + (+mod * OD6S.pipsPerDice);
                         const dice = od6sutilities.getDiceFromScore(score);
                         let rollString;
@@ -1182,11 +1177,9 @@ export class OD6SActor extends Actor {
 
                             await rollMessage.update(rollMessageUpdate, {"diff": true});
                         }
-                    }
                 }
-            },
-            default: "roll"
-        }).render(true);
+            }
+        });
     }
 
     /**

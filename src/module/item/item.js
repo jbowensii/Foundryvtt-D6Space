@@ -188,21 +188,21 @@ export class OD6SItem extends Item {
         });
 
         // Render the confirmation dialog window
-        return Dialog.prompt({
-            title: title,
+        return foundry.applications.api.DialogV2.prompt({
+            window: { title: title },
             content: html,
-            label: title,
-            callback: html => {
-                const form = html[0].querySelector("form");
-                const fd = new FormDataExtended(form);
-                foundry.utils.mergeObject(data, fd.object, {inplace: true});
-                if ( !data.folder ) delete data.folder;
-                if ( types.length === 1 ) data.type = types[0];
-                if ( !data.name?.trim() ) data.name = this.defaultName();
-                return this.create(data, {parent, pack, renderSheet: true});
-            },
-            rejectClose: false,
-            options
+            ok: {
+                label: title,
+                callback: (event, button, dialog) => {
+                    const form = dialog.querySelector("form");
+                    const fd = new FormDataExtended(form);
+                    foundry.utils.mergeObject(data, fd.object, {inplace: true});
+                    if ( !data.folder ) delete data.folder;
+                    if ( types.length === 1 ) data.type = types[0];
+                    if ( !data.name?.trim() ) data.name = this.defaultName();
+                    return this.create(data, {parent, pack, renderSheet: true});
+                }
+            }
         });
     }
 

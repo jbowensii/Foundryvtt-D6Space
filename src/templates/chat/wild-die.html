@@ -1,7 +1,9 @@
     <div class="flexrow flex-group-left">
         <label for="wildie">{{localize "OD6S.CHOOSE_WILD_EFFECT"}}:</label>
         <select name="wilddie" id="wilddie">
-            {{selectOptions (getWildDieOptions) selected=(getWildDieDefaultValue) localize=true}}
+            {{#each (getWildDieOptions) as |label key|}}
+                <option value="{{key}}" {{#if (eq key (getWildDieDefaultValue))}}selected{{/if}}>{{localize label}}</option>
+            {{/each}}
         </select>
     </div>
     <input name="messageId" type="hidden" value="{{messageId}}">

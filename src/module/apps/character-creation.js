@@ -274,20 +274,16 @@ export default class OD6SCreateCharacter extends HandlebarsApplicationMixin(Appl
         const specData = target.dataset;
         const specTemplate = "systems/od6s/templates/apps/character-creation/specialize.html";
         const html = await renderTemplate(specTemplate, specData);
-        new Dialog({
-            title: game.i18n.localize("OD6S.CREATE_SPECIALIZATION"),
+        await foundry.applications.api.DialogV2.prompt({
+            window: { title: game.i18n.localize("OD6S.CREATE_SPECIALIZATION") },
             content: html,
-            buttons: {
-                submit: {
-                    label: game.i18n.localize("OD6S.CREATE_SPECIALIZATION"),
-                    callback: async dlg => {
-                        const dlgEl = dlg instanceof HTMLElement ? dlg : dlg[0];
-                        await this.addSpec(dlgEl.querySelector("#specname").value, specData);
-                    }
+            ok: {
+                label: game.i18n.localize("OD6S.CREATE_SPECIALIZATION"),
+                callback: async (event2, button, dialog) => {
+                    await this.addSpec(dialog.querySelector("#specname").value, specData);
                 }
-            },
-            default: "submit"
-        }).render(true, { focus: true });
+            }
+        });
     }
 
     static async #onNavigate(event, target) {

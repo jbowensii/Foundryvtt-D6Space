@@ -79,8 +79,8 @@ export class InitRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     async updateDialog() {
-        this.rollData.characterpoints > this.rollData.actor.system.characterpoints.value ? this.rollData.cpcostcolor = "var(--od6s-danger)" :
-            this.rollData.cpcostcolor = "var(--od6s-text)";
+        this.rollData.characterpoints > this.rollData.actor.system.characterpoints.value ? this.rollData.cpcostcolor = "cp-over" :
+            this.rollData.cpcostcolor = "";
         this.render();
     }
 
@@ -113,7 +113,7 @@ export class od6sInitRoll {
             showWildDie: game.settings.get('od6s', 'use_wild_die'),
             characterpoints: 0,
             cpcost: 0,
-            cpcostcolor: "var(--od6s-text)",
+            cpcostcolor: "",
             bonusdice: 0,
             bonuspips: 0,
             actor: actor,
@@ -510,8 +510,8 @@ export class RollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 
     async updateDialog() {
         if (this.rollData.actor.type === 'character') {
-            this.rollData.characterpoints > this.rollData.actor.system.characterpoints.value ? this.rollData.cpcostcolor = "var(--od6s-danger)" :
-                this.rollData.cpcostcolor = "var(--od6s-text)";
+            this.rollData.characterpoints > this.rollData.actor.system.characterpoints.value ? this.rollData.cpcostcolor = "cp-over" :
+                this.rollData.cpcostcolor = "";
         }
         this.render();
     }
@@ -1322,7 +1322,7 @@ export class od6sroll {
             canusecp: canUseCp,
             contact: contact,
             cpcost: 0,
-            cpcostcolor: "var(--od6s-text)",
+            cpcostcolor: "",
             bonusdice: bonusdice.dice,
             bonuspips: bonusdice.pips,
             isvisible: isVisible,

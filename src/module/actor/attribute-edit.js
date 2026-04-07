@@ -2,10 +2,6 @@ import {od6sutilities} from "../system/utilities.js";
 
 export class od6sattributeedit {
 
-    activateListeners(html) {
-        super.activateListeners(html);
-    }
-
     async _onAttributeEdit(event) {
         event.preventDefault();
 
@@ -20,24 +16,20 @@ export class od6sattributeedit {
         const advanceTemplate = "systems/od6s/templates/actor/common/attribute-edit.html";
         const html = await renderTemplate(advanceTemplate, editData);
 
-        new Dialog({
-            title: game.i18n.localize("OD6S.EDIT") + " " + event.currentTarget.dataset.label + "!",
+        await foundry.applications.api.DialogV2.prompt({
+            window: { title: game.i18n.localize("OD6S.EDIT") + " " + event.currentTarget.dataset.label + "!" },
             content: html,
-            buttons: {
-                submit: {
-                    label: game.i18n.localize("OD6S.EDIT_ATTRIBUTE"),
-                    callback: dlg => {
-                        const dlgEl = dlg instanceof HTMLElement ? dlg : dlg[0];
-                        return od6sattributeedit.editAttributeAction(
-                        dlgEl.querySelector("#dice").value,
-                        dlgEl.querySelector("#pips").value,
+            ok: {
+                label: game.i18n.localize("OD6S.EDIT_ATTRIBUTE"),
+                callback: (event2, button, dialog) => {
+                    return od6sattributeedit.editAttributeAction(
+                        dialog.querySelector("#dice").value,
+                        dialog.querySelector("#pips").value,
                         event,
                         this.actor);
-                    }
                 }
-            },
-            default: "submit"
-        }).render(true);
+            }
+        });
     }
 
     static async editAttributeAction(dice, pips, event, actor) {

@@ -2,11 +2,15 @@
     <div class="flexrow flex-group-left">
         {{#if object.isExplosive}}
             <select name="choosetarget" id="choosetarget" multiple>
-                {{selectOptions object.targets selected=target valueAttr="id" labelAttr="name"}}
+                {{#each object.targets as |t|}}
+                    <option value="{{t.id}}" {{#if (eq t.id ../target)}}selected{{/if}}>{{t.name}}</option>
+                {{/each}}
             </select>
         {{else}}
             <select name="choosetarget" id="choosetarget">
-                {{selectOptions object.targets selected=target valueAttr="id" labelAttr="name"}}
+                {{#each object.targets as |t|}}
+                    <option value="{{t.id}}" {{#if (eq t.id ../target)}}selected{{/if}}>{{t.name}}</option>
+                {{/each}}
             </select>
         {{/if}}
     </div>

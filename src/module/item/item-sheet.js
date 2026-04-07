@@ -177,19 +177,16 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
         const addTemplate = "systems/od6s/templates/item/item-add-actor-type.html";
         const html = await renderTemplate(addTemplate, data);
         const label = game.i18n.localize("OD6S.ACTOR_TYPE")
-        new Dialog({
-            title: game.i18n.localize("OD6S.ADD") + " " + label,
+        await foundry.applications.api.DialogV2.prompt({
+            window: { title: game.i18n.localize("OD6S.ADD") + " " + label },
             content: html,
-            buttons: {
-                submit: {
-                    label: game.i18n.localize("OD6S.ADD"),
-                    callback: dlg => this._addActorTypeAction(
-                        dlg[0].querySelector("#actor-type").value
-                    )
-                }
-            },
-            default: "submit"
-        }).render(true);
+            ok: {
+                label: game.i18n.localize("OD6S.ADD"),
+                callback: (event, button, dialog) => this._addActorTypeAction(
+                    dialog.querySelector("#actor-type").value
+                )
+            }
+        });
     }
 
     async _addActorTypeAction(type) {
@@ -226,19 +223,16 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
         const html = await renderTemplate(addTemplate, itemData);
         const label = game.i18n.localize("OD6S.LABEL");
 
-        new Dialog({
-            title: game.i18n.localize("OD6S.ADD") + " " + label + "!",
+        await foundry.applications.api.DialogV2.prompt({
+            window: { title: game.i18n.localize("OD6S.ADD") + " " + label + "!" },
             content: html,
-            buttons: {
-                submit: {
-                    label: game.i18n.localize("OD6S.ADD"),
-                    callback: dlg => this._addLabelAction(
-                        dlg[0].querySelector("#key").value,
-                        dlg[0].querySelector("#value").value)
-                }
-            },
-            default: "submit"
-        }).render(true);
+            ok: {
+                label: game.i18n.localize("OD6S.ADD"),
+                callback: (event, button, dialog) => this._addLabelAction(
+                    dialog.querySelector("#key").value,
+                    dialog.querySelector("#value").value)
+            }
+        });
     }
 
     async _addLabelAction(key, value) {
@@ -500,20 +494,17 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
         const html = await renderTemplate(addTemplate, newItem);
         const label = game.i18n.localize(OD6S.itemLabels[event.currentTarget.dataset.type] || event.currentTarget.dataset.type);
 
-        new Dialog({
-            title: game.i18n.localize("OD6S.ADD") + " " + label + "!",
+        await foundry.applications.api.DialogV2.prompt({
+            window: { title: game.i18n.localize("OD6S.ADD") + " " + label + "!" },
             content: html,
-            buttons: {
-                submit: {
-                    label: game.i18n.localize("OD6S.ADD"),
-                    callback: dlg => this._addTemplateItemAction(
-                        dlg[0].querySelector("#itemname").value,
-                        event.currentTarget.dataset.type,
-                        this)
-                }
-            },
-            default: "submit"
-        }).render(true);
+            ok: {
+                label: game.i18n.localize("OD6S.ADD"),
+                callback: (event2, button, dialog) => this._addTemplateItemAction(
+                    dialog.querySelector("#itemname").value,
+                    event.currentTarget.dataset.type,
+                    this)
+            }
+        });
     }
 
     async _addTemplateItemAction(name, type, itemSheet) {
@@ -568,20 +559,17 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
         const html = await renderTemplate(editTemplate, itemData);
         const label = game.i18n.localize(OD6S.itemLabels[event.currentTarget.dataset.type] || event.currentTarget.dataset.type);
 
-        new Dialog({
-            title: game.i18n.localize("OD6S.EDIT") + " " + label + "!",
+        await foundry.applications.api.DialogV2.prompt({
+            window: { title: game.i18n.localize("OD6S.EDIT") + " " + label + "!" },
             content: html,
-            buttons: {
-                submit: {
-                    label: game.i18n.localize("OD6S.EDIT"),
-                    callback: dlg => this._editTemplateItemAction(
-                        dlg[0].querySelector("#itemdesc").value,
-                        event,
-                        this)
-                }
-            },
-            default: "submit"
-        }).render(true);
+            ok: {
+                label: game.i18n.localize("OD6S.EDIT"),
+                callback: (event2, button, dialog) => this._editTemplateItemAction(
+                    dialog.querySelector("#itemdesc").value,
+                    event,
+                    this)
+            }
+        });
     }
 
     async _editTemplateItemAction(desc, event, itemSheet) {
@@ -604,20 +592,24 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 
     async _deleteTemplateItem(event) {
         const confirmText = "<p>" + game.i18n.localize("OD6S.DELETE_CONFIRM") + "</p>";
-        await Dialog.prompt({
-            title: game.i18n.localize("OD6S.DELETE"),
+        await foundry.applications.api.DialogV2.confirm({
+            window: { title: game.i18n.localize("OD6S.DELETE") },
             content: confirmText,
-            callback: async () => {
-                const itemIndex = this.item.system.items.findIndex(
-                    i => i.name === event.currentTarget.dataset.name
-                        && i.type === event.currentTarget.dataset.type);
-                this.item.system.items.splice(itemIndex, 1);
-                const update = {};
-                update.id = this.item.id;
-                update.system = this.item.system;
-                await this.item.update(update, {diff: true})
-                this.render();
-            }
+            yes: {
+                label: game.i18n.localize("OD6S.DELETE"),
+                callback: async () => {
+                    const itemIndex = this.item.system.items.findIndex(
+                        i => i.name === event.currentTarget.dataset.name
+                            && i.type === event.currentTarget.dataset.type);
+                    this.item.system.items.splice(itemIndex, 1);
+                    const update = {};
+                    update.id = this.item.id;
+                    update.system = this.item.system;
+                    await this.item.update(update, {diff: true})
+                    this.render();
+                }
+            },
+            no: { label: game.i18n.localize("Cancel") }
         })
     }
 
@@ -631,21 +623,18 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
         const editTemplate = "systems/od6s/templates/item/item-attribute-edit.html";
         const html = await renderTemplate(editTemplate, editData);
 
-        new Dialog({
-            title: game.i18n.localize("OD6S.EDIT") + " " + event.currentTarget.dataset.label + "!",
+        await foundry.applications.api.DialogV2.prompt({
+            window: { title: game.i18n.localize("OD6S.EDIT") + " " + event.currentTarget.dataset.label + "!" },
             content: html,
-            buttons: {
-                submit: {
-                    label: game.i18n.localize("OD6S.EDIT_ATTRIBUTE"),
-                    callback: dlg => this._editAttributeAction(
-                        dlg[0].querySelector("#dice").value,
-                        dlg[0].querySelector("#pips").value,
-                        event,
-                        this)
-                }
-            },
-            default: "submit"
-        }).render(true);
+            ok: {
+                label: game.i18n.localize("OD6S.EDIT_ATTRIBUTE"),
+                callback: (event2, button, dialog) => this._editAttributeAction(
+                    dialog.querySelector("#dice").value,
+                    dialog.querySelector("#pips").value,
+                    event,
+                    this)
+            }
+        });
     }
 
     async _editAttributeAction(dice, pips, event, itemSheet) {

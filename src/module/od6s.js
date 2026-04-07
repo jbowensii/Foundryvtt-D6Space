@@ -1454,23 +1454,21 @@ export function getAttributeShortName(attribute) {
 async function simpleRoll() {
     const html = await renderTemplate("systems/od6s/templates/simpleRoll.html",
         {"wilddie": true, "dice": 1, "pips": 0});
-    new Dialog({
-        title: game.i18n.localize('OD6S.ROLL'),
+    await foundry.applications.api.DialogV2.prompt({
+        window: { title: game.i18n.localize('OD6S.ROLL') },
         content: html,
-        buttons: {
-            roll: {
-                label: game.i18n.localize('OD6S.ROLL'),
-                callback: async (dlg) => {
+        ok: {
+            label: game.i18n.localize('OD6S.ROLL'),
+            callback: async (event2, button, dialog) => {
                     let wild = false;
                     let rollString = "";
                     let rollMode = 0;
-                    const dlgEl = dlg instanceof HTMLElement ? dlg : dlg[0];
-                    let dice = dlgEl.querySelector("#dice").value;
-                    const pips = dlgEl.querySelector("#pips").value;
-                    const damageRoll = dlgEl.querySelector('#damageroll').checked;
-                    const damageType = dlgEl.querySelector('#damagetype').value;
+                    let dice = dialog.querySelector("#dice").value;
+                    const pips = dialog.querySelector("#pips").value;
+                    const damageRoll = dialog.querySelector('#damageroll').checked;
+                    const damageType = dialog.querySelector('#damagetype').value;
                     if (game.settings.get('od6s', 'use_wild_die')) {
-                        wild = dlgEl.querySelector("#wilddie").checked;
+                        wild = dialog.querySelector("#wilddie").checked;
                     } else {
                         wild = false;
                     }
@@ -1570,9 +1568,7 @@ async function simpleRoll() {
                     }
                 }
             }
-        },
-        default: "roll"
-    }).render(true);
+        });
 }
 
 // Custom die terms registered in CONFIG.Dice.terms. Both are d6 with the "x6"

@@ -119,6 +119,10 @@
   border: 1px solid var(--od6s-border, #999);
 }
 
+.cp-over {
+  color: var(--od6s-danger, crimson);
+}
+
 .bordered {
   border: 3px solid var(--od6s-border, black);
 }

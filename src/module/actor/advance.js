@@ -70,8 +70,8 @@ export class AdvanceDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     async updateDialog() {
-        this.advanceData.cpcost > this.actorSheet.actor.system.characterpoints.value ? this.advanceData.cpcostcolor="red" :
-            this.advanceData.cpcostcolor="black";
+        this.advanceData.cpcost > this.actorSheet.actor.system.characterpoints.value ? this.advanceData.cpcostcolor = "cp-over" :
+            this.advanceData.cpcostcolor = "";
         this.render();
     }
 
@@ -325,7 +325,7 @@ export class od6sadvance {
             score: originalScore,
             base: base,
             cpcost: cpcost,
-            cpcostcolor: "black",
+            cpcostcolor: "",
             freeadvance: freeAdvance,
             type: dataset.type,
             originalscore: originalScore,

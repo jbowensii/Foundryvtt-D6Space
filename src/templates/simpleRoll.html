@@ -25,7 +25,9 @@
         <div class="flexrow flex-group-left">
             <label for="damagetype">{{localize 'OD6S.DAMAGE_TYPE'}}:</label>
             <select name="damagetype" id="damagetype">
-                {{selectOptions (getDamageTypes) selected=damagetype localize=true}}
+                {{#each (getDamageTypes) as |label key|}}
+                    <option value="{{key}}" {{#if (eq key ../damagetype)}}selected{{/if}}>{{localize label}}</option>
+                {{/each}}
             </select>
         </div>
     </div>

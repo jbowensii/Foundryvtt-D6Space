@@ -6,7 +6,9 @@
             <div class="form-fields">
                 {{#if setting.choice}}
                     <select name="{{setting.key}}" id="{{setting.key}}">
-                        {{selectOptions setting.choices selected=setting.value localize=true}}
+                        {{#each setting.choices as |label key|}}
+                            <option value="{{key}}" {{#if (eq key ../setting.value)}}selected{{/if}}>{{localize label}}</option>
+                        {{/each}}
                     </select>
                 {{else}}
                     {{#if setting.actorType}}
@@ -41,7 +43,9 @@
                             <input type="{{setting.inputType}}" name="{{setting.key}}"
                                    data-dtype="{{setting.type.name}}"
                                    value="{{setting.value}}">
-                            {{filePicker target=setting.key type="image"}}
+                            <button type="button" class="file-picker" data-type="image" data-target="{{setting.key}}" tabindex="-1" title="Browse Files">
+                                <i class="fas fa-file-import fa-fw"></i>
+                            </button>
                         {{else}}
                             <input type="{{setting.inputType}}" name="{{setting.key}}"
                                    data-dtype="{{setting.type.name}}"

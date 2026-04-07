@@ -10,7 +10,10 @@
                 <div class="template-dropdown">
                     <label for="select-template">{{localize 'OD6S.TEMPLATES'}}:</label>
                     <select name="select-template" id="select-template">
-                        {{selectOptions templateChoices selected=selectedTemplate blank=(localize 'OD6S.CREATE_CHARACTER_TEMPLATE_NONE') valueAttr="uuid" labelAttr="name"}}
+                        <option value="">{{localize 'OD6S.CREATE_CHARACTER_TEMPLATE_NONE'}}</option>
+                        {{#each templateChoices as |choice|}}
+                            <option value="{{choice.uuid}}" {{#if (eq choice.uuid ../selectedTemplate)}}selected{{/if}}>{{choice.name}}</option>
+                        {{/each}}
                     </select>
                 </div>
                 {{> systems/od6s/templates/actor/character/create-character-template.html}}
