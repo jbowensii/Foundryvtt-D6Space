@@ -36,21 +36,32 @@ export class OD6SActor extends Actor {
         this.overrides ??= {};
         this.statuses ??= new Set();
         this.tokenActiveEffectChanges ??= {};
-        // Reset our own phase tracker so re-entrant prepareData cycles work cleanly
-        this._od6sCompletedPhases = new Set();
         super.prepareData();
     }
 
     /** @override */
     applyActiveEffects(phase) {
-        // v14 tracks completed AE phases in a private field and throws if a phase
-        // is re-run. During reset()/updateSource() cycles the private tracker isn't
-        // cleared, causing errors logged via Hooks.onError before the throw.
-        // Pre-check with our own tracker to avoid calling super when it would throw.
-        if (this._od6sCompletedPhases?.has(phase)) return;
-        this._od6sCompletedPhases ??= new Set();
-        this._od6sCompletedPhases.add(phase);
-        return super.applyActiveEffects(phase);
+        // v14 tracks completed AE phases in a private field and throws via
+        // Hooks.onError (which logs to console) before the throw propagates.
+        // Neither catching the throw nor pre-tracking phases prevents the log
+        // because Foundry's internal tracker persists across _initialize cycles.
+        // Wrap super call to intercept Hooks.onError for this specific message.
+        const origOnError = Hooks.onError;
+        let suppressed = false;
+        Hooks.onError = (loc, err, ...rest) => {
+            if (err?.message?.includes("has already completed")) {
+                suppressed = true;
+                return;
+            }
+            return origOnError.call(Hooks, loc, err, ...rest);
+        };
+        try {
+            return super.applyActiveEffects(phase);
+        } catch(e) {
+            if (!suppressed) throw e;
+        } finally {
+            Hooks.onError = origOnError;
+        }
     }
 
     /** @override */
