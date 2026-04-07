@@ -1612,23 +1612,14 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
             }
         }
 
-        // Characters: AEs start disabled until equipped, except always-on types
-        if (this.actor.type === 'character') {
-            if (itemData.type !== 'cybernetic' &&
-                itemData.type !== 'advantage' &&
-                itemData.type !== 'disadvantage' &&
-                itemData.type !== 'specialability') {
-                itemData.effects.forEach((i) => {
-                    i.disabled = true;
-                })
-            }
-        } else if (this.actor.type === 'container') {
+        // Set equipped state based on actor type (v14: don't modify effects array
+        // before createEmbeddedDocuments — it triggers ActiveEffect phase errors)
+        if (this.actor.type === 'container') {
             if (this._isEquippable(itemData.type)) {
                 itemData.system.equipped.value = false;
             }
-        } else {
-            // Vehicles: native item types auto-equip; cargo items stay unequipped with effects disabled
-            if (OD6S.allowedItemTypes[this.actor.type].includes(itemData.type)) {
+        } else if (this.actor.type === 'vehicle' || this.actor.type === 'starship') {
+            if (OD6S.allowedItemTypes[this.actor.type]?.includes(itemData.type)) {
                 if (this._isEquippable(itemData.type)) {
                     itemData.system.equipped.value = true;
                 }
@@ -1636,10 +1627,6 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 if (this._isEquippable(itemData.type)) {
                     itemData.system.equipped.value = false;
                 }
-                itemData.effects.forEach((i) => {
-                    i.disabled = true;
-                    i.transfer = false;
-                })
             }
         }
 
