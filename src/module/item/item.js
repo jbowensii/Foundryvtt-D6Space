@@ -173,7 +173,7 @@ export class OD6SItem extends Item {
         })
 
         // Render the document creation form
-        const html = await renderTemplate("templates/sidebar/document-create.html", {
+        const html = await foundry.applications.handlebars.renderTemplate("templates/sidebar/document-create.html", {
             folders,
             name: data.name || game.i18n.format("DOCUMENT.New", {type: label}),
             folder: data.folder,
@@ -194,7 +194,7 @@ export class OD6SItem extends Item {
             ok: {
                 label: title,
                 callback: (event, button, dialog) => {
-                    const form = (button.form ?? dialog.element).querySelector("form");
+                    const form = button.form ?? dialog.element;
                     const fd = new foundry.applications.ux.FormDataExtended(form);
                     foundry.utils.mergeObject(data, fd.object, {inplace: true});
                     if ( !data.folder ) delete data.folder;
