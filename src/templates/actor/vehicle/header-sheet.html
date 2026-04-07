@@ -118,16 +118,16 @@
         <div class="flexrow flex-group-left">
             <label for="actor.system.cover.value">{{localize "OD6S.COVER"}}</label>
             <select name="system.cover.value" id="actor.system.cover.value" style="width: 70px;">
-                {{#each (getCover "OD6S.COVER") as |label key|}}
-                    <option value="{{key}}" {{#if (eq key ../actor.system.cover.value)}}selected{{/if}}>{{localize label}}</option>
+                {{#each (getCover "OD6S.COVER") as |val key|}}
+                    <option value="{{key}}" {{#if (eq key ../actor.system.cover.value)}}selected{{/if}}>{{localize key}}</option>
                 {{/each}}
             </select>
         </div>
         <div class="flexrow flex-group-left">
             <label for="actor.system.damage.value">{{localize 'OD6S.DAMAGE'}}:</label>
             <select name="system.damage.value" id="actor.system.damage.value" style="width: 70px;">
-                {{#each (getVehicleDamageLevels) as |label key|}}
-                    <option value="{{key}}" {{#if (eq key ../actor.system.damage.value)}}selected{{/if}}>{{localize label}}</option>
+                {{#each (getVehicleDamageLevels) as |val key|}}
+                    <option value="{{key}}" {{#if (eq key ../actor.system.damage.value)}}selected{{/if}}>{{localize key}}</option>
                 {{/each}}
             </select>
         </div>
