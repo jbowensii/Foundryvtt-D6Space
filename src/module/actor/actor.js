@@ -72,14 +72,8 @@ export class OD6SActor extends Actor {
         }
     }
 
-    /** @override */
-    prepareData() {
-        // Prepare data for the actor. Calling the super version of this executes
-        // the following, in order: data reset (to clear active effects),
-        // prepareBaseData(), prepareEmbeddedDocuments() (including active effects),
-        // prepareDerivedData().
-        super.prepareData();
-    }
+    // prepareData() is inherited from Actor — no override needed.
+    // v14 handles ActiveEffect application in phases (initial/final) automatically.
 
     /** @override */
     prepareBaseData() {

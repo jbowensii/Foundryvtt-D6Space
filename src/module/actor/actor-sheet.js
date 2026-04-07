@@ -163,7 +163,8 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
             }
         });
         dd.bind(this.element);
-        this._dragDrop = [dd];
+        // v14: _dragDrop is a getter-only property on ActorSheetV2, so we store our own reference
+        this._od6sDragDrop = [dd];
     }
 
     // Ensure runtime flags exist with default values so downstream code can assume they are set.
