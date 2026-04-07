@@ -11,7 +11,7 @@
                             {{#each actor.advantages as |advantage key|}}
                                 <li class="specialability item flexrow" data-item-id="{{advantage._id}}">
                                     <div class="flexrow flex-group-left show-item-details"
-                                         data-item-name="{{item.name}}"
+                                         data-item-name="{{advantage.name}}"
                                          data-actor-id="{{../actor.id}}"
                                          data-item-id="{{advantage._id}}">{{advantage.name}}</div>
                                     <div class="item-controls flexrow flex-group-center"
@@ -45,8 +45,7 @@
                         {{#each actor.disadvantages as |disadvantage key|}}
                             <li class="specialability item flexrow" data-item-id="{{disadvantage._id}}">
                                 <div class="flexrow flex-group-left show-item-details"
-                                     data-item-name="{{item.name}}" data-item-name="{{item.name}}"
-
+                                     data-item-name="{{disadvantage.name}}"
                                      data-actor-id="{{../actor.id}}"
                                      data-item-id="{{disadvantage._id}}">{{disadvantage.name}}</div>
                                 <div class="item-controls flexrow flex-group-center"
@@ -81,8 +80,7 @@
                     {{#each actor.specialabilities as |specialability key|}}
                         <li class="specialability item flexrow" data-item-id="{{specialability._id}}">
                             <div class="flexrow flex-group-left show-item-details"
-                                 data-item-name="{{item.name}}"
-                                 data-item-name="{{item.name}}"
+                                 data-item-name="{{specialability.name}}"
                                  data-actor-id="{{../actor.id}}"
                                  data-item-id="{{specialability._id}}">{{specialability.name}}</div>
                             <div class="item-controls flexrow flex-group-center"
