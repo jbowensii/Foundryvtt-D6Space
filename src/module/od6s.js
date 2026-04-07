@@ -1113,7 +1113,7 @@ Hooks.on("updateCombat", async (Combat, data, options, userId) => {
         // New round placeholder
     }
 
-    if (typeof (Combat.combatant.actor) !== 'undefined') {
+    if (Combat.combatant && typeof (Combat.combatant.actor) !== 'undefined') {
         if (game.user.isGM) {
 
             // Reset defensive bonuses unless reaction_skills mode is on (that resets at round end instead)
