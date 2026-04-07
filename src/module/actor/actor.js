@@ -36,19 +36,21 @@ export class OD6SActor extends Actor {
         this.overrides ??= {};
         this.statuses ??= new Set();
         this.tokenActiveEffectChanges ??= {};
+        // Reset our own phase tracker so re-entrant prepareData cycles work cleanly
+        this._od6sCompletedPhases = new Set();
         super.prepareData();
     }
 
     /** @override */
     applyActiveEffects(phase) {
         // v14 tracks completed AE phases in a private field and throws if a phase
-        // is re-run. During reset() → _initialize() after createEmbeddedDocuments,
-        // the private tracker isn't cleared, causing spurious errors. Suppress them.
-        try {
-            return super.applyActiveEffects(phase);
-        } catch(e) {
-            if (!e.message?.includes("has already completed")) throw e;
-        }
+        // is re-run. During reset()/updateSource() cycles the private tracker isn't
+        // cleared, causing errors logged via Hooks.onError before the throw.
+        // Pre-check with our own tracker to avoid calling super when it would throw.
+        if (this._od6sCompletedPhases?.has(phase)) return;
+        this._od6sCompletedPhases ??= new Set();
+        this._od6sCompletedPhases.add(phase);
+        return super.applyActiveEffects(phase);
     }
 
     /** @override */
