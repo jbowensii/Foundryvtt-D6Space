@@ -272,7 +272,7 @@
   align-items: center;
   text-align: center;
   padding: 1px;
-  border: 1px solid #999;
+  border: 1px solid var(--od6s-border, #999);
 }
 
 .flex-group-left {

@@ -19,8 +19,8 @@
 
 .tabs {
   height: 40px;
-  border-top: 1px solid #AAA;
-  border-bottom: 1px solid #AAA;
+  border-top: 1px solid var(--od6s-border, #AAA);
+  border-bottom: 1px solid var(--od6s-border, #AAA);
 
   .item {
     line-height: 40px;

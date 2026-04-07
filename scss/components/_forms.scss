@@ -116,11 +116,11 @@
   box-sizing: border-box;
   padding: 2px;
   margin: 5px;
-  border: 1px solid #999;
+  border: 1px solid var(--od6s-border, #999);
 }
 
 .bordered {
-  border: 3px solid black;
+  border: 3px solid var(--od6s-border, black);
 }
 
 .advancebox {
@@ -141,15 +141,15 @@
 .body-points-max {
   justify-content: center;
   align-items: center;
-  background-color: black;
-  color: white;
+  background-color: var(--od6s-header-bg, black);
+  color: var(--od6s-header-text, white);
 }
 
 .attribute-action {
   justify-content: center;
   align-items: center;
-  background-color: black;
-  color: white;
+  background-color: var(--od6s-header-bg, black);
+  color: var(--od6s-header-text, white);
 }
 
 .indent {
@@ -203,9 +203,9 @@
 
 .reset-template,
 .reset-species-template {
-  background-color: red;
+  background-color: var(--od6s-danger, red);
   border: none;
-  color: black;
+  color: var(--od6s-danger-text, white);
   text-align: center;
   text-decoration: none;
   display: inline-block;
@@ -213,9 +213,9 @@
 
 
 .damage-button {
-  background-color: crimson;
+  background-color: var(--od6s-danger, crimson);
   border: none;
-  color: white;
+  color: var(--od6s-danger-text, white);
   padding: 15px 32px;
   text-align: center;
   text-decoration: none;

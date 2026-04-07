@@ -55,7 +55,7 @@ export  default class ExplosiveDialog extends HandlebarsApplicationMixin(Applica
                     }
 
                     this.token = canvas.tokens.controlled[0];
-                    const explosiveTemplateDoc = new RegionDocument({
+                    const explosiveTemplateDoc = new foundry.documents.RegionDocument({
                         t: "circle",
                         user: game.user.id,
                         fillColor: "#FFFF00",

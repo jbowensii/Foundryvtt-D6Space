@@ -311,7 +311,6 @@ export class OD6SActor extends Actor {
         if (this.type === 'vehicle' || this.type === 'starship') {
             if (!this.system.embedded_pilot) return;
         }
-        let formula;
         // Base init is the character's perception score.  Special abilities and optional rules may add to it.
         // Using perception can be overridden in system config options
         // 0.7.3 add an option to change the base attribute
@@ -321,7 +320,7 @@ export class OD6SActor extends Actor {
         const tiebreaker = (+(this.system.attributes.per.score / 100 + this.system.attributes.agi.score / 100).toPrecision(2));
         // One die is removed from the pool and replaced with an exploding wild die (d6x6)
         dice.dice--;
-        formula = dice.dice + "d6[Base]" + "+" + dice.pips + "+1d6x6[Wild]+" + tiebreaker;
+        const formula = dice.dice + "d6[Base]" + "+" + dice.pips + "+1d6x6[Wild]+" + tiebreaker;
         this.system.initiative.formula = formula;
         this.system.initiative.score = score;
         return this.system;
@@ -575,7 +574,7 @@ export class OD6SActor extends Actor {
             if (this.itemTypes.armor.length) {
                 this.itemTypes.armor.forEach((value, index, array) => {
                     let armorDamage = 0;
-                    const damaged =  typeof(value.system.damaged === "undefined") ? 0 : value.system.damaged;
+                    const damaged = typeof value.system.damaged === "undefined" ? 0 : value.system.damaged;
 
                     if (value.system.equipped.value) {
                         switch (wound) {
@@ -631,8 +630,7 @@ export class OD6SActor extends Actor {
     }
 
     async applyMortallyWoundedFailure() {
-        let tokens;
-        tokens ??= this.getActiveTokens();
+        const tokens = this.getActiveTokens();
 
         if(game.settings.get('od6s','auto_status')) {
             for (const token of tokens) {
@@ -659,8 +657,7 @@ export class OD6SActor extends Actor {
     }
 
     async applyIncapacitatedFailure() {
-        let tokens;
-        tokens ??= this.getActiveTokens();
+        const tokens = this.getActiveTokens();
 
         const roll = await new Roll("10d6").evaluate();
         const flavor = this.name + game.i18n.localize('OD6S.CHAT_UNCONSCIOUS_01') +
@@ -1201,14 +1198,14 @@ export class OD6SActor extends Actor {
         event.preventDefault();
 
         const documentName = 'Item';
-        let types, folders, label, title, template;
+        let types;
         types = game.documentTypes[documentName].filter(t => t !== CONST.BASE_DOCUMENT_TYPE);
-        let data = {};
+        const data = {};
         const foldersCollection = game.folders.filter(f => (f.type === documentName) && f.displayed);
-        folders = foldersCollection.map(f => ({id: f.id, name: f.name}));
-        label = game.i18n.localize('OD6S.ITEM');
-        title = game.i18n.format("OD6S.CREATE_ITEM", {entity: label});
-        template = 'templates/sidebar/document-create.html';
+        const folders = foldersCollection.map(f => ({id: f.id, name: f.name}));
+        const label = game.i18n.localize('OD6S.ITEM');
+        const title = game.i18n.format("OD6S.CREATE_ITEM", {entity: label});
+        const template = 'templates/sidebar/document-create.html';
 
         if (game.settings.get('od6s', 'hide_advantages_disadvantages')) {
             types = types.filter(function (value, index, arr) {

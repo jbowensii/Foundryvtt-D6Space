@@ -77,7 +77,7 @@ export default class OD6SEditDifficulty extends HandlebarsApplicationMixin(Appli
     };
 
     async _prepareContext(options) {
-        const context = this.options;
+        const context = {...this.options};
         context.buttons = [
             { type: "submit", icon: "fa-solid fa-check", label: "Submit" },
         ];
@@ -129,7 +129,7 @@ export class OD6SEditDamage extends HandlebarsApplicationMixin(ApplicationV2) {
     };
 
     async _prepareContext(options) {
-        const context = this.options;
+        const context = {...this.options};
         context.buttons = [
             { type: "submit", icon: "fa-solid fa-check", label: "Submit" },
         ];
@@ -172,7 +172,7 @@ export class OD6SChooseTarget extends HandlebarsApplicationMixin(ApplicationV2) 
     };
 
     async _prepareContext(options) {
-        const context = this.options;
+        const context = {...this.options};
         context.buttons = [
             { type: "submit", icon: "fa-solid fa-check", label: "Submit" },
         ];
@@ -237,7 +237,7 @@ export class OD6SHandleWildDieForm extends HandlebarsApplicationMixin(Applicatio
     };
 
     async _prepareContext(options) {
-        const context = this.options;
+        const context = {...this.options};
         context.buttons = [
             { type: "submit", icon: "fa-solid fa-check", label: "Submit" },
         ];

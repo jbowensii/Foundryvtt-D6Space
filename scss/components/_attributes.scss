@@ -12,7 +12,7 @@
   text-shadow: 0 0 2px darkgreen;
   &:hover,
   &:focus {
-    color: #000;
+    color: var(--od6s-text, #000);
     text-shadow: 0 0 10px red;
     /* Lighter red for better contrast on Dark theme */
     :root.theme-dark &,
@@ -29,7 +29,7 @@
   text-shadow: 0 0 2px darkred;
   &:hover,
   &:focus {
-    color: #000;
+    color: var(--od6s-text, #000);
     text-shadow: 0 0 10px red;
     /* Lighter red for better contrast on Dark theme */
     :root.theme-dark &,
@@ -54,5 +54,5 @@
   list-style: none;
   margin: 2px 0;
   padding: 2px;
-  outline: 1px solid #000;
+  outline: 1px solid var(--od6s-border, #000);
 }

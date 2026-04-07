@@ -5,7 +5,7 @@ export default class od6sInitiativeConfiguration extends HandlebarsApplicationMi
     requiresWorldReload = false;
 
     static DEFAULT_OPTIONS = {
-        id: "custom_initiative",
+        id: "od6s-config-initiative",
         classes: ["od6s", "settings"],
         tag: "form",
         position: { width: 600, height: "auto" },
@@ -32,7 +32,7 @@ export default class od6sInitiativeConfiguration extends HandlebarsApplicationMi
     async _prepareContext(options) {
         const context = {};
         context.settings = Array.from(game.settings.settings).filter(s => s[1].od6sInitiative).map(i => i[1]);
-        context.settings.forEach(s => s.inputType = s.type == Boolean ? "checkbox" : "text");
+        context.settings.forEach(s => s.inputType = s.type === Boolean ? "checkbox" : "text");
         context.settings.forEach(s => s.choice = typeof(s.choices) === 'undefined' ? false : true);
         context.settings.forEach(s => s.value = game.settings.get(s.namespace, s.key));
 

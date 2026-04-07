@@ -8,7 +8,7 @@
 .highlight {
   &:hover,
   &:focus {
-    color: #000;
+    color: var(--od6s-text, #000);
     text-shadow: 0 0 10px red;
     /* In Foundry's Dark theme, use a lighter red for better contrast */
     :root.theme-dark &,
@@ -22,7 +22,7 @@
 }
 
 .damaged {
-   color: #8B0000; 
+   color: var(--od6s-danger, #8B0000);
 }
 
 .modifier-button {
@@ -48,7 +48,7 @@
 .crew-member {
   &:hover,
   &:focus {
-    color: #000;
+    color: var(--od6s-text, #000);
     text-shadow: 0 0 10px red;
     /* Improve visibility on Dark theme */
     :root.theme-dark &,

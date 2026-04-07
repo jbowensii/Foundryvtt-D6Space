@@ -5,7 +5,7 @@ export default class od6sRevealConfiguration extends HandlebarsApplicationMixin(
     requiresWorldReload = false;
 
     static DEFAULT_OPTIONS = {
-        id: "custom_labels",
+        id: "od6s-config-reveal",
         classes: ["od6s", "settings"],
         tag: "form",
         position: { width: 600, height: "auto" },
@@ -32,7 +32,7 @@ export default class od6sRevealConfiguration extends HandlebarsApplicationMixin(
     async _prepareContext(options) {
         const context = {};
         context.settings = Array.from(game.settings.settings).filter(s => s[1].od6sReveal).map(i => i[1]);
-        context.settings.forEach(s => s.inputType = s.type == Boolean ? "checkbox" : "text");
+        context.settings.forEach(s => s.inputType = s.type === Boolean ? "checkbox" : "text");
         context.settings.forEach(s => s.value = game.settings.get(s.namespace, s.key));
         context.buttons = [{ type: "submit", icon: "fa-solid fa-save", label: "Submit" }];
         return context;

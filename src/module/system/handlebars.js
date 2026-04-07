@@ -498,7 +498,7 @@ export default function od6sHandlebars() {
 
         // Bitwise check: each actor type is a bit position in the bitmask
         Handlebars.registerHelper('getActorTypeConfig', function (value, type) {
-            return ((value >> OD6S.actorMasks[type]) % 2 != 0);
+            return ((value >> OD6S.actorMasks[type]) % 2 !== 0);
         })
 
         Handlebars.registerHelper('getVehicleDamageLevels', function () {
@@ -783,7 +783,7 @@ export default function od6sHandlebars() {
             const field = 'custom_field_' + fieldNum + '_actor_types';
             const actorTypes = game.settings.get('od6s', field);
             const mask = 1 << OD6S.actorMasks[type];
-            return (actorTypes & mask) != 0;
+            return (actorTypes & mask) !== 0;
         })
 
         Handlebars.registerHelper('getCurrencyLabel', function () {

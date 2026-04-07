@@ -1,4 +1,3 @@
-<form>
     <div>
         {{#if (getConfig 'showSkillSpecialization' '')}}
             <p><b>{{ localize 'OD6S.ROLLING'}} {{specSkill}}: {{title}}: {{setDice dice actionpenalty woundpenalty
@@ -165,7 +164,7 @@
         {{#if (showPenalties type) }}
             <div class="center"><b>{{localize "OD6S.PENALTIES"}}</b></div>
             <div class="row">
-                <div class="column>">
+                <div class="column">
                     <div class="flexrow flex-group-left" title="{{localize 'OD6S.ACTION_PENALTY'}}">
                         <div class="actionpenalty flexrow flex-group-left">
                             <label for="actionpenalty">{{localize 'OD6S.ACTIONS'}}:</label>
@@ -193,7 +192,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="column>">
+                <div class="column">
                     <div class="flexrow flex-group-left" title="{{localize 'OD6S.STUNNED_PENALTY'}}">
                         <div class="stunnedpenalty flexrow flex-group-left">
                             <label for="stunnedpenalty">{{localize 'OD6S.WOUNDS_STUNNED'}}:</label>
@@ -206,7 +205,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="column>">
+                <div class="column">
                     <div class="flexrow flex-group-left" title="{{localize 'OD6S.OTHER_PENALTY'}}">
                         <div class="otherpenalty flexrow flex-group-left">
                             <label for="otherpenalty">{{localize 'OD6S.OTHER'}}:</label>
@@ -451,4 +450,3 @@
             <i class="fas fa-dice-d20"></i> {{localize 'OD6S.ROLL'}}
         </button>
     </div>
-</form>

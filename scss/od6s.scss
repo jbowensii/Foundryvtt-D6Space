@@ -344,7 +344,7 @@
 
 /* Remove the attribute box border in light mode */
 :root.theme-light .od6s .tab.attributes .attribute-list li.attributes,
-::root.theme-light .od6s .tab.main .attribute-list li.attributes,
+:root.theme-light .od6s .tab.main .attribute-list li.attributes,
 .theme-light .od6s .tab.attributes .attribute-list li.attributes,
 .theme-light .od6s .tab.main .attribute-list li.attributes,
 [data-theme=light] .od6s .tab.attributes .attribute-list li.attributes,
@@ -509,10 +509,7 @@
 
 // Settings configuration forms: let Foundry handle scrolling natively via PARTS.scrollable.
 // Only need to ensure the window has bounded height and the layout doesn't prevent overflow.
-.application#custom_labels,
-.application#custom_miscrules,
-.application#custom_attributes_sorting,
-.application#wild_die {
+.application.od6s.settings {
   .window-content {
     .settings-wrapper {
       display: flex;

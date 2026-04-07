@@ -13,6 +13,10 @@ $padding-lg: 20px;
   --od6s-surface-3: #{c.$surface-3-light};
   --od6s-border: #{c.$border-light};
   --od6s-focus: #{c.$focus-light};
+  --od6s-header-bg: #333;
+  --od6s-header-text: #fff;
+  --od6s-danger: crimson;
+  --od6s-danger-text: #fff;
 }
 
 :root.theme-dark, .theme-dark, [data-theme="dark"] {
@@ -23,4 +27,8 @@ $padding-lg: 20px;
   --od6s-surface-3: #{c.$surface-3-dark};
   --od6s-border: #{c.$border-dark};
   --od6s-focus: #{c.$focus-dark};
+  --od6s-header-bg: #444;
+  --od6s-header-text: #eee;
+  --od6s-danger: #dc3545;
+  --od6s-danger-text: #fff;
 }

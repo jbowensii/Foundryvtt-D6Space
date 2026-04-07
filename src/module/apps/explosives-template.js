@@ -91,7 +91,7 @@ export default class ExplosivesTemplate {
                     }
                 }
             });
-        } catch (e) {
+        } catch {
             // Player cancelled placement (e.g. right-click or Escape)
             await this.actorSheet?.maximize();
             return null;
