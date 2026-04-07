@@ -55,7 +55,7 @@ export  default class ExplosiveDialog extends HandlebarsApplicationMixin(Applica
                     }
 
                     this.token = canvas.tokens.controlled[0];
-                    const templateData = {
+                    const explosiveTemplateDoc = new RegionDocument({
                         t: "circle",
                         user: game.user.id,
                         fillColor: "#FFFF00",
@@ -64,9 +64,7 @@ export  default class ExplosiveDialog extends HandlebarsApplicationMixin(Applica
                         x: this.token.center.x,
                         y: this.token.center.y,
                         hidden: true
-                    }
-
-                    const explosiveTemplateDoc = new MeasuredTemplateDocument(templateData, {parent: canvas.scene});
+                    }, {parent: canvas.scene});
                     const explosiveTemplate = new ExplosivesTemplate(explosiveTemplateDoc);
                     await explosiveTemplate.setExplosiveData(this.data, this.token.center.x, this.token.center.y);
                     //const result = await explosiveTemplate.drawPreview();
@@ -91,13 +89,16 @@ export  default class ExplosiveDialog extends HandlebarsApplicationMixin(Applica
     async placeTemplate() {
     }
 
-    // Start interactive template placement; rejection means the player cancelled (right-click)
+    // Start interactive region placement; null result means the player cancelled or placement was blocked
     createTemplate(explosiveTemplate) {
-        const result = explosiveTemplate.drawPreview();
-        Promise.resolve(result).then((template) => {
-            this.handleResult(template).then();
+        explosiveTemplate.drawPreview().then((template) => {
+            if (template) {
+                this.handleResult(template);
+            }
+            // null means cancelled or blocked by walls — nothing to do
         }).catch(e => {
-            // Player has likely right-clicked to cancel
+            // Unexpected error during placement
+            console.error("OD6S | Explosive placement failed:", e);
         });
     }
 
@@ -105,14 +106,17 @@ export  default class ExplosiveDialog extends HandlebarsApplicationMixin(Applica
 
     }
 
-    // After template placement: measure range, store flags linking template to weapon, and trigger hit roll
+    // After template placement: measure range, store flags linking region to weapon, and trigger hit roll
     async handleResult(template) {
         this.data.stage += 1;
 
         if (this.data.stage === 1 && this.data.type === 'OD6S.EXPLOSIVE_THROWN') {
-            const _range = "";
-            const distance = Math.floor(canvas.grid.measureDistance({x: this.token.center.x, y: this.token.center.y},
-                {x: template[0].x, y: template[0].y}, {gridSpaces: false}))
+            const regionDoc = template[0];
+            const regionCenter = regionDoc.object?.center
+                ?? {x: regionDoc.shapes[0]?.x ?? 0, y: regionDoc.shapes[0]?.y ?? 0};
+            const distance = Math.floor(canvas.grid.measureDistance(
+                {x: this.token.center.x, y: this.token.center.y},
+                regionCenter, {gridSpaces: false}))
 
             // Set flags
             const itemFlagData = {

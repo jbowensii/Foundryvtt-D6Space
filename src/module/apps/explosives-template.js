@@ -1,187 +1,156 @@
-// OD6S Explosive measured template — interactive canvas placement with range line, wall collision, and snap-to-grid.
+// OD6S Explosive region placement — interactive canvas placement using v14 Scene Regions API
+// with post-placement wall collision validation.
 
-export default class ExplosivesTemplate extends foundry.canvas.placeables.MeasuredTemplate {
-
-    /**
-     * Track the timestamp when the last mouse move event was captured.
-     * @type {number}
-     */
-    #moveTime = 0;
-
-    /* -------------------------------------------- */
+export default class ExplosivesTemplate {
 
     /**
-     * The initially active CanvasLayer to re-activate after the workflow is complete.
-     * @type {CanvasLayer}
-     */
-    #initialLayer;
-
-    /* -------------------------------------------- */
-
-    /**
-     * Track the bound event handlers so they can be properly canceled later.
+     * Explosive data passed from the dialog (actor, item, type, etc.).
      * @type {object}
      */
-    #events;
+    exData;
 
-    // Cribbed heavily from DND5E ability-template
+    /**
+     * The actor sheet that originated the placement, used to minimize/maximize during placement.
+     * @type {ActorSheet}
+     */
+    actorSheet;
+
+    /**
+     * Origin coordinates (token center) for range measurement and wall collision checks.
+     * @type {{x: number, y: number}}
+     */
+    origin;
+
+    /**
+     * The blast radius in grid units.
+     * @type {number}
+     */
+    radius;
+
+    /* -------------------------------------------- */
+
+    /**
+     * Set explosive data and origin coordinates for placement.
+     * @param {object} data - Explosive data from the dialog (actor, item, type, etc.)
+     * @param {number} x - Origin X coordinate (token center)
+     * @param {number} y - Origin Y coordinate (token center)
+     */
     async setExplosiveData(data, x, y) {
         this.exData = data;
         this.actorSheet = this.exData.actor.sheet;
         this.originX = x;
         this.originY = y;
         this.origin = {x: x, y: y};
-        this.rangeLine = new PIXI.Graphics();
-        this.rangeMeasure = new PIXI.Text({  text: "0 M"});
+        this.radius = this._getBlastRadius(data);
     }
 
+    /* -------------------------------------------- */
+
     /**
-     * Creates a preview of the template.
-     * @returns {Promise}  A promise that resolves with the final measured template if created.
+     * Determine the blast radius based on the explosive zones setting.
+     * @param {object} data - Explosive data containing the item
+     * @returns {number} The blast radius in grid units
+     * @private
+     */
+    _getBlastRadius(data) {
+        if (game.settings.get('od6s', 'explosive_zones')) {
+            return data.item.system.blast_radius['4'].range;
+        }
+        return data.item.system.blast_radius['3'].range;
+    }
+
+    /* -------------------------------------------- */
+
+    /**
+     * Create a preview of the explosive placement using the Scene Regions API.
+     * Uses canvas.regions.placeRegion() for interactive placement, then validates
+     * the placement against wall collisions. If blocked, deletes the region and returns null.
+     *
+     * @returns {Promise<RegionDocument[]|null>} An array containing the placed RegionDocument,
+     *          or null if cancelled or blocked by walls.
+     *          The returned array format maintains compatibility with handleResult() in ExplosiveDialog.
      */
     async drawPreview() {
-        const initialLayer = canvas.activeLayer;
-
-        // Draw the template and switch to the template layer
-        await this.draw();
-        this.layer.activate();
-        this.layer.preview.addChild(this);
-        this.layer.preview.addChild(this.rangeLine);
-        this.layer.preview.addChild(this.rangeMeasure);
-
         // Hide the sheet that originated the preview
         this.actorSheet?.minimize();
 
-        // Activate interactivity
-        return this.activatePreviewListeners(initialLayer);
-    }
+        const radiusPixels = this.radius * canvas.grid.size;
+        const hidden = game.settings.get('od6s', 'hide_explosive_templates');
 
-    /**
-     * Activate listeners for the template preview
-     * @param {CanvasLayer} initialLayer  The initially active CanvasLayer to re-activate after the workflow is complete
-     * @returns {Promise}                 A promise that resolves with the final measured template if created.
-     */
-    activatePreviewListeners(initialLayer) {
-        return new Promise((resolve, reject) => {
-            this.#initialLayer = initialLayer;
-            this.#events = {
-                cancel: this._onCancelPlacement.bind(this),
-                confirm: this._onConfirmPlacement.bind(this),
-                move: this._onMovePlacement.bind(this),
-                resolve,
-                reject,
-                rotate: this._onRotatePlacement.bind(this)
-            };
+        let regionDoc;
+        try {
+            regionDoc = await canvas.regions.placeRegion({
+                name: game.i18n.localize("OD6S.EXPLOSIVE"),
+                color: "#FFFF00",
+                shapes: [{type: "ellipse", x: 0, y: 0, radiusX: radiusPixels, radiusY: radiusPixels}],
+                visibility: hidden ? CONST.REGION_VISIBILITY.LAYER : CONST.REGION_VISIBILITY.ALWAYS,
+                flags: {
+                    od6s: {
+                        explosive: true,
+                        originalOwner: game.user.id
+                    }
+                }
+            });
+        } catch (e) {
+            // Player cancelled placement (e.g. right-click or Escape)
+            await this.actorSheet?.maximize();
+            return null;
+        }
 
-            // Activate listeners
-            canvas.stage.on("mousemove", this.#events.move);
-            canvas.stage.on("mousedown", this.#events.confirm);
-            canvas.app.view.oncontextmenu = this.#events.cancel;
-            canvas.app.view.onwheel = this.#events.rotate;
-        });
-    }
+        if (!regionDoc) {
+            // User cancelled — no region created
+            await this.actorSheet?.maximize();
+            return null;
+        }
 
-    /**
-     * Shared code for when template placement ends by being confirmed or canceled.
-     * @param {Event} event  Triggering event that ended the placement.
-     */
-    async _finishPlacement(event) {
-        this.layer.preview.removeChild(this.rangeLine);
-        this.layer.preview.removeChild(this.rangeMeasure);
-        this.layer._onDragLeftCancel(event);
-        canvas.stage.off("mousemove", this.#events.move);
-        canvas.stage.off("mousedown", this.#events.confirm);
-        canvas.app.view.oncontextmenu = null;
-        canvas.app.view.onwheel = null;
-        this.#initialLayer.activate();
-        await this.actorSheet?.maximize();
-    }
+        // Determine the placed center position
+        const center = this._getRegionCenter(regionDoc);
 
-    /* -------------------------------------------- */
-
-    /**
-     * Move the template preview when the mouse moves.
-     * @param {Event} event  Triggering mouse event.
-     */
-    _onMovePlacement(event) {
-        event.stopPropagation();
-        const now = Date.now(); // Apply a 20ms throttle
-        const origin = {x: this.originX, y: this.originY};
-        if ( now - this.#moveTime <= 20 ) return;
-        const center = event.data.getLocalPosition(this.layer);
-        const interval = canvas.grid.type === CONST.GRID_TYPES.GRIDLESS ? 0 : 2;
-        const snapped = canvas.grid.getSnappedPosition(center.x, center.y, interval);
-        this.document.updateSource({x: snapped.x, y: snapped.y});
-        this.refresh();
-        this.#moveTime = now;
-        const distance = Math.floor(canvas.grid.measureDistance({x: this.originX, y: this.originY}, this.center));
-
-        this.rangeLine.clear();
-        //this.rangeLine.position.set(this.origin.x,this.origin.y);
-        this.rangeLine.lineStyle(4, 0xffd900, 1);
-        this.rangeLine.moveTo(this.origin.x, this.origin.y);
-        this.rangeLine.lineTo(center.x, center.y);
-
-        this.rangeMeasure.x = this.center.x - 30;
-        this.rangeMeasure.y = this.center.y + 60;
-        this.rangeMeasure.style.fill = 0xFFFFFF;
-        this.rangeMeasure.text = distance + " M";
-
-        // Check both movement and sight walls to prevent placing explosives through barriers
-        const collisionCheck =
+        // Validate wall collision — check both movement and sight walls
+        const hasCollision =
             CONFIG.Canvas.polygonBackends.move.testCollision(
-                origin, this.center,
-                {type: "move", mode: "any"})  ||
-	        CONFIG.Canvas.polygonBackends.sight.testCollision(
-                origin, this.center,
-                {type: "sight", mode: "any"});
-        this._preview = !!collisionCheck;
+                this.origin, center,
+                {type: "move", mode: "any"}
+            ) ||
+            CONFIG.Canvas.polygonBackends.sight.testCollision(
+                this.origin, center,
+                {type: "sight", mode: "any"}
+            );
+
+        if (hasCollision) {
+            ui.notifications.warn(game.i18n.localize("OD6S.WARN_EXPLOSIVE_NOT_CONFIGURED_FOR_ZONES"));
+            await regionDoc.delete();
+            await this.actorSheet?.maximize();
+            return null;
+        }
+
+        await this.actorSheet?.maximize();
+
+        // Return in array format for compatibility with ExplosiveDialog.handleResult()
+        // handleResult() accesses template[0].id, template[0].x, template[0].y
+        return [regionDoc];
     }
 
     /* -------------------------------------------- */
 
     /**
-     * Rotate the template preview by 3˚ increments when the mouse wheel is rotated.
-     * @param {Event} event  Triggering mouse event.
+     * Get the center coordinates of a placed region from its first shape.
+     * @param {RegionDocument} regionDoc - The placed region document
+     * @returns {{x: number, y: number}} The center coordinates in canvas space
+     * @private
      */
-    _onRotatePlacement(event) {
-        if ( event.ctrlKey ) event.preventDefault(); // Avoid zooming the browser window
-        event.stopPropagation();
-        const delta = canvas.grid.type > CONST.GRID_TYPES.SQUARE ? 30 : 15;
-        const snap = event.shiftKey ? delta : 5;
-        const update = {direction: this.document.direction + (snap * Math.sign(event.deltaY))};
-        this.document.updateSource(update);
-        this.refresh();
+    _getRegionCenter(regionDoc) {
+        // The region's shapes store coordinates relative to the region.
+        // The region itself has an x/y offset (its position on the canvas).
+        // For placeRegion(), the shape center is placed at the clicked location.
+        const shape = regionDoc.shapes[0];
+        if (shape) {
+            return {x: shape.x, y: shape.y};
+        }
+        // Fallback: use the region object's center if available
+        if (regionDoc.object?.center) {
+            return regionDoc.object.center;
+        }
+        return {x: 0, y: 0};
     }
-
-    /* -------------------------------------------- */
-
-    /**
-     * Confirm placement when the left mouse button is clicked.
-     * @param {Event} event  Triggering mouse event.
-     */
-    async _onConfirmPlacement(event) {
-        if(CONFIG.Canvas.polygonBackends.move.testCollision(
-            {x: this.originX, y: this.originY}, this.center, {type: "move", mode: "any"}) ||
-	   CONFIG.Canvas.polygonBackends.sight.testCollision(
-                {x: this.originX, y: this.originY}, this.center,
-                {type: "sight", mode: "any"})) return;
-        await this._finishPlacement(event);
-        const interval = canvas.grid.type === CONST.GRID_TYPES.GRIDLESS ? 0 : 2;
-        const destination = canvas.grid.getSnappedPosition(this.document.x, this.document.y, interval);
-        this.document.updateSource(destination);
-        this.#events.resolve(canvas.scene.createEmbeddedDocuments("MeasuredTemplate", [this.document.toObject()]));
-    }
-
-    /* -------------------------------------------- */
-
-    /**
-     * Cancel placement when the right mouse button is clicked.
-     * @param {Event} event  Triggering mouse event.
-     */
-    async _onCancelPlacement(event) {
-        await this._finishPlacement(event);
-        this.#events.reject();
-    }
-
 }

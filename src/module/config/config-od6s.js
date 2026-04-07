@@ -1202,143 +1202,117 @@ OD6S.hiddenStatusEffects = [
   "mortally_wounded"
 ]
 
-OD6S.statusEffects = [
-    {
-        id: "dead",
+OD6S.statusEffects = {
+    dead: {
         label: "EFFECT.StatusDead",
         icon: "icons/svg/skull.svg"
     },
-    {
-        id: "unconscious",
+    unconscious: {
         label: "EFFECT.StatusUnconscious",
         icon: "icons/svg/unconscious.svg"
     },
-    {
-        id: "sleep",
+    sleep: {
         label: "EFFECT.StatusAsleep",
         icon: "icons/svg/sleep.svg"
     },
-    {
-        id: "stunned",
+    stunned: {
         label: "EFFECT.StatusStunned",
         icon: "icons/svg/daze.svg",
         hide: true
     },
-    {
-        id: "wounded",
+    wounded: {
         label: "EFFECT.StatusWounded",
         icon: "systems/od6s/icons/wounded.png",
         hide: true
     },
-    {
-        id: "severely_wounded",
+    severely_wounded: {
         label: "EFFECT.StatusSeverelyWounded",
         icon: "systems/od6s/icons/severely-wounded.png",
         hide: true
     },
-    {
-        id: "incapacitated",
+    incapacitated: {
         label: "EFFECT.StatusIncapacitated",
         icon: "systems/od6s/icons/incapacitated.png",
         hide: true
     },
-    {
-        id: "mortally_wounded",
+    mortally_wounded: {
         label: "EFFECT.StatusMortallyWounded",
         icon: "systems/od6s/icons/mortally-wounded.png",
         hide: true
     },
-    {
-        id: "prone",
+    prone: {
         label: "EFFECT.StatusProne",
         icon: "icons/svg/falling.svg"
     },
-    {
-        id: "restrain",
+    restrain: {
         label: "EFFECT.StatusRestrained",
         icon: "icons/svg/net.svg",
     },
-    {
-        id: "paralysis",
+    paralysis: {
         label: "EFFECT.StatusParalysis",
         icon: "icons/svg/paralysis.svg",
     },
-    {
-        id: "fly",
+    fly: {
         label: "EFFECT.StatusFlying",
         icon: "icons/svg/wing.svg",
     },
-    {
-        id: "blind",
+    blind: {
         label: "EFFECT.StatusBlind",
         icon: "icons/svg/blind.svg"
     },
-    {
-        id: "deaf",
+    deaf: {
         label: "EFFECT.StatusDeaf",
         icon: "icons/svg/deaf.svg"
     },
-    {
-        id: "silence",
+    silence: {
         label: "EFFECT.StatusSilenced",
         icon: "icons/svg/silenced.svg"
     },
-    {
-        id: "fear",
+    fear: {
         label: "EFFECT.StatusFear",
         icon: "icons/svg/terror.svg"
     },
-    {
-        id: "burning",
+    burning: {
         label: "EFFECT.StatusBurning",
         icon: "icons/svg/fire.svg"
     },
-    {
-        id: "frozen",
+    frozen: {
         label: "EFFECT.StatusFrozen",
         icon: "icons/svg/frozen.svg"
     },
-    {
-        id: "shock",
+    shock: {
         label: "EFFECT.StatusShocked",
         icon: "icons/svg/lightning.svg"
     },
-    {
-        id: "bleeding",
+    bleeding: {
         label: "EFFECT.StatusBleeding",
         icon: "icons/svg/blood.svg"
     },
-    {
-        id: "disease",
+    disease: {
         label: "EFFECT.StatusDisease",
         icon: "icons/svg/biohazard.svg"
     },
-    {
-        id: "poison",
+    poison: {
         label: "EFFECT.StatusPoison",
         icon: "icons/svg/poison.svg"
     },
-    {
-        id: "radiation",
+    radiation: {
         label: "EFFECT.StatusRadiation",
         icon: "icons/svg/radiation.svg"
     },
-    {
-        id: "upgrade",
+    upgrade: {
         label: "EFFECT.StatusUpgrade",
         icon: "icons/svg/upgrade.svg"
     },
-    {
-        id: "downgrade",
+    downgrade: {
         label: "EFFECT.StatusDowngrade",
         icon: "icons/svg/downgrade.svg"
     },
-    {
-        id: "target",
+    target: {
         label: "EFFECT.StatusTarget",
         icon: "icons/svg/target.svg"
     }
-]
+}
 
 OD6S.hitLocations = {
     0: "OD6S.LOCATION_RIGHT_HAND",

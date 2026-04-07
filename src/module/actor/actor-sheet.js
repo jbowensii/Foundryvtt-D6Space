@@ -731,7 +731,7 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                                         for (let i = 0; i < e.changes.length; i++) {
                                             const c = e.changes[i];
                                             if (c.key.startsWith('system.items.skills')) {
-                                                if (c.mode === 2) {
+                                                if (c.type === "override") {
                                                     const t = c.key.split('.');
                                                     const item = this.actor.items.find(i => i.name === t[3]);
                                                     const itemUpdate = {};

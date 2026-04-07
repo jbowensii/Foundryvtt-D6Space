@@ -141,7 +141,7 @@ export class od6sutilities {
         let scatter = 0;
         let angle = 0;
 
-        const template = canvas.templates.get(templateId);
+        const template = canvas.regions.get(templateId);
         const target = {x: template.x, y: template.y};
         const sourceRay = new Ray(origin, target);
 
@@ -241,7 +241,7 @@ export class od6sutilities {
 
     static async getExplosiveTargets(actor, itemId) {
         const item = actor.isToken ? actor.token.actor.items.get(itemId) : actor.items.get(itemId);
-        const template = canvas.templates.get(item.getFlag('od6s','explosiveTemplate'));
+        const template = canvas.regions.get(item.getFlag('od6s','explosiveTemplate'));
         const tokens = canvas.tokens.placeables.filter(
             t => template._getGridHighlightPositions().find(o => o.x === t.x && o.y === t.y)
         )
@@ -331,11 +331,11 @@ export class od6sutilities {
         const item = actor.items.get(data.itemId);
 
         if (game.settings.get('od6s', 'auto_explosive')) {
-            const template = await canvas.scene.getEmbeddedDocument('MeasuredTemplate', item.getFlag('od6s', 'explosiveTemplate'));
+            const template = canvas.scene.regions.get(item.getFlag('od6s', 'explosiveTemplate'));
 
             if (typeof (template) !== 'undefined') {
                 if(template.isOwner) {
-                    await canvas.scene.deleteEmbeddedDocuments('MeasuredTemplate', [template.id]);
+                    await canvas.scene.deleteEmbeddedDocuments('Region', [template.id]);
                 } else {
                     await OD6S.socket.executeAsGM('deleteExplosiveTemplate', {templateId: template.id});
                 }
@@ -1284,7 +1284,7 @@ export class od6sutilities {
         const data = {};
         data.actor = actor;
         data.item = item;
-        data.template = canvas.scene.getEmbeddedDocument('MeasuredTemplate', item.getFlag('od6s', 'explosiveTemplate'));;
+        data.template = canvas.scene.regions.get(item.getFlag('od6s', 'explosiveTemplate'));
         return data;
     }
 

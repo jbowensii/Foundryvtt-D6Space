@@ -59,7 +59,7 @@ export class OD6SItem extends Item {
         if(this?.actor !== null) {
             for (const effect of this.actor?.allApplicableEffects()) {
                 if (!effect?.active) continue;
-                changes.push(...effect.changes.filter(c => c.mode === CONST.ACTIVE_EFFECT_MODES.CUSTOM &&
+                changes.push(...effect.changes.filter(c => c.type === "custom" &&
                     c.key.match(itemRegex)));
             }
             for (const change in changes) {

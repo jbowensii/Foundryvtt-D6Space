@@ -157,7 +157,7 @@ Hooks.once('init', async function () {
 // When an explosive template is moved on the canvas (e.g., GM repositioning),
 // recalculate which tokens fall within the blast radius and update the linked
 // chat message's target list so damage buttons reflect the new positions.
-Hooks.on('updateMeasuredTemplate', async (template, change) => {
+Hooks.on('updateRegion', async (template, change) => {
     if (game.user.isGM) {
         if (change.flags?.od6s.messageId ) {
             return;
@@ -209,7 +209,7 @@ Hooks.on('preDeleteDocument', async (document, options, userId) => {
 
 // When an explosive template is removed from the canvas, clean up all related
 // flags on the source item and delete the linked chat message if unhandled.
-Hooks.on('deleteMeasuredTemplate', async (template) => {
+Hooks.on('deleteRegion', async (template) => {
     if (game.settings.get('od6s', 'auto_explosive') && game.user.isGM) {
         if (template.getFlag('od6s', 'explosive')) {
             let actor;
@@ -259,9 +259,9 @@ Hooks.on("preDeleteChatMessage", async (message, data, diff, id) => {
             actor = game.actors.get(message.speaker.actor);
         }
         const item = actor.items.find(i => i.id === message.getFlag('od6s', 'itemId'));
-        const template = await canvas.scene.getEmbeddedDocument('MeasuredTemplate', item.getFlag('od6s', 'explosiveTemplate'));
+        const template = canvas.scene.regions.get(item.getFlag('od6s', 'explosiveTemplate'));
         if (typeof (template) !== 'undefined') {
-            await canvas.scene.deleteEmbeddedDocuments('MeasuredTemplate', [item.getFlag('od6s', 'explosiveTemplate')]);
+            await canvas.scene.deleteEmbeddedDocuments('Region', [item.getFlag('od6s', 'explosiveTemplate')]);
         }
         await item.unsetFlag('od6s', 'explosiveSet');
         await item.unsetFlag('od6s', 'explosiveTemplate');
@@ -398,10 +398,10 @@ Hooks.on('renderChatLog', (log, html, data) => {
         if (od6sutilities.boolCheck(stun)) {
             if (stunEffect === 'unconscious') {
                 if (game.settings.get('od6s', 'auto_status')) {
-                    await token.object.toggleEffect(CONFIG.statusEffects.find(e => e.id === 'unconscious', {
+                    await token.object.toggleEffect(CONFIG.statusEffects.unconscious, {
                         overlay: false,
                         active: true
-                    }));
+                    });
                 }
             } else {
                 if (stunEffect === '-1D') {
@@ -417,12 +417,11 @@ Hooks.on('renderChatLog', (log, html, data) => {
                     await actor.update(update);
                 }
                 if(!actor.effects.contents.find(
-                    i => i.name === game.i18n.localize(CONFIG.statusEffects.find(
-                        e => e.id === 'stunned').name))) {
-                    await token.object.toggleEffect(CONFIG.statusEffects.find(e => e.id === 'stunned', {
+                    i => i.name === game.i18n.localize(CONFIG.statusEffects.stunned.name))) {
+                    await token.object.toggleEffect(CONFIG.statusEffects.stunned, {
                         overlay: false,
                         active: true
-                    }));
+                    });
                 }
             }
 
@@ -457,10 +456,10 @@ Hooks.on('renderChatLog', (log, html, data) => {
         const actor = message.speaker.token === null ?
             game.actors.get(message.speaker.actor) : game.scenes.active.tokens.get(message.speaker.token).actor;
         const item = actor.items.get(message.getFlag('od6s','itemId'));
-        const template = canvas.scene.getEmbeddedDocument('MeasuredTemplate', item.getFlag('od6s','explosiveTemplate'));
+        const template = canvas.scene.regions.get(item.getFlag('od6s','explosiveTemplate'));
         await template.setFlag('od6s','handled', true);
         await message.setFlag('od6s','handled', true);
-        await canvas.scene.deleteEmbeddedDocuments('MeasuredTemplate', [template.id]);
+        await canvas.scene.deleteEmbeddedDocuments('Region', [template.id]);
         message.setFlag('od6s', 'applied', true);
     })
 
@@ -907,10 +906,10 @@ Hooks.on("updateActor", async (document, change, options, userId) => {
 
                     const tokens = document.getActiveTokens(true, false);
                     for (const token of tokens) {
-                        await token.toggleEffect(CONFIG.statusEffects.find(e => e.id === 'unconscious', {
+                        await token.toggleEffect(CONFIG.statusEffects.unconscious, {
                             overlay: false,
                             active: true
-                        }));
+                        });
                     }
                 }
             }
@@ -930,7 +929,7 @@ Hooks.on("updateActor", async (document, change, options, userId) => {
                 for (const s in OD6S.woundsId) {
                     const id = OD6S.woundsId[s]
                     if (id === 'healthy') continue;
-                    const statusEffect = CONFIG.statusEffects.find(e => e.id === id)
+                    const statusEffect = CONFIG.statusEffects[id]
                     if (game.user.isGM) {
                         for (const token of tokens) {
                             await token.toggleEffect(statusEffect, {
@@ -945,10 +944,10 @@ Hooks.on("updateActor", async (document, change, options, userId) => {
                 for (const token of tokens) {
                     if (status === 'healthy') continue;
                     if (game.user.isGM) {
-                        await token.toggleEffect(CONFIG.statusEffects.find(e => e.id === status, {
+                        await token.toggleEffect(CONFIG.statusEffects[status], {
                             overlay: false,
                             active: true
-                        }));
+                        });
                     }
                 }
 
@@ -994,7 +993,7 @@ Hooks.on("updateActor", async (document, change, options, userId) => {
                 for (const s in OD6S.woundsId) {
                     const id = OD6S.woundsId[s]
                     if (id === 'healthy') continue;
-                    const statusEffect = CONFIG.statusEffects.find(e => e.id === id)
+                    const statusEffect = CONFIG.statusEffects[id]
                     for (const token of tokens) {
                         await token.toggleEffect(statusEffect, {
                             overlay: false,
@@ -1005,10 +1004,10 @@ Hooks.on("updateActor", async (document, change, options, userId) => {
 
                 for (const token of tokens) {
                     if (status === 'healthy') continue;
-                    await token.toggleEffect(CONFIG.statusEffects.find(e => e.id === status, {
+                    await token.toggleEffect(CONFIG.statusEffects[status], {
                         overlay: false,
                         active: true
-                    }));
+                    });
                 }
 
                 for (const token of tokens) {
@@ -1183,8 +1182,7 @@ Hooks.on("preUpdateCombat", async (Combat, data, options, userId) => {
                     // Stun duration expired: remove the stunned AE and reset counters
                     if (rounds < 1) {
                         const effect = combatant.actor.effects.contents.find(
-                            i => i.name === game.i18n.localize(CONFIG.statusEffects.find(
-                                e => e.id === 'stunned').name));
+                            i => i.name === game.i18n.localize(CONFIG.statusEffects.stunned.name));
 
                         if (typeof (effect) !== 'undefined') {
                             await combatant.actor.deleteEmbeddedDocuments("ActiveEffect", [effect.id]);
@@ -1308,10 +1306,10 @@ Hooks.on('createChatMessage', async function (msg) {
                 await item.unsetFlag('od6s', 'explosiveRange');
                 await od6sutilities.wait(100);
 
-                const template = await canvas.scene.getEmbeddedDocument('MeasuredTemplate', msg.getFlag('od6s', 'template'));
+                const template = canvas.scene.regions.get(msg.getFlag('od6s', 'template'));
                 if (typeof (template) !== "undefined") {
                     await template.setFlag('od6s', 'handled', true);
-                    await canvas.scene.deleteEmbeddedDocuments('MeasuredTemplate', [template.id])
+                    await canvas.scene.deleteEmbeddedDocuments('Region', [template.id])
                 }
             }
 
@@ -1634,7 +1632,7 @@ async function triggerRollAction(type, actorId) {
 }
 
 export async function updateExplosiveTemplate(data) {
-    const template = canvas.templates.get(data.templateId);
+    const template = canvas.regions.get(data.templateId);
     if (data.operation === "update") {
         return await template.document.update(data.update);
     } else if (data.operation === "setFlags") {
@@ -1645,8 +1643,8 @@ export async function updateExplosiveTemplate(data) {
 }
 
 export async function deleteExplosiveTemplate(data) {
-    const template = canvas.templates.get(data.templateId);
-    await canvas.scene.deleteEmbeddedDocuments('MeasuredTemplate', [template.id]);
+    const template = canvas.regions.get(data.templateId);
+    await canvas.scene.deleteEmbeddedDocuments('Region', [template.id]);
 }
 
 /**

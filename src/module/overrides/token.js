@@ -8,7 +8,7 @@ export class OD6SToken extends foundry.canvas.placeables.Token {
         if (!this.controlled) return false;
         if (!user.isGM && event.interactionData.object.actor.type === 'container') return false;
         const tool = game.activeTool;
-        if ((tool !== "select") || game.keyboard.isModifierActive(foundry.helpers.interaction.KeyboardManager.MODIFIER_KEYS.CONTROL)) return false;
+        if (!tool || (tool !== "select") || game.keyboard.isModifierActive(foundry.helpers.interaction.KeyboardManager.MODIFIER_KEYS.CONTROL)) return false;
         const blockMove = game.paused && !game.user.isGM;
         return !this._movement && !blockMove;
     }

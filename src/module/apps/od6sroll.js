@@ -1164,10 +1164,10 @@ export class od6sroll {
                             if (rangeDifficulty) difficultyLevel = 'OD6S.DIFFICULTY_DIFFICULT'
                         } else {
                             if (isExplosive) {
-                                const template = canvas.templates.get(item.getFlag('od6s', 'explosiveTemplate'));
+                                const template = canvas.regions.get(item.getFlag('od6s', 'explosiveTemplate'));
                                 if (typeof (template) !== 'undefined' && template !== null) {
                                     await template.destroy();
-                                    await canvas.scene.deleteEmbeddedDocuments('MeasuredTemplate', [template.id]);
+                                    await canvas.scene.deleteEmbeddedDocuments('Region', [template.id]);
                                     await item.unsetFlag('od6s', 'explosiveSet');
                                     await item.unsetFlag('od6s', 'explosiveTemplate');
                                     await item.unsetFlag('od6s', 'explosiveRange');
@@ -1391,7 +1391,7 @@ export class od6sroll {
             const item = this.rollData.actor.items.find(i=> i.id === this.rollData.itemid);
             if(item.getFlag('od6s','explosiveTemplate') !== '' || item.getFlag('od6s','explosiveTemplate') !== 'undefined') {
                 try {
-                    await canvas.scene.deleteEmbeddedDocuments('MeasuredTemplate', [item.getFlag('od6s', 'explosiveTemplate')]);
+                    await canvas.scene.deleteEmbeddedDocuments('Region', [item.getFlag('od6s', 'explosiveTemplate')]);
                 } catch {}
             }
             await item.unsetFlag('od6s', 'explosiveSet');
@@ -1913,7 +1913,7 @@ export class od6sroll {
             const item = rollData.actor.items.find(i => i.id === rollData.itemid);
             const origin = item.getFlag('od6s', 'explosiveOrigin');
             const templateId = item.getFlag('od6s', 'explosiveTemplate');
-            const template = canvas.templates.get(templateId);
+            const template = canvas.regions.get(templateId);
             await template.document.setFlag('od6s','message', rollMessage.id);
 
             if(rollData.actor.isToken) {

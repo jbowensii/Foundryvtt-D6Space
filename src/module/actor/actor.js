@@ -227,7 +227,7 @@ export class OD6SActor extends Actor {
 
         for ( const effect of this.allApplicableEffects() ) {
             if (!effect.active) continue;
-            changes.push(...effect.changes.filter(c => c.mode === CONST.ACTIVE_EFFECT_MODES.CUSTOM &&
+            changes.push(...effect.changes.filter(c => c.type === "custom" &&
                 !c.key.match(itemRegex)));
         }
 
@@ -664,10 +664,10 @@ export class OD6SActor extends Actor {
 
         if(game.settings.get('od6s','auto_status')) {
             for (const token of tokens) {
-                await token.toggleEffect(CONFIG.statusEffects.find(e => e.id === 'dead', {
+                await token.toggleEffect(CONFIG.statusEffects.dead, {
                     overlay: false,
                     active: true
-                }));
+                });
             }
         }
 
@@ -698,10 +698,10 @@ export class OD6SActor extends Actor {
         if (game.modules.get("dice-so-nice")?.active) game.dice3d.messageHookDisabled=false;
 
         for (const token of tokens) {
-            await token.toggleEffect(CONFIG.statusEffects.find(e => e.id === 'unconscious', {
+            await token.toggleEffect(CONFIG.statusEffects.unconscious, {
                 overlay: false,
                 active: true
-            }));
+            });
         }
     }
 
