@@ -416,6 +416,12 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         // Everything below here is only needed if the sheet is editable
         if (!this.isEditable) return;
 
+        // Sheet mode dropdown — explicit handler to guarantee the select saves
+        this.element.querySelectorAll('.sheetmode-select, select[name="system.sheetmode.value"]').forEach(el =>
+            el.addEventListener('change', async ev => {
+                await this.actor.update({"system.sheetmode.value": ev.target.value});
+            }));
+
         // Alpha sort items
         this.element.querySelectorAll('.alpha-item-sort-button').forEach(el =>
             el.addEventListener('click', async ev => {
