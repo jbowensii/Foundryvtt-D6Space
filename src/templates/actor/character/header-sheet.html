@@ -161,7 +161,9 @@
     <div class="flexrow flex-group-right header-mode-row">
         <label for="sheetmode-{{actor._id}}">{{localize 'OD6S.SHEETMODE'}}:</label>
         <select id="sheetmode-{{actor._id}}" name="system.sheetmode.value" class="sheetmode-select">
-            {{selectOptions sheetModeChoices selected=actor.system.sheetmode.value localize=true}}
+            <option value="normal" {{#if (eq actor.system.sheetmode.value "normal")}}selected{{/if}}>{{localize 'OD6S.SHEETMODE_NORMAL'}}</option>
+            <option value="advance" {{#if (eq actor.system.sheetmode.value "advance")}}selected{{/if}}>{{localize 'OD6S.SHEETMODE_ADVANCE'}}</option>
+            <option value="freeedit" {{#if (eq actor.system.sheetmode.value "freeedit")}}selected{{/if}}>{{localize 'OD6S.SHEETMODE_FREEDIT'}}</option>
         </select>
     </div>
     </div>
