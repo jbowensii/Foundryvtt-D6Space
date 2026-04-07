@@ -2,8 +2,7 @@
   "id": "od6s",
   "title": "OpenD6 Space",
   "description": "OpenD6 Space System for FoundryVTT",
-  "version": "1.0.0",
-  "templateVersion": 2,
+  "version": "1.0.1",
   "compatibility": {
     "minimum": "13",
     "verified": "13.341",
@@ -152,8 +151,10 @@
     }
   ]},
   "socket": true,
-  "gridDistance": 1,
-  "gridUnits": "m",
+  "grid": {
+    "distance": 1,
+    "units": "m"
+  },
   "url": "https://github.com/jbowensii/Foundryvtt-D6Space",
   "manifest": "https://github.com/jbowensii/Foundryvtt-D6Space/releases/latest/download/system.json",
   "download": "https://github.com/jbowensii/Foundryvtt-D6Space/releases/latest/download/od6s.zip",
