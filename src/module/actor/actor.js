@@ -30,6 +30,8 @@ export class OD6SActor extends Actor {
 
     async _onCreate(data, options, user) {
         await super._onCreate(data, options, user);
+        // Guard: actor may have been deleted between create and this async callback
+        if (!game.actors?.get(this.id)) return;
         if (game.user.isGM || this.isOwner) {
             if (this.type === 'character') {
                 const update = {};
