@@ -2,7 +2,7 @@
   "id": "od6s",
   "title": "OpenD6 Space",
   "description": "OpenD6 Space System for FoundryVTT",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "compatibility": {
     "minimum": "14",
     "verified": "14.359",
@@ -151,6 +151,37 @@
       "type": "module"
     }
   ]},
+  "documentTypes": {
+    "Actor": {
+      "character": {},
+      "npc": {},
+      "creature": {},
+      "vehicle": {},
+      "starship": {},
+      "container": {}
+    },
+    "Item": {
+      "skill": {},
+      "specialization": {},
+      "advantage": {},
+      "disadvantage": {},
+      "specialability": {},
+      "armor": {},
+      "weapon": {},
+      "gear": {},
+      "cybernetic": {},
+      "manifestation": {},
+      "character-template": {},
+      "action": {},
+      "vehicle": {},
+      "vehicle-weapon": {},
+      "vehicle-gear": {},
+      "starship-weapon": {},
+      "starship-gear": {},
+      "species-template": {},
+      "item-group": {}
+    }
+  },
   "socket": true,
   "grid": {
     "distance": 1,

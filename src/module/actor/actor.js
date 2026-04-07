@@ -26,7 +26,7 @@ export class OD6SActor extends Actor {
      */
     // v14: Neither _onCreate(this.update) nor _preCreate(this.updateSource) are safe
     // for modifying actor data — both trigger v14's phased ActiveEffect lifecycle errors.
-    // Default token/system settings are now handled by template.json and DataModel defaults.
+    // Default token/system settings are now handled by DataModel defaults.
     // No _preCreate or _onCreate override needed.
 
     // prepareData() is inherited from Actor — no override needed.
