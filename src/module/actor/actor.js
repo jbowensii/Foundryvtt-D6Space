@@ -32,13 +32,23 @@ export class OD6SActor extends Actor {
     prepareData() {
         // v14 workaround (foundryvtt#11096): Actor class fields are undefined
         // during the first prepareData() because _initialize() runs in the parent
-        // constructor before class field initializers execute. Force-reset on every
-        // cycle so reset() → _initialize() also clears stale AE phase tracking
-        // stored in tokenActiveEffectChanges (prevents "phase already completed").
-        this.overrides = {};
+        // constructor before class field initializers execute.
+        this.overrides ??= {};
         this.statuses ??= new Set();
-        this.tokenActiveEffectChanges = {};
+        this.tokenActiveEffectChanges ??= {};
         super.prepareData();
+    }
+
+    /** @override */
+    applyActiveEffects(phase) {
+        // v14 tracks completed AE phases in a private field and throws if a phase
+        // is re-run. During reset() → _initialize() after createEmbeddedDocuments,
+        // the private tracker isn't cleared, causing spurious errors. Suppress them.
+        try {
+            return super.applyActiveEffects(phase);
+        } catch(e) {
+            if (!e.message?.includes("has already completed")) throw e;
+        }
     }
 
     /** @override */
