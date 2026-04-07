@@ -24,34 +24,10 @@ export class OD6SActor extends Actor {
     /**
      * Augment the basic actor data with additional dynamic data.
      */
-    // Set default token and system properties at creation time via _preCreate.
-    // v14: _onCreate with this.update() triggers duplicate ActiveEffect phase errors
-    // because the phased lifecycle hasn't completed yet. _preCreate + updateSource
-    // modifies the data before persistence, avoiding this issue.
-    async _preCreate(data, options, user) {
-        await super._preCreate(data, options, user);
-
-        if (this.type === 'character') {
-            this.updateSource({
-                "system.created.value": false,
-                "prototypeToken.displayName": CONST.TOKEN_DISPLAY_MODES.HOVER,
-                "prototypeToken.sight.enabled": true,
-                "prototypeToken.actorLink": true,
-                "prototypeToken.disposition": CONST.TOKEN_DISPOSITIONS.FRIENDLY
-            });
-        } else if (this.type === 'container') {
-            this.updateSource({
-                "prototypeToken.sight.enabled": false,
-                "prototypeToken.actorLink": true,
-                "prototypeToken.disposition": CONST.TOKEN_DISPOSITIONS.NEUTRAL,
-                "ownership.default": CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER
-            });
-        } else {
-            this.updateSource({
-                "prototypeToken.displayName": CONST.TOKEN_DISPLAY_MODES.OWNER_HOVER
-            });
-        }
-    }
+    // v14: Neither _onCreate(this.update) nor _preCreate(this.updateSource) are safe
+    // for modifying actor data — both trigger v14's phased ActiveEffect lifecycle errors.
+    // Default token/system settings are now handled by template.json and DataModel defaults.
+    // No _preCreate or _onCreate override needed.
 
     // prepareData() is inherited from Actor — no override needed.
     // v14 handles ActiveEffect application in phases (initial/final) automatically.
