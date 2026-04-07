@@ -98,6 +98,17 @@ export class OD6SItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
     _onRender(context, options) {
         super._onRender(context, options);
 
+        // Initialize tabs — AppV2 doesn't auto-initialize AppV1-style tabs
+        if (!this._sheetTabs) {
+            this._sheetTabs = new foundry.applications.ux.Tabs({
+                navSelector: ".sheet-tabs",
+                contentSelector: ".sheet-body",
+                initial: "description",
+                callback: () => {}
+            });
+        }
+        this._sheetTabs.bind(this.element);
+
         // Everything below here is only needed if the sheet is editable
         if (!this.isEditable) return;
 
