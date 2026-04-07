@@ -30,7 +30,7 @@
         <div class="tab attributes" data-group="primary" data-tab="attributes">
             {{!-- As you add new fields, add them in here! --}}
             <div class="flexrow flex-group-left">
-                <div class="flexrow data-attribute="{{item.system.attribute}}">
+                <div class="flexrow" data-attribute="{{item.system.attribute}}">
                 <label for="item.system.attribute">{{localize 'OD6S.ATTRIBUTE'}}:</label>
                 <select name="system.attribute" id="item.system.attribute" style="width: 70px;">
                     {{#select item.system.attribute}}

@@ -127,6 +127,13 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
             data.attrs = attributes.sort((a, b) => (a.sort) - (b.sort));
         }
 
+        // Provide select option objects for {{selectOptions}} in templates
+        data.sheetModeChoices = {
+            normal: "OD6S.SHEETMODE_NORMAL",
+            advance: "OD6S.SHEETMODE_ADVANCE",
+            freeedit: "OD6S.SHEETMODE_FREEDIT"
+        };
+
         return data;
     }
 
