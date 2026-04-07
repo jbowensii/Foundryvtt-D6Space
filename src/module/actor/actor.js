@@ -27,10 +27,18 @@ export class OD6SActor extends Actor {
     // v14: Neither _onCreate(this.update) nor _preCreate(this.updateSource) are safe
     // for modifying actor data — both trigger v14's phased ActiveEffect lifecycle errors.
     // Default token/system settings are now handled by DataModel defaults.
-    // No _preCreate or _onCreate override needed.
 
-    // prepareData() is inherited from Actor — no override needed.
-    // v14 handles ActiveEffect application in phases (initial/final) automatically.
+    /** @override */
+    prepareData() {
+        // v14 workaround (foundryvtt#11096): Actor class fields (overrides,
+        // statuses, tokenActiveEffectChanges) are undefined during the first
+        // prepareData() call because _initialize() runs in the parent constructor
+        // before class field initializers execute. Initialize them defensively.
+        this.overrides ??= {};
+        this.statuses ??= new Set();
+        this.tokenActiveEffectChanges ??= {};
+        super.prepareData();
+    }
 
     /** @override */
     prepareBaseData() {

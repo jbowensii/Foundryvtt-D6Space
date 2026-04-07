@@ -1204,113 +1204,139 @@ OD6S.hiddenStatusEffects = [
 
 OD6S.statusEffects = {
     dead: {
-        label: "EFFECT.StatusDead",
-        icon: "icons/svg/skull.svg"
+        id: "dead",
+        name: "EFFECT.StatusDead",
+        img: "icons/svg/skull.svg"
     },
     unconscious: {
-        label: "EFFECT.StatusUnconscious",
-        icon: "icons/svg/unconscious.svg"
+        id: "unconscious",
+        name: "EFFECT.StatusUnconscious",
+        img: "icons/svg/unconscious.svg"
     },
     sleep: {
-        label: "EFFECT.StatusAsleep",
-        icon: "icons/svg/sleep.svg"
+        id: "sleep",
+        name: "EFFECT.StatusAsleep",
+        img: "icons/svg/sleep.svg"
     },
     stunned: {
-        label: "EFFECT.StatusStunned",
-        icon: "icons/svg/daze.svg",
+        id: "stunned",
+        name: "EFFECT.StatusStunned",
+        img: "icons/svg/daze.svg",
         hide: true
     },
     wounded: {
-        label: "EFFECT.StatusWounded",
-        icon: "systems/od6s/icons/wounded.png",
+        id: "wounded",
+        name: "EFFECT.StatusWounded",
+        img: "systems/od6s/icons/wounded.png",
         hide: true
     },
     severely_wounded: {
-        label: "EFFECT.StatusSeverelyWounded",
-        icon: "systems/od6s/icons/severely-wounded.png",
+        id: "severely_wounded",
+        name: "EFFECT.StatusSeverelyWounded",
+        img: "systems/od6s/icons/severely-wounded.png",
         hide: true
     },
     incapacitated: {
-        label: "EFFECT.StatusIncapacitated",
-        icon: "systems/od6s/icons/incapacitated.png",
+        id: "incapacitated",
+        name: "EFFECT.StatusIncapacitated",
+        img: "systems/od6s/icons/incapacitated.png",
         hide: true
     },
     mortally_wounded: {
-        label: "EFFECT.StatusMortallyWounded",
-        icon: "systems/od6s/icons/mortally-wounded.png",
+        id: "mortally_wounded",
+        name: "EFFECT.StatusMortallyWounded",
+        img: "systems/od6s/icons/mortally-wounded.png",
         hide: true
     },
     prone: {
-        label: "EFFECT.StatusProne",
-        icon: "icons/svg/falling.svg"
+        id: "prone",
+        name: "EFFECT.StatusProne",
+        img: "icons/svg/falling.svg"
     },
     restrain: {
-        label: "EFFECT.StatusRestrained",
-        icon: "icons/svg/net.svg",
+        id: "restrain",
+        name: "EFFECT.StatusRestrained",
+        img: "icons/svg/net.svg"
     },
     paralysis: {
-        label: "EFFECT.StatusParalysis",
-        icon: "icons/svg/paralysis.svg",
+        id: "paralysis",
+        name: "EFFECT.StatusParalysis",
+        img: "icons/svg/paralysis.svg"
     },
     fly: {
-        label: "EFFECT.StatusFlying",
-        icon: "icons/svg/wing.svg",
+        id: "fly",
+        name: "EFFECT.StatusFlying",
+        img: "icons/svg/wing.svg"
     },
     blind: {
-        label: "EFFECT.StatusBlind",
-        icon: "icons/svg/blind.svg"
+        id: "blind",
+        name: "EFFECT.StatusBlind",
+        img: "icons/svg/blind.svg"
     },
     deaf: {
-        label: "EFFECT.StatusDeaf",
-        icon: "icons/svg/deaf.svg"
+        id: "deaf",
+        name: "EFFECT.StatusDeaf",
+        img: "icons/svg/deaf.svg"
     },
     silence: {
-        label: "EFFECT.StatusSilenced",
-        icon: "icons/svg/silenced.svg"
+        id: "silence",
+        name: "EFFECT.StatusSilenced",
+        img: "icons/svg/silenced.svg"
     },
     fear: {
-        label: "EFFECT.StatusFear",
-        icon: "icons/svg/terror.svg"
+        id: "fear",
+        name: "EFFECT.StatusFear",
+        img: "icons/svg/terror.svg"
     },
     burning: {
-        label: "EFFECT.StatusBurning",
-        icon: "icons/svg/fire.svg"
+        id: "burning",
+        name: "EFFECT.StatusBurning",
+        img: "icons/svg/fire.svg"
     },
     frozen: {
-        label: "EFFECT.StatusFrozen",
-        icon: "icons/svg/frozen.svg"
+        id: "frozen",
+        name: "EFFECT.StatusFrozen",
+        img: "icons/svg/frozen.svg"
     },
     shock: {
-        label: "EFFECT.StatusShocked",
-        icon: "icons/svg/lightning.svg"
+        id: "shock",
+        name: "EFFECT.StatusShocked",
+        img: "icons/svg/lightning.svg"
     },
     bleeding: {
-        label: "EFFECT.StatusBleeding",
-        icon: "icons/svg/blood.svg"
+        id: "bleeding",
+        name: "EFFECT.StatusBleeding",
+        img: "icons/svg/blood.svg"
     },
     disease: {
-        label: "EFFECT.StatusDisease",
-        icon: "icons/svg/biohazard.svg"
+        id: "disease",
+        name: "EFFECT.StatusDisease",
+        img: "icons/svg/biohazard.svg"
     },
     poison: {
-        label: "EFFECT.StatusPoison",
-        icon: "icons/svg/poison.svg"
+        id: "poison",
+        name: "EFFECT.StatusPoison",
+        img: "icons/svg/poison.svg"
     },
     radiation: {
-        label: "EFFECT.StatusRadiation",
-        icon: "icons/svg/radiation.svg"
+        id: "radiation",
+        name: "EFFECT.StatusRadiation",
+        img: "icons/svg/radiation.svg"
     },
     upgrade: {
-        label: "EFFECT.StatusUpgrade",
-        icon: "icons/svg/upgrade.svg"
+        id: "upgrade",
+        name: "EFFECT.StatusUpgrade",
+        img: "icons/svg/upgrade.svg"
     },
     downgrade: {
-        label: "EFFECT.StatusDowngrade",
-        icon: "icons/svg/downgrade.svg"
+        id: "downgrade",
+        name: "EFFECT.StatusDowngrade",
+        img: "icons/svg/downgrade.svg"
     },
     target: {
-        label: "EFFECT.StatusTarget",
-        icon: "icons/svg/target.svg"
+        id: "target",
+        name: "EFFECT.StatusTarget",
+        img: "icons/svg/target.svg"
     }
 }
 
