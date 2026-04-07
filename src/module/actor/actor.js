@@ -24,51 +24,32 @@ export class OD6SActor extends Actor {
     /**
      * Augment the basic actor data with additional dynamic data.
      */
+    // Set default token and system properties at creation time via _preCreate.
+    // v14: _onCreate with this.update() triggers duplicate ActiveEffect phase errors
+    // because the phased lifecycle hasn't completed yet. _preCreate + updateSource
+    // modifies the data before persistence, avoiding this issue.
     async _preCreate(data, options, user) {
         await super._preCreate(data, options, user);
-    }
 
-    async _onCreate(data, options, user) {
-        await super._onCreate(data, options, user);
-        // Guard: actor may have been deleted between create and this async callback
-        if (!game.actors?.get(this.id)) return;
-        if (game.user.isGM || this.isOwner) {
-            if (this.type === 'character') {
-                const update = {};
-                update.system = {
-                    'created.value': false
-                }
-                update.id = this.id;
-                await this.prototypeToken.update({
-                    _id: this.id,
-                    id: this.id,
-                    displayName: CONST.TOKEN_DISPLAY_MODES.HOVER,
-                    vision: true,
-                    actorLink: true,
-                    disposition: 1
-                });
-                await this.update(update);
-            } else {
-                await this.prototypeToken.update({
-                    _id: this.id,
-                    id: this.id,
-                    displayName: CONST.TOKEN_DISPLAY_MODES.OWNER_HOVER
-                });
-            }
-
-            if (this.type === 'container') {
-                await this.prototypeToken.update({
-                    _id: this.id,
-                    id: this.id,
-                    vision: false,
-                    actorLink: true,
-                    disposition: 0
-                });
-                const update = {};
-                update.id = this.id;
-                update[`ownership.default`] = CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER;
-                await this.update(update);
-            }
+        if (this.type === 'character') {
+            this.updateSource({
+                "system.created.value": false,
+                "prototypeToken.displayName": CONST.TOKEN_DISPLAY_MODES.HOVER,
+                "prototypeToken.sight.enabled": true,
+                "prototypeToken.actorLink": true,
+                "prototypeToken.disposition": CONST.TOKEN_DISPOSITIONS.FRIENDLY
+            });
+        } else if (this.type === 'container') {
+            this.updateSource({
+                "prototypeToken.sight.enabled": false,
+                "prototypeToken.actorLink": true,
+                "prototypeToken.disposition": CONST.TOKEN_DISPOSITIONS.NEUTRAL,
+                "ownership.default": CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER
+            });
+        } else {
+            this.updateSource({
+                "prototypeToken.displayName": CONST.TOKEN_DISPLAY_MODES.OWNER_HOVER
+            });
         }
     }
 
