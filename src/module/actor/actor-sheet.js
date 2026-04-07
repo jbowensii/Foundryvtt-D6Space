@@ -1675,7 +1675,8 @@ export class OD6SActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
                 await this.actor.createEmbeddedDocuments("Item", Array.isArray(itemData) ? itemData : [itemData]);
             }
         }
-        this.render();
+        // v14: Foundry auto-renders after document changes; explicit render() can trigger
+        // duplicate ActiveEffect phase errors in v14's phased lifecycle.
     }
 
     _onSortItem(event, itemData) {
