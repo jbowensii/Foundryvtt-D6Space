@@ -1,0 +1,191 @@
+/**
+ * D6DB-Style Sheet Layout for FoundryVTT Actor Sheets
+ * EXPERIMENTAL — layout-specific styles for the character sheet mockup.
+ * Uses design tokens from d6db-theme.css
+ */
+
+/* ─── Sheet Root ─── */
+.d6db-sheet {
+  background: var(--d6-space-900);
+  color: var(--d6-text);
+  font-family: var(--d6-font-body);
+  padding: 8px;
+  gap: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Identity Header ─── */
+.d6-identity {
+  padding: 12px;
+}
+
+.d6-identity-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.d6-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--d6-card-radius);
+  border: 2px solid var(--d6-card-border);
+  object-fit: cover;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.d6-avatar:hover {
+  border-color: var(--d6-holo-50);
+}
+
+.d6-identity-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.d6-character-name {
+  margin: 0;
+  font-size: 22px;
+}
+
+.d6-character-name input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--d6-card-border);
+  color: var(--d6-holo);
+  font-family: var(--d6-font-display);
+  font-size: 22px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  width: 100%;
+  padding: 2px 0;
+}
+
+.d6-character-name input:focus {
+  border-bottom-color: var(--d6-holo);
+  outline: none;
+}
+
+.d6-identity-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.d6-species {
+  font-size: 13px;
+  color: var(--d6-text-muted);
+}
+
+/* ─── Quick Stats Grid ─── */
+.d6-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.d6-stat-card {
+  padding: 8px 4px;
+  text-align: center;
+}
+
+/* ─── Tab Navigation ─── */
+.d6-tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--d6-card-border);
+  padding: 0;
+}
+
+.d6-tab {
+  font-family: var(--d6-font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--d6-text-muted);
+  padding: 8px 16px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s ease, border-color 0.2s ease;
+  text-decoration: none;
+}
+
+.d6-tab:hover {
+  color: var(--d6-text);
+}
+
+.d6-tab.active {
+  color: var(--d6-holo);
+  border-bottom-color: var(--d6-holo);
+}
+
+/* ─── Attributes Grid ─── */
+.d6-attributes-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.d6-attribute-column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.d6-attribute {
+  padding: 8px 10px;
+}
+
+/* ─── Scrollable Content ─── */
+.d6-tab-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+/* ─── FoundryVTT Window Overrides ─── */
+.d6db-sheet .window-content {
+  background: var(--d6-space-900);
+  padding: 0;
+}
+
+/* Remove default Foundry borders from flex groups */
+.d6db-sheet .flex-group-center,
+.d6db-sheet .flex-group-left,
+.d6db-sheet .flex-group-right {
+  border: none;
+}
+
+/* Style all inputs in the d6db theme */
+.d6db-sheet input[type="text"],
+.d6db-sheet input[type="number"] {
+  background: var(--d6-space-700);
+  border: 1px solid var(--d6-card-border);
+  border-radius: 4px;
+  color: var(--d6-text);
+  font-family: var(--d6-font-body);
+  padding: 3px 6px;
+}
+
+.d6db-sheet input[type="text"]:focus,
+.d6db-sheet input[type="number"]:focus {
+  border-color: var(--d6-holo-50);
+  box-shadow: 0 0 4px var(--d6-holo-30);
+  outline: none;
+}
+
+.d6db-sheet select {
+  background: var(--d6-space-700);
+  border: 1px solid var(--d6-card-border);
+  border-radius: 4px;
+  color: var(--d6-text);
+  font-family: var(--d6-font-ui);
+  padding: 3px 6px;
+}

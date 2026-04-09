@@ -1,0 +1,322 @@
+/**
+ * D6DB-Style Theme for OpenD6 Space Character Sheets
+ * Based on the holographic terminal aesthetic of d6db.com
+ *
+ * This is an EXPERIMENTAL theme — not yet integrated into the system.
+ * To use: add this CSS class to the actor sheet application element.
+ */
+
+/* ─── Google Fonts ─── */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+/* ─── Design Tokens ─── */
+:root {
+  /* Space background scale */
+  --d6-space-900: #07090f;
+  --d6-space-800: #0a0f1a;
+  --d6-space-700: #0f172a;
+  --d6-space-600: #162040;
+  --d6-space-400: #1e3255;
+
+  /* Accent colors */
+  --d6-holo: #38bdf8;
+  --d6-holo-90: rgba(56, 189, 248, 0.9);
+  --d6-holo-80: rgba(56, 189, 248, 0.8);
+  --d6-holo-70: rgba(56, 189, 248, 0.7);
+  --d6-holo-50: rgba(56, 189, 248, 0.5);
+  --d6-holo-30: rgba(56, 189, 248, 0.3);
+  --d6-holo-10: rgba(56, 189, 248, 0.1);
+  --d6-rebel: #f59e0b;
+  --d6-danger: #ef4444;
+
+  /* Section icon colors */
+  --d6-combat: #ef4444;
+  --d6-points: #f59e0b;
+  --d6-equipment: #14b8a6;
+  --d6-abilities: #8b5cf6;
+  --d6-identity: #f59e0b;
+
+  /* Text */
+  --d6-text: #e2e8f0;
+  --d6-text-muted: #94a3b8;
+  --d6-text-dim: rgba(148, 163, 184, 0.7);
+
+  /* Cards */
+  --d6-card-bg: var(--d6-space-800);
+  --d6-card-border: var(--d6-space-400);
+  --d6-card-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  --d6-card-glow: 0 0 12px var(--d6-holo-50);
+  --d6-card-radius: 0.5rem;
+
+  /* Typography */
+  --d6-font-display: 'Orbitron', monospace, sans-serif;
+  --d6-font-ui: 'Exo 2', sans-serif;
+  --d6-font-body: 'Inter', -apple-system, sans-serif;
+}
+
+/* ─── Card Component ─── */
+.card-holo {
+  background: var(--d6-card-bg);
+  border: 1px solid var(--d6-card-border);
+  border-radius: var(--d6-card-radius);
+  box-shadow: var(--d6-card-shadow);
+  padding: 1rem;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-holo:hover {
+  border-color: var(--d6-holo-50);
+  box-shadow: var(--d6-card-shadow), var(--d6-card-glow);
+}
+
+/* Subtle grid pattern overlay */
+.card-holo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--d6-holo-10) 1px, transparent 1px),
+    linear-gradient(90deg, var(--d6-holo-10) 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0.03;
+  pointer-events: none;
+}
+
+/* ─── Typography ─── */
+.d6-heading {
+  font-family: var(--d6-font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--d6-holo);
+}
+
+.d6-label {
+  font-family: var(--d6-font-display);
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--d6-text-muted);
+}
+
+.d6-dice {
+  font-family: var(--d6-font-display);
+  font-weight: 700;
+  color: var(--d6-holo);
+  cursor: pointer;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+.d6-dice:hover {
+  color: #7dd3fc;
+  text-shadow: 0 0 8px var(--d6-holo-50);
+}
+
+.d6-body {
+  font-family: var(--d6-font-body);
+  color: var(--d6-text);
+  line-height: 1.6;
+}
+
+.d6-ui {
+  font-family: var(--d6-font-ui);
+  color: var(--d6-text);
+}
+
+/* ─── Attribute Block ─── */
+.d6-attribute {
+  margin-bottom: 0.75rem;
+}
+
+.d6-attribute-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid var(--d6-card-border);
+  margin-bottom: 0.25rem;
+}
+
+.d6-attribute-name {
+  font-family: var(--d6-font-display);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--d6-holo);
+}
+
+.d6-attribute-dice {
+  font-family: var(--d6-font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--d6-holo);
+}
+
+/* ─── Skill Row ─── */
+.d6-skill {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 0 2px 12px;
+  border-left: 2px solid var(--d6-holo-30);
+  font-family: var(--d6-font-body);
+  font-size: 13px;
+  color: var(--d6-text);
+  transition: border-color 0.2s ease;
+}
+
+.d6-skill:hover {
+  border-left-color: var(--d6-holo);
+}
+
+.d6-skill-name {
+  flex: 1;
+}
+
+.d6-skill-dice {
+  font-family: var(--d6-font-display);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--d6-holo-80);
+  cursor: pointer;
+}
+
+.d6-skill-dice:hover {
+  color: var(--d6-holo);
+  text-shadow: 0 0 6px var(--d6-holo-50);
+}
+
+/* ─── Quick Stats Grid ─── */
+.d6-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.5rem;
+}
+
+.d6-stat-card {
+  background: var(--d6-space-700);
+  border: 1px solid var(--d6-card-border);
+  border-radius: var(--d6-card-radius);
+  padding: 0.5rem;
+  text-align: center;
+}
+
+.d6-stat-value {
+  font-family: var(--d6-font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--d6-holo);
+}
+
+.d6-stat-label {
+  font-family: var(--d6-font-display);
+  font-size: 8px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--d6-text-muted);
+  margin-top: 2px;
+}
+
+/* ─── Section Headers ─── */
+.d6-section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--d6-card-border);
+}
+
+.d6-section-icon {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.5;
+}
+
+.d6-section-title {
+  font-family: var(--d6-font-display);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--d6-text-muted);
+}
+
+/* ─── Animations ─── */
+@keyframes holo-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+
+@keyframes scanline-scroll {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+/* Subtle scanline overlay for cards */
+.card-holo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(56, 189, 248, 0.01) 3px,
+    rgba(56, 189, 248, 0.01) 4px
+  );
+  pointer-events: none;
+}
+
+/* ─── Badges ─── */
+.d6-badge {
+  font-family: var(--d6-font-ui);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  border: 1px solid;
+}
+
+.d6-badge-holo {
+  color: var(--d6-holo);
+  border-color: var(--d6-holo-30);
+  background: var(--d6-holo-10);
+}
+
+.d6-badge-rebel {
+  color: var(--d6-rebel);
+  border-color: rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+/* ─── Input Styling (for FoundryVTT forms) ─── */
+.d6-input {
+  background: var(--d6-space-700);
+  border: 1px solid var(--d6-card-border);
+  border-radius: 4px;
+  color: var(--d6-text);
+  font-family: var(--d6-font-body);
+  padding: 4px 8px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.d6-input:focus {
+  border-color: var(--d6-holo-50);
+  box-shadow: 0 0 4px var(--d6-holo-30);
+  outline: none;
+}
+
+.d6-input-dice {
+  font-family: var(--d6-font-display);
+  font-weight: 600;
+  color: var(--d6-holo);
+  text-align: center;
+  width: 60px;
+}

@@ -1,0 +1,117 @@
+{{!--
+  D6DB-Style Character Sheet Mockup for FoundryVTT
+  EXPERIMENTAL — not yet integrated into the system.
+  This shows what the character sheet COULD look like using
+  the d6db.com holographic terminal aesthetic.
+--}}
+<form class="{{cssClass}} flexcol d6db-sheet" autocomplete="off">
+
+    {{!-- Character Identity --}}
+    <header class="card-holo d6-identity">
+        <div class="d6-identity-row">
+            <img class="d6-avatar" src="{{actor.img}}" data-edit="img"
+                 title="{{actor.name}}" alt="{{localize 'OD6S.ALT_ACTOR_IMAGE'}}"/>
+            <div class="d6-identity-info">
+                <h1 class="d6-heading d6-character-name">
+                    <input name="name" type="text" value="{{actor.name}}"
+                           placeholder="{{localize 'OD6S.CHAR_NAME'}}" data-dtype="String"/>
+                </h1>
+                <div class="d6-identity-meta">
+                    <span class="d6-badge d6-badge-holo">{{actor.type}}</span>
+                    <span class="d6-ui d6-species">{{actor.system.species.content}}</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    {{!-- Quick Stats --}}
+    <div class="d6-stats-grid">
+        <div class="d6-stat-card card-holo">
+            <div class="d6-stat-value">{{actor.system.move.value}}</div>
+            <div class="d6-stat-label">Move</div>
+        </div>
+        <div class="d6-stat-card card-holo">
+            <div class="d6-stat-value">{{actor.system.fatepoints.value}}</div>
+            <div class="d6-stat-label">Force Points</div>
+        </div>
+        <div class="d6-stat-card card-holo">
+            <div class="d6-stat-value">{{actor.system.characterpoints.value}}</div>
+            <div class="d6-stat-label">Character Points</div>
+        </div>
+        <div class="d6-stat-card card-holo">
+            <div class="d6-stat-value">{{actor.system.custom1.value}}</div>
+            <div class="d6-stat-label">Dark Side Points</div>
+        </div>
+    </div>
+
+    {{!-- Tab Navigation --}}
+    <nav class="d6-tabs">
+        <a class="d6-tab active" data-tab="attributes">
+            <span class="d6-tab-label">Attributes & Skills</span>
+        </a>
+        <a class="d6-tab" data-tab="combat">
+            <span class="d6-tab-label">Combat</span>
+        </a>
+        <a class="d6-tab" data-tab="equipment">
+            <span class="d6-tab-label">Equipment</span>
+        </a>
+        <a class="d6-tab" data-tab="abilities">
+            <span class="d6-tab-label">Abilities</span>
+        </a>
+        <a class="d6-tab" data-tab="bio">
+            <span class="d6-tab-label">Biography</span>
+        </a>
+    </nav>
+
+    {{!-- Attributes & Skills Tab --}}
+    <section class="d6-tab-content" data-tab="attributes">
+        <div class="d6-attributes-grid">
+            {{!-- Left Column: DEX, PER, STR --}}
+            <div class="d6-attribute-column">
+                {{!-- Example attribute block --}}
+                <div class="card-holo d6-attribute">
+                    <div class="d6-attribute-header">
+                        <span class="d6-attribute-name">Dexterity</span>
+                        <span class="d6-attribute-dice d6-dice rolldialog"
+                              data-type="attribute" data-score="{{actor.system.attributes.agi.score}}"
+                              data-label="Dexterity">
+                            {{diceFromScore actor.system.attributes.agi.score}}D+{{pipsFromScore actor.system.attributes.agi.score}}
+                        </span>
+                    </div>
+                    {{!-- Skills under this attribute --}}
+                    {{#each actor.skills as |skill|}}
+                        {{#if (eq skill.system.attribute "agi")}}
+                        <div class="d6-skill rolldialog"
+                             data-type="skill" data-score="{{skill.system.score}}"
+                             data-label="{{skill.name}}" data-item-id="{{skill._id}}">
+                            <span class="d6-skill-name">{{skill.name}}</span>
+                            <span class="d6-skill-dice d6-dice">
+                                {{diceFromScore skill.system.score}}D+{{pipsFromScore skill.system.score}}
+                            </span>
+                        </div>
+                        {{/if}}
+                    {{/each}}
+                </div>
+            </div>
+
+            {{!-- Right Column: KNO, MEC, TEC --}}
+            <div class="d6-attribute-column">
+                {{!-- Similar blocks for other attributes --}}
+            </div>
+        </div>
+    </section>
+
+    {{!-- Equipment Tab --}}
+    <section class="d6-tab-content" data-tab="equipment" style="display:none">
+        <div class="card-holo">
+            <div class="d6-section-header">
+                <svg class="d6-section-icon" style="color: var(--d6-equipment);" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+                <span class="d6-section-title">Weapons</span>
+            </div>
+            {{!-- Weapon list items here --}}
+        </div>
+    </section>
+
+</form>
